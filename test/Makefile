@@ -1,6 +1,6 @@
 
 all: LDFLAGS= -L../../lemon-main/dist/lib -L../../antlr4/runtime/Cpp/run/usr/local/lib -I../node_modules/zlib/dist/lib -lantlr4-runtime -lemon -lz -ldl -pthread
-all: build/src/constitution/graph.o build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o test
+all: build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o test
 	$(CXX) $(LDFLAGS) -o test $(wildcard build/src/*.o) $(wildcard build/src/parsing/*.o) $(wildcard build/src/constitution/*.o)
 
 #build/src/constitution/graph.o: CXXFLAGS= -fmodules-ts -O3 -pthread -std=c++2a -I../../lemon-main/dist/include

@@ -77,14 +77,11 @@ TEST_CASE("test 3sgs") {
    antlr4::tree::xpath::XPath xPath(&parser, thePath);///dataBlock/dataBlockHeading/*");
    std::vector<antlr4::tree::ParseTree *> dataBlockHeading=xPath.evaluate(tree);
    for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlockHeading.begin();it!=dataBlockHeading.end();it++){
-       ;
-       bool atomSites=false;
        if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
-           for(unsigned int tagIndex=0;tagIndex<r->loopHeader()->tag().size();tagIndex++){
-               if(r->loopHeader()->tag(tagIndex)->getText().rfind("_atom_site.", 0) == 0)atomSites=true;
-       //if(atomSites)std::cout<<"here "<<r->loopHeader()->tag(tagIndex)->getText()<<std::endl;
-           }
-           if(atomSites){
+           bool once=true;
+           auto tags=r->loopHeader()->tag();
+           for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("_atom_site.", 0) == 0; })){
+               once=false;
                unsigned int columnCount=0;
                unsigned int entityCount=0;
                lemon::ListGraph::Node n=graph.addNode();

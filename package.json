@@ -11,7 +11,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "make clean",
-    "build": "cd test && pwd && mkdir -p build/src/parsing&& mkdir -p build/src/constitution && which make && make -f Makefile all",
+    "build": "cd test && pwd && mkdir -p build/src/parsing && mkdir -p build/src/constitution && which make && make -f Makefile all",
     "zlib" : "cd node_modules/zlib && cmake -DCMAKE_INSTALL_PREFIX=dist . && make install",
     "test": "yarn build && `pwd` && cd test && test"
   },
