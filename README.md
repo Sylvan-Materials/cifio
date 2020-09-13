@@ -37,3 +37,7 @@ yarn zlib
 
 yarn test
 ```
+
+## Contact
+
+My twitch stream is https://www.twitch.tv/sylvanmats
