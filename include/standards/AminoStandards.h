@@ -11,6 +11,8 @@
 
 #include "zlib.h"
 
+#include "reading/gz/GZReader.h"
+
 #include "antlr4-runtime.h"
 #include "parsing/CIFLexer.h"
 #include "parsing/CIFParser.h"
@@ -56,32 +58,16 @@ namespace sylvanmats::standards{
         std::shared_ptr<antlr4::tree::xpath::XPath> xPath;
         antlr4::tree::ParseTree* tree;
         std::vector<antlr4::tree::ParseTree*> dataTag;
-        std::stringstream ss;
     public:
     AminoStandards(){
-        std::string filePath="/home/roger/Downloads/aa-variants-v1.cif.gz";
-        gzFile file=gzopen(filePath.c_str(), "rb");
-        int uncomprLen=1024;
-        char buf[1024];
-        bool eofHit=false;
-        while(!eofHit && uncomprLen>0){
-            char * ret=gzgets(file, (char*)buf, (int)uncomprLen);
-            if(ret==NULL)eofHit=true;
-            else ss<<ret;
-        }
-        ss.seekg(0, std::ios::end);
-        int size = ss.tellg();
-        std::cout<<"decompress size "<<size<<std::endl;
-        ss.seekg(0, std::ios::beg);
-        gzclose(file);
+        std::string filePath="~/Downloads/aa-variants-v1.cif.gz";
+    sylvanmats::reading::GZReader gzReader;
+    gzReader(filePath, [&](std::istream& content){
 
-        input=std::make_shared<antlr4::ANTLRInputStream>(ss);
+        input=std::make_shared<antlr4::ANTLRInputStream>(content);
         lexer=std::make_shared<sylvanmats::CIFLexer>(input.get());
         tokens=std::make_shared<antlr4::CommonTokenStream>(lexer.get());
-//tokens.fill();
-//  for (auto token : tokens.getTokens()) {
-//    std::cout << token->toString() << std::endl;
-//  }    
+
         parser=std::make_shared<sylvanmats::CIFParser>(tokens.get());
         parser->setBuildParseTree(true);
         tree = parser->cif();
@@ -89,6 +75,7 @@ namespace sylvanmats::standards{
         const std::string thePath="/cif/dataBlock/dataItems/tag";
         xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath);
         dataTag=xPath->evaluate(tree);
+    });
     };
 
     AminoStandards(const AminoStandards& orig) = delete;

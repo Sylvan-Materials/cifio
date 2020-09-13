@@ -12,6 +12,7 @@
 #include "antlr4-runtime.h"
 #include "parsing/CIFLexer.h"
 #include "parsing/CIFParser.h"
+#include "reading/gz/GZReader.h"
 
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
@@ -52,11 +53,13 @@ standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="OXT", .atom_id_2="HX
 
 TEST_CASE("test 3sgs") {
     printf("hello from <test.cpp>\n");
-    //std::string name = "~/Downloads/3sgs.cif.gz";
-    std::string name = "/home/roger/Downloads/3sgs.cif";
-    std::ifstream file(name);
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    file.close();
+    std::string filePath = "~/Downloads/3sgs.cif.gz";
+    sylvanmats::reading::GZReader gzReader;
+    gzReader(filePath, [](std::istream& content){
+//    std::string name = "/home/roger/Downloads/3sgs.cif";
+//    std::ifstream file(name);
+//    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+//    file.close();
     //std::cout<<content<<std::endl;
     antlr4::ANTLRInputStream input(content);
     sylvanmats::CIFLexer lexer(&input);
@@ -75,7 +78,7 @@ TEST_CASE("test 3sgs") {
     
    const std::string thePath="/cif/dataBlock/dataItems/loop";
    antlr4::tree::xpath::XPath xPath(&parser, thePath);///dataBlock/dataBlockHeading/*");
-   std::vector<antlr4::tree::ParseTree *> dataBlockHeading=xPath.evaluate(tree);
+   std::vector<antlr4::tree::ParseTree*> dataBlockHeading=xPath.evaluate(tree);
    for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlockHeading.begin();it!=dataBlockHeading.end();it++){
        if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
            bool once=true;
@@ -144,7 +147,7 @@ TEST_CASE("test 3sgs") {
                     break;
                }
                columnCount++;
-               if(valueIndex % (r->loopHeader()->tag().size()) == r->loopHeader()->tag().size()-1){
+               if(valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1){
                    columnCount=0;
                    entityCount++;
                    std::cout<<" "<<entityCount<<std::endl;
@@ -187,7 +190,7 @@ TEST_CASE("test 3sgs") {
        }
    }
     sylvanmats::publishing::JGFPublisher jgfPublisher(graph);   
-   std::cout<<"# of sites: "<<graph.getNumberOfAtomSites()<<std::endl;
    CHECK_EQ(graph.getNumberOfAtomSites(), 46);
    std::cout<<" "<<jgfPublisher<<std::endl;
+   });
 }
