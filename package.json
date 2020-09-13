@@ -1,0 +1,21 @@
+{
+  "name": "cifio",
+  "version": "1.0.0",
+  "devDependencies": {
+    "doctest" : "onqtam/doctest",
+    "mio" : "mandreyel/mio",
+    "rapidjson" : "Tencent/rapidjson",
+    "zlib" : "madler/zlib"
+  }, 
+  "description": "input/output of cif data",
+  "main": "index.js",
+  "scripts": {
+    "clean": "make clean",
+    "build": "cd test && pwd && mkdir -p build/src/parsing&& mkdir -p build/src/constitution && which make && make -f Makefile all",
+    "zlib" : "cd node_modules/zlib && cmake -DCMAKE_INSTALL_PREFIX=dist . && make install",
+    "test": "yarn build && `pwd` && cd test && test"
+  },
+  "author": "rimmartin",
+  "license": "MIT"
+}
+
