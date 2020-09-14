@@ -10,6 +10,10 @@ mio@mandreyel/mio:
   version "0.0.0"
   resolved "https://codeload.github.com/mandreyel/mio/tar.gz/8c0d3c7c23c595803d07c44a6088fc3ac920fa3d"
 
+openssl@openssl/openssl#OpenSSL_1_1_1g:
+  version "0.0.0"
+  resolved "https://codeload.github.com/openssl/openssl/tar.gz/e2e09d9fba1187f8d6aafaa34d4172f56f1ffb72"
+
 rapidjson@Tencent/rapidjson:
   version "1.0.4"
   resolved "https://codeload.github.com/Tencent/rapidjson/tar.gz/ce81bc9edfe773667a7a4454ba81dac72ed4364c"

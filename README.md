@@ -14,12 +14,14 @@ https://files.rcsb.org/download/3SGS.cif.gz in your ~/Downloads folder.
 (Note: this will change as this project setup becomes mroe automated)
 
 Set compiler(>=10), antlr and zlib paths
+
 ```
 export PATH=~/node-v14.9.0-linux-x64/bin:~/Software/gcc-dev/dist/bin:$PATH
 export LD_LIBRARY_PATH=`pwd`/../antlr4/runtime/Cpp/run/usr/local/lib:`pwd`/node_modules/zlib/dist/lib:$LD_LIBRARY_PATH
 ```
 
 Generate the c++ lexer/parser code once from the grammar:
+
 ```
 export CLASSPATH=`pwd`/../antlr4/tool/target/antlr4-4.8-2-SNAPSHOT-complete.jar
 cd grammars
@@ -34,6 +36,8 @@ yarn install
 
 #run once
 yarn zlib
+#run once
+yarn ssl
 
 yarn test
 ```

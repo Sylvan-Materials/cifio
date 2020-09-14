@@ -13,25 +13,59 @@
 #include "parsing/CIFLexer.h"
 #include "parsing/CIFParser.h"
 #include "reading/gz/GZReader.h"
+#include "reading/tcp/TCPReader.h"
 
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
 #include "publishing/jgf/JGFPublisher.h"
 
+TEST_CASE("test tcp for a cif.gz"){
+    std::string comp_id="3sgs";
+    std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
+    sylvanmats::reading::TCPReader tcpReader;
+    tcpReader(url, [&comp_id](std::istream& is){
+        std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+        CHECK_EQ(content.size(), 26817);
+        std::string path="./examples/"+comp_id+".cif.gz";
+        gzFile file=gzopen(path.c_str(), "wb");
+        int uncomprLen=1024;
+        char buf[uncomprLen+1];
+        std::memset (buf, 0, uncomprLen+1);
+        bool eofHit=false;
+        unsigned long long count=0;
+        while(!eofHit && uncomprLen>0){
+            std::memset (buf, 0, uncomprLen+1);
+            std:strncpy(buf, &content[count], uncomprLen);
+            buf[uncomprLen+1]=0;
+            int ret=gzputs(file, (char*)buf);
+            if(ret<=0)eofHit=true;
+            else count+=ret;
+            if(uncomprLen>content.size()-count)uncomprLen=content.size()-count;
+            std::cout<<ret<<" "<<eofHit<<" "<<count<<" "<<content.size()<<" "<<uncomprLen<<std::endl;
+        }
+//        count++;
+//        gzseek(file, 1L, SEEK_CUR);
+        CHECK_EQ(count, 26817);
+        gzclose(file);
+        
+    });
+
+}
+
 TEST_CASE("test decompression of aa-variants-v1.cif.gz") {
- std::vector<sylvanmats::standards::chem_comp_bond> standardChemCompBond;
- standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="N", .atom_id_2="CA", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="N", .atom_id_2="H", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="N", .atom_id_2="HN2", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CA", .atom_id_2="C", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CA", .atom_id_2="CB", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CA", .atom_id_2="HA", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="C", .atom_id_2="O", .value_order=2});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="C", .atom_id_2="OXT", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CB", .atom_id_2="HB1", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CB", .atom_id_2="HB2", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CB", .atom_id_2="HB3", .value_order=1});
-standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="OXT", .atom_id_2="HXT", .value_order=1});
+    std::vector<sylvanmats::standards::chem_comp_bond> standardChemCompBond;
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="N", .atom_id_2="CA", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="N", .atom_id_2="H", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="N", .atom_id_2="HN2", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CA", .atom_id_2="C", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CA", .atom_id_2="CB", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CA", .atom_id_2="HA", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="C", .atom_id_2="O", .value_order=2});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="C", .atom_id_2="OXT", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CB", .atom_id_2="HB1", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CB", .atom_id_2="HB2", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="CB", .atom_id_2="HB3", .value_order=1});
+    standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="OXT", .atom_id_2="HXT", .value_order=1});
  
     sylvanmats::standards::AminoStandards aminoStandards;
    std::string_view comp_id="ALA";
@@ -52,26 +86,21 @@ standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="OXT", .atom_id_2="HX
 }
 
 TEST_CASE("test 3sgs") {
-    printf("hello from <test.cpp>\n");
-    std::string filePath = "~/Downloads/3sgs.cif.gz";
+    std::string filePath="./examples/3sgs.cif.gz";
     sylvanmats::reading::GZReader gzReader;
     gzReader(filePath, [](std::istream& content){
-//    std::string name = "/home/roger/Downloads/3sgs.cif";
-//    std::ifstream file(name);
-//    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-//    file.close();
-    //std::cout<<content<<std::endl;
+
+std::cout<<"ANTLRInputStream "<<std::endl;
     antlr4::ANTLRInputStream input(content);
     sylvanmats::CIFLexer lexer(&input);
     antlr4::CommonTokenStream tokens(&lexer);
-//tokens.fill();
-//  for (auto token : tokens.getTokens()) {
-//    std::cout << token->toString() << std::endl;
-//  }    
+
+    std::cout<<"CIFParser "<<std::endl;
     sylvanmats::CIFParser parser(&tokens);
     parser.setBuildParseTree(true);
     antlr4::tree::ParseTree* tree = parser.cif();
 
+    std::cout<<"AminoStandards "<<std::endl;
     sylvanmats::standards::AminoStandards aminoStandards;
    
     sylvanmats::constitution::Graph graph;
