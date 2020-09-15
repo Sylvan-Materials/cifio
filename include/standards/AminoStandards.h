@@ -72,9 +72,15 @@ namespace sylvanmats::standards{
         parser->setBuildParseTree(true);
         tree = parser->cif();
 
-        const std::string thePath="/cif/dataBlock/dataItems/tag";
+        //std::cout << tree->toStringTree(&parser) << std::endl << std::endl;
+
+        const std::string thePath="/cif/*/*/tag";
         xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath);
         dataTag=xPath->evaluate(tree);
+        std::cout<<"dataTag.size() "<<dataTag.size()<<std::endl;
+        const std::string thePath2="/cif/dataBlock/dataItems/tag";
+        xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath2);
+        std::cout<<"s? "<<xPath->evaluate(tree).size()<<std::endl;
     });
     };
 
@@ -84,7 +90,7 @@ namespace sylvanmats::standards{
     public:
         bool operator()(std::string_view& comp_id, std::function<void(chem_comp_bond ccb)> apply){
             bool ret=false;
-            for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataTag.begin();it!=dataTag.end();it++){
+            for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataTag.begin();!ret && it!=dataTag.end();it++){
                     //std::cout<<" "<<(*it)->toStringTree()<<std::endl;
                 bool atomSites=false;
                 if (sylvanmats::CIFParser::TagContext* r=dynamic_cast<sylvanmats::CIFParser::TagContext*>((*it))) {

@@ -200,7 +200,7 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                         for(lemon::ListGraph::NodeIt nSiteA(graph); countA<entityCount && nSiteA!=lemon::INVALID; ++nSiteA){
                         unsigned int countB=0;
                         for(lemon::ListGraph::NodeIt nSiteB(graph); countB<entityCount && nSiteB!=lemon::INVALID; ++nSiteB){
-                            std::cout<<"??? "<<countA<<" "<<countB<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
+                            //std::cout<<"??? "<<countA<<" "<<countB<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                             if(countA<countB && nSiteA!=nSiteB && ((graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_1)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_2)==0) || (graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_2)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_1)==0))){
                                 std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                                 lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
