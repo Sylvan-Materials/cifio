@@ -34,13 +34,23 @@ namespace sylvanmats::constitution {
 
     };
 
+    struct _comp_bond{
+        std::string comp_id;
+        std::string atom_id_1;
+        std::string atom_id_2;
+        short value_order=1;
+        bool pdbx_aromatic_flag=false;
+        bool pdbx_stereo_config=false;
+        unsigned int pdbx_ordinal;
+    }; 
 
     class Graph : public lemon::ListGraph {
 
         
         public:
             lemon::ListGraph::NodeMap<_atom_site<double>> atomSites;
-            Graph() : atomSites(*this){
+            lemon::ListGraph::EdgeMap<_comp_bond> compBond;
+            Graph() : atomSites(*this), compBond(*this){
             };
 
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};

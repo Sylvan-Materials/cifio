@@ -41,7 +41,7 @@ TEST_CASE("test tcp for a cif.gz"){
             if(ret<=0)eofHit=true;
             else count+=ret;
             if(uncomprLen>content.size()-count)uncomprLen=content.size()-count;
-            std::cout<<ret<<" "<<eofHit<<" "<<count<<" "<<content.size()<<" "<<uncomprLen<<std::endl;
+            //std::cout<<ret<<" "<<eofHit<<" "<<count<<" "<<content.size()<<" "<<uncomprLen<<std::endl;
         }
 //        count++;
 //        gzseek(file, 1L, SEEK_CUR);
@@ -133,6 +133,9 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                     case 0:
 
                     break;
+                    case 1:
+                        graph.atomSites[n].id =std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                    break;
                     case 2:
                         graph.atomSites[n].type_symbol=r->loopBody()->value(valueIndex)->getText();
                     break;
@@ -190,14 +193,18 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                     previous_ins_code=ins_code;
                    }
                    else if(previous_seq_id!=seq_id || previous_comp_id.compare(comp_id)!=0 || previous_asym_id.compare(asym_id)!=0 || previous_alt_id.compare(alt_id)!=0 || previous_ins_code.compare(ins_code)!=0){
-                    std::cout<<" "<<previous_comp_id<<" comp_id "<<comp_id<<std::endl;
+                    std::cout<<" "<<previous_comp_id<<" comp_id |"<<comp_id<<"|"<<std::endl;
                     bool ret=aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
+                        std::cout<<"got std "<<comp_id<<entityCount<<std::endl;
                         unsigned int countA=0;
                         for(lemon::ListGraph::NodeIt nSiteA(graph); countA<entityCount && nSiteA!=lemon::INVALID; ++nSiteA){
                         unsigned int countB=0;
                         for(lemon::ListGraph::NodeIt nSiteB(graph); countB<entityCount && nSiteB!=lemon::INVALID; ++nSiteB){
+                            std::cout<<"??? "<<countA<<" "<<countB<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                             if(countA<countB && nSiteA!=nSiteB && ((graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_1)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_2)==0) || (graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_2)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_1)==0))){
+                                std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                                 lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
+                                graph.compBond[e].value_order=ccb.value_order;
                             }                       
                             countB++;
                         }

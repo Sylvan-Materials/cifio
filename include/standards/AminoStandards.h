@@ -91,13 +91,14 @@ namespace sylvanmats::standards{
                     if(r->getText().compare("_chem_comp.id")==0){
                         if(sylvanmats::CIFParser::DataItemsContext* dic=dynamic_cast<sylvanmats::CIFParser::DataItemsContext*>(r->parent))
                         if(dic->value()->getText().compare(comp_id)==0){
+std::cout<<" "<<comp_id<<" "<<dataTag.size()<<std::endl;
                             sylvanmats::CIFParser::DataBlockContext* db=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>(dic->parent);
                             auto oi=db->dataItems();
                             for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("_chem_comp_bond.", 0) == 0; })){
                                 unsigned int columnCount=0;
                                  chem_comp_bond ccb;
                                  for(unsigned int valueIndex=0;valueIndex<l->loop()->loopBody()->value().size();valueIndex++){
-                                     //std::cout<<r->loopBody()->value(valueIndex)->getText()<<" ";
+                                     std::cout<<l->loop()->loopBody()->value(valueIndex)->getText()<<" ";
                                      switch(columnCount){
                                           case 0:
                                               ccb.comp_id=l->loop()->loopBody()->value(valueIndex)->getText();
@@ -120,7 +121,7 @@ namespace sylvanmats::standards{
                                      }
                                      columnCount++;
                                      if(valueIndex % (l->loop()->loopHeader()->tag().size()) == l->loop()->loopHeader()->tag().size()-1){
-                                         //std::cout<<std::endl;
+                                         std::cout<<std::endl;
                                          apply(ccb);
                                          columnCount=0;
                                          ret=true;

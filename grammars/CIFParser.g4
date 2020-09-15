@@ -8,10 +8,10 @@ cif : Comments? (WhiteSpace | Eol | TokenizedComments)? (dataBlock((WhiteSpace |
 dataBlock : dataBlockHeading ((WhiteSpace | Eol | TokenizedComments)+( dataItems | saveFrame) )*;
 
 dataBlockHeading : DATA_ blockHeading;
-blockHeading : (NonBlankChars|Digit);
+blockHeading : (NonBlankChars|Numeric|Digit)+;
 
 dataItems : tag (WhiteSpace | Eol )+ value | loop;
-tag : Underscore (NonBlankChars|Underscore|Numeric|Period | Digit)+;
+tag : Underscore (NonBlankChars|Underscore|Numeric|Period | Digit|DATA_|LOOP_|SAVE_)+;
 value : ( Period | Questionmark | Numeric | NonBlankChars | Underscore | SingleQuotedString | DoubleQuotedString | TextField )+;
 
 loop : loopHeader loopBody;

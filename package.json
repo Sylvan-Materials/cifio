@@ -2,11 +2,12 @@
   "name": "cifio",
   "version": "1.0.0",
   "devDependencies": {
-    "doctest" : "onqtam/doctest",
+    "json-graph-specification" : "jsongraph/json-graph-specification",
     "mio" : "mandreyel/mio",
     "rapidjson" : "Tencent/rapidjson",
     "zlib" : "madler/zlib",
-    "openssl": "openssl/openssl#OpenSSL_1_1_1g"
+    "openssl": "openssl/openssl#OpenSSL_1_1_1g",
+    "doctest" : "onqtam/doctest"
   }, 
   "description": "input/output of cif data",
   "main": "index.js",

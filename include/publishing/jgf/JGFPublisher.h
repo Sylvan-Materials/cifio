@@ -21,16 +21,42 @@ namespace sylvanmats::publishing{
     {
         os << R"({
 "graph" : {
+    "directed": false,
+    "type": "constitutional",
     "nodes": {
-)";
+       )";
+        std::vector<lemon::ListGraph::Node> nodes;
         for(lemon::ListGraph::NodeIt nSiteA(jgfp.graph); nSiteA!=lemon::INVALID; ++nSiteA){
-        os << R"(")"<<jgfp.graph.atomSites[nSiteA].label_atom_id<<R"(":{})";
-        lemon::ListGraph::NodeIt n=nSiteA;
-        ++n;
-        if(n!=lemon::INVALID) os << R"(,)";
+           nodes.push_back(nSiteA);
+        }
+        unsigned long long count=0;
+        for(lemon::ListGraph::Node n: nodes | std::views::reverse){
+            os << R"(")"<<jgfp.graph.atomSites[n].id<<R"(":{"label": ")"+jgfp.graph.atomSites[n].label_atom_id+R"(", "metadata": {"comp_id":")"+jgfp.graph.atomSites[n].label_comp_id+R"(","seq_id":")"+std::to_string(jgfp.graph.atomSites[n].auth_seq_id)+R"("}})";
+            if(count<nodes.size()-1) os << R"(,
+       )";
+            count++;
         }
 os << R"(
   }
+,
+    "edges": [
+               )";
+       count=0;
+       for(lemon::ListGraph::EdgeIt e(jgfp.graph); e!=lemon::INVALID; ++e){
+        os << R"(
+          {
+            "source": ")"+std::to_string(jgfp.graph.atomSites[jgfp.graph.u(e)].id)+R"(",
+            "target": ")"+std::to_string(jgfp.graph.atomSites[jgfp.graph.v(e)].id)+R"(",
+            "label": ")"+std::to_string(jgfp.graph.compBond[e].value_order)+R"(")";
+            if(count<lemon::countEdges(jgfp.graph)-1) os << R"(,
+       )";
+            count++;
+        os << R"(
+          }
+)";
+       }
+os << R"(
+             ]
 }
 )";
         os << "}\n";
