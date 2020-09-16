@@ -33,13 +33,17 @@ Eol : [\n\r];
 
 WhiteSpace : [ \t];
 Semi : ';';
-LBracket : '[';
-RBracket : ']';
 Pound : '#';
 Underscore : '_';
 Period : '.';
 Questionmark : '?';
+fragment
+LBracket : '[';
+fragment
+RBracket : ']';
+fragment
 Plus : '+';
+fragment
 Dash : '-';
 
 fragment

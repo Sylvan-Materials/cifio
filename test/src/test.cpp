@@ -179,10 +179,10 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                     break;
                }
                columnCount++;
-               if(valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1){
+               if(valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1 || valueIndex==r->loopBody()->value().size()-1){
                    columnCount=0;
                    entityCount++;
-                   std::cout<<" "<<entityCount<<std::endl;
+                   //std::cout<<" "<<entityCount<<std::endl;
                    if(first){
                     first=false;
                     entityCount=0;
@@ -192,7 +192,7 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                     previous_alt_id=alt_id;
                     previous_ins_code=ins_code;
                    }
-                   else if(previous_seq_id!=seq_id || previous_comp_id.compare(comp_id)!=0 || previous_asym_id.compare(asym_id)!=0 || previous_alt_id.compare(alt_id)!=0 || previous_ins_code.compare(ins_code)!=0){
+                   else if((previous_seq_id!=seq_id || previous_comp_id.compare(comp_id)!=0 || previous_asym_id.compare(asym_id)!=0 || previous_alt_id.compare(alt_id)!=0 || previous_ins_code.compare(ins_code)!=0) || valueIndex==r->loopBody()->value().size()-1){
                     std::cout<<" "<<previous_comp_id<<" comp_id |"<<comp_id<<"|"<<std::endl;
                     bool ret=aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
                         std::cout<<"got std "<<comp_id<<entityCount<<std::endl;

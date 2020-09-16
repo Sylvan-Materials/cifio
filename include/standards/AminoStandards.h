@@ -57,30 +57,30 @@ namespace sylvanmats::standards{
         std::shared_ptr<sylvanmats::CIFParser> parser;
         std::shared_ptr<antlr4::tree::xpath::XPath> xPath;
         antlr4::tree::ParseTree* tree;
-        std::vector<antlr4::tree::ParseTree*> dataTag;
+        std::vector<antlr4::tree::ParseTree*> dataBlock;
     public:
     AminoStandards(){
         std::string filePath="~/Downloads/aa-variants-v1.cif.gz";
     sylvanmats::reading::GZReader gzReader;
     gzReader(filePath, [&](std::istream& content){
 
+        std::cout<<"ANTLRInputStream "<<std::endl;
         input=std::make_shared<antlr4::ANTLRInputStream>(content);
         lexer=std::make_shared<sylvanmats::CIFLexer>(input.get());
         tokens=std::make_shared<antlr4::CommonTokenStream>(lexer.get());
 
         parser=std::make_shared<sylvanmats::CIFParser>(tokens.get());
-        parser->setBuildParseTree(true);
+        //parser->setBuildParseTree(true);
+        std::cout<<"parser "<<std::endl;
         tree = parser->cif();
 
         //std::cout << tree->toStringTree(&parser) << std::endl << std::endl;
 
-        const std::string thePath="/cif/*/*/tag";
+        const std::string thePath="/cif/dataBlock";
+        std::cout<<" "<<thePath<<std::endl;
         xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath);
-        dataTag=xPath->evaluate(tree);
-        std::cout<<"dataTag.size() "<<dataTag.size()<<std::endl;
-        const std::string thePath2="/cif/dataBlock/dataItems/tag";
-        xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath2);
-        std::cout<<"s? "<<xPath->evaluate(tree).size()<<std::endl;
+        dataBlock=xPath->evaluate(tree);
+        std::cout<<"dataBlock.size() "<<dataBlock.size()<<std::endl;
     });
     };
 
@@ -90,21 +90,18 @@ namespace sylvanmats::standards{
     public:
         bool operator()(std::string_view& comp_id, std::function<void(chem_comp_bond ccb)> apply){
             bool ret=false;
-            for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataTag.begin();!ret && it!=dataTag.end();it++){
+            for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlock.begin();!ret && it!=dataBlock.end();it++){
                     //std::cout<<" "<<(*it)->toStringTree()<<std::endl;
                 bool atomSites=false;
-                if (sylvanmats::CIFParser::TagContext* r=dynamic_cast<sylvanmats::CIFParser::TagContext*>((*it))) {
-                    if(r->getText().compare("_chem_comp.id")==0){
-                        if(sylvanmats::CIFParser::DataItemsContext* dic=dynamic_cast<sylvanmats::CIFParser::DataItemsContext*>(r->parent))
-                        if(dic->value()->getText().compare(comp_id)==0){
-std::cout<<" "<<comp_id<<" "<<dataTag.size()<<std::endl;
-                            sylvanmats::CIFParser::DataBlockContext* db=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>(dic->parent);
-                            auto oi=db->dataItems();
+                if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*it))) {
+                    if(r->dataItems().size()>0 && r->dataItems(0)->tag()!=nullptr &&  r->dataItems(0)->tag()->getText().compare("_chem_comp.id")==0){
+                        if(r->dataItems(0)->value()->getText().compare(comp_id)==0){
+                            auto oi=r->dataItems();
                             for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("_chem_comp_bond.", 0) == 0; })){
                                 unsigned int columnCount=0;
                                  chem_comp_bond ccb;
                                  for(unsigned int valueIndex=0;valueIndex<l->loop()->loopBody()->value().size();valueIndex++){
-                                     std::cout<<l->loop()->loopBody()->value(valueIndex)->getText()<<" ";
+                                     //std::cout<<l->loop()->loopBody()->value(valueIndex)->getText()<<" ";
                                      switch(columnCount){
                                           case 0:
                                               ccb.comp_id=l->loop()->loopBody()->value(valueIndex)->getText();
@@ -127,7 +124,7 @@ std::cout<<" "<<comp_id<<" "<<dataTag.size()<<std::endl;
                                      }
                                      columnCount++;
                                      if(valueIndex % (l->loop()->loopHeader()->tag().size()) == l->loop()->loopHeader()->tag().size()-1){
-                                         std::cout<<std::endl;
+                                         //std::cout<<std::endl;
                                          apply(ccb);
                                          columnCount=0;
                                          ret=true;
