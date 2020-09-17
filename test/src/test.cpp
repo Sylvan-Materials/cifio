@@ -106,7 +106,7 @@ std::cout<<"ANTLRInputStream "<<std::endl;
     sylvanmats::constitution::Graph graph;
     
    const std::string thePath="/cif/dataBlock/dataItems/loop";
-   antlr4::tree::xpath::XPath xPath(&parser, thePath);///dataBlock/dataBlockHeading/*");
+   antlr4::tree::xpath::XPath xPath(&parser, thePath);
    std::vector<antlr4::tree::ParseTree*> dataBlockHeading=xPath.evaluate(tree);
    for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlockHeading.begin();it!=dataBlockHeading.end();it++){
        if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
@@ -179,13 +179,11 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                     break;
                }
                columnCount++;
-               if(valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1 || valueIndex==r->loopBody()->value().size()-1){
+               if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
                    columnCount=0;
-                   entityCount++;
-                   //std::cout<<" "<<entityCount<<std::endl;
+//                   std::cout<<valueIndex<<" "<<(r->loopHeader()->tag().size() % valueIndex)<<" "<<(r->loopHeader()->tag().size()-1)<<" entityCount "<<entityCount<<" "<<previous_comp_id<<" "<<comp_id<<" "<<previous_seq_id<<" "<<seq_id<<" "<<previous_asym_id<<" "<<asym_id<<" "<<previous_alt_id<<" "<<alt_id<<" "<<previous_ins_code<<" "<<ins_code<<std::endl;
                    if(first){
                     first=false;
-                    entityCount=0;
                     previous_seq_id=seq_id;
                     previous_comp_id=comp_id;
                     previous_asym_id=asym_id;
@@ -193,16 +191,16 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                     previous_ins_code=ins_code;
                    }
                    else if((previous_seq_id!=seq_id || previous_comp_id.compare(comp_id)!=0 || previous_asym_id.compare(asym_id)!=0 || previous_alt_id.compare(alt_id)!=0 || previous_ins_code.compare(ins_code)!=0) || valueIndex==r->loopBody()->value().size()-1){
-                    std::cout<<" "<<previous_comp_id<<" comp_id |"<<comp_id<<"|"<<std::endl;
-                    bool ret=aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
-                        std::cout<<"got std "<<comp_id<<entityCount<<std::endl;
+//                    std::cout<<entityCount<<" "<<previous_comp_id<<" comp_id |"<<comp_id<<"|"<<std::endl;
+                    bool ret=aminoStandards(previous_comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
+//                        std::cout<<"got std "<<comp_id<<" "<<entityCount<<std::endl;
                         unsigned int countA=0;
                         for(lemon::ListGraph::NodeIt nSiteA(graph); countA<entityCount && nSiteA!=lemon::INVALID; ++nSiteA){
                         unsigned int countB=0;
                         for(lemon::ListGraph::NodeIt nSiteB(graph); countB<entityCount && nSiteB!=lemon::INVALID; ++nSiteB){
                             //std::cout<<"??? "<<countA<<" "<<countB<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                             if(countA<countB && nSiteA!=nSiteB && ((graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_1)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_2)==0) || (graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_2)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_1)==0))){
-                                std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
+                                //std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                                 lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
                                 graph.compBond[e].value_order=ccb.value_order;
                             }                       
@@ -218,6 +216,7 @@ std::cout<<"ANTLRInputStream "<<std::endl;
                     previous_alt_id=alt_id;
                     previous_ins_code=ins_code;
                    }
+                   entityCount++;
                    if(valueIndex<r->loopBody()->value().size()-1)n=graph.addNode();
                }
            }
