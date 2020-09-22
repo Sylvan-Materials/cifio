@@ -31,7 +31,7 @@ namespace sylvanmats::publishing{
         }
         unsigned long long count=0;
         for(lemon::ListGraph::Node n: nodes | std::views::reverse){
-            os << R"(")"<<jgfp.graph.atomSites[n].id<<R"(":{"label": ")"+jgfp.graph.atomSites[n].label_atom_id+R"(", "metadata": {"comp_id":")"+jgfp.graph.atomSites[n].label_comp_id+R"(","seq_id":")"+std::to_string(jgfp.graph.atomSites[n].auth_seq_id)+R"("}})";
+            os << R"(")"<<jgfp.graph.atomSites[n].id<<R"(":{"label": ")"+jgfp.graph.atomSites[n].label_atom_id+R"(", "metadata": {"comp_id":")"+jgfp.graph.atomSites[n].label_comp_id+R"(","seq_id":")"+std::to_string(jgfp.graph.atomSites[n].auth_seq_id)+R"(","type_symbol":")"+jgfp.graph.atomSites[n].type_symbol+R"("}})";
             if(count<nodes.size()-1) os << R"(,
        )";
             count++;
@@ -48,12 +48,11 @@ os << R"(
             "source": ")"+std::to_string(jgfp.graph.atomSites[jgfp.graph.u(e)].id)+R"(",
             "target": ")"+std::to_string(jgfp.graph.atomSites[jgfp.graph.v(e)].id)+R"(",
             "label": ")"+std::to_string(jgfp.graph.compBond[e].value_order)+R"(")";
+        os << R"(
+          })";
             if(count<lemon::countEdges(jgfp.graph)-1) os << R"(,
        )";
             count++;
-        os << R"(
-          }
-)";
        }
 os << R"(
              ]

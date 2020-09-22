@@ -64,7 +64,6 @@ namespace sylvanmats::standards{
     sylvanmats::reading::GZReader gzReader;
     gzReader(filePath, [&](std::istream& content){
 
-        std::cout<<"ANTLRInputStream "<<std::endl;
         input=std::make_shared<antlr4::ANTLRInputStream>(content);
         lexer=std::make_shared<sylvanmats::CIFLexer>(input.get());
         tokens=std::make_shared<antlr4::CommonTokenStream>(lexer.get());
@@ -80,7 +79,7 @@ namespace sylvanmats::standards{
         std::cout<<" "<<thePath<<std::endl;
         xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath);
         dataBlock=xPath->evaluate(tree);
-        std::cout<<"dataBlock.size() "<<dataBlock.size()<<std::endl;
+        //std::cout<<"dataBlock.size() "<<dataBlock.size()<<std::endl;
     });
     };
 
@@ -88,7 +87,7 @@ namespace sylvanmats::standards{
     virtual ~AminoStandards() = default;
 
     public:
-        bool operator()(std::string_view& comp_id, std::function<void(chem_comp_bond ccb)> apply){
+        bool operator()(const std::string_view& comp_id, std::function<void(chem_comp_bond ccb)> apply){
             bool ret=false;
             for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlock.begin();!ret && it!=dataBlock.end();it++){
                     //std::cout<<" "<<(*it)->toStringTree()<<std::endl;
@@ -96,6 +95,7 @@ namespace sylvanmats::standards{
                 if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*it))) {
                     if(r->dataItems().size()>0 && r->dataItems(0)->tag()!=nullptr &&  r->dataItems(0)->tag()->getText().compare("_chem_comp.id")==0){
                         if(r->dataItems(0)->value()->getText().compare(comp_id)==0){
+                        //std::cout<<""<<comp_id<<" ? "<<r->dataItems(0)->value()->getText()<<std::endl;
                             auto oi=r->dataItems();
                             for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("_chem_comp_bond.", 0) == 0; })){
                                 unsigned int columnCount=0;
