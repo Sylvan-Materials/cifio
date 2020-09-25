@@ -95,6 +95,14 @@ TEST_CASE("test 3sgs") {
     populator(filePath, graph, [](sylvanmats::constitution::Graph& graph){
     sylvanmats::publishing::JGFPublisher jgfPublisher(graph);   
    CHECK_EQ(graph.getNumberOfAtomSites(), 46);
+   CHECK_EQ(graph.getCell().length_a, 4.821);
+   CHECK_EQ(graph.getCell().length_b, 19.500);
+   CHECK_EQ(graph.getCell().length_c, 21.004);
+   CHECK_EQ(graph.getCell().angle_alpha, 90.000);
+   CHECK_EQ(graph.getCell().angle_beta, 94.230);
+   CHECK_EQ(graph.getCell().angle_gamma, 90.000);
+   CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 1 21 1");
+   CHECK_EQ(graph.getSymmetry().Int_Tables_number, 4);
    std::cout<<" "<<jgfPublisher<<std::endl;
    
    });

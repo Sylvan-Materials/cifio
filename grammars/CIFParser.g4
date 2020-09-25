@@ -12,7 +12,8 @@ blockHeading : (NonBlankChars|Numeric|Period|Questionmark|Digit|Underscore)+;
 
 dataItems : tag (WhiteSpace | Eol )+ value | loop;
 tag : Underscore (NonBlankChars|Underscore|Numeric|Period | Digit|DATA_|LOOP_|SAVE_)+;
-value : ( Period | Questionmark | Numeric | NonBlankChars | Underscore | SingleQuotedString | DoubleQuotedString | TextField )+;
+value : singleQuotedString | ( DoubleQuotedString | Period | Questionmark | Numeric | NonBlankChars | Underscore | TextField )+;
+singleQuotedString : SingleQuotedString;
 
 loop : loopHeader loopBody;
 loopHeader : LOOP_ ((WhiteSpace | Eol | TokenizedComments)+ tag?)+;

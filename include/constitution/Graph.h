@@ -31,6 +31,7 @@ namespace sylvanmats::constitution {
         std::string auth_asym_id;
         std::string auth_atom_id;
         int pdbx_PDB_model_num;
+        unsigned short proton_count=0;
 
     };
 
@@ -42,7 +43,41 @@ namespace sylvanmats::constitution {
         bool pdbx_aromatic_flag=false;
         bool pdbx_stereo_config=false;
         unsigned int pdbx_ordinal;
-    }; 
+    };
+
+    struct _pdbx_poly_seq_scheme {
+        std::string asym_id;
+        long long entity_id;
+        long long seq_id;
+        std::string mon_id;
+        long long ndb_seq_num;
+        long long pdb_seq_num;
+        long long auth_seq_num;
+        std::string pdb_mon_id;
+        std::string auth_mon_id;
+        std::string pdb_strand_id;
+        std::string pdb_ins_code;
+        std::string hetero;
+    };
+
+    template<typename T>
+    struct _cell {
+        T length_a;
+        T length_b;
+        T length_c;
+        T angle_alpha;
+        T angle_beta;
+        T angle_gamma;
+    };
+
+    struct _symmetry {
+        std::string space_group_name_H_M;
+        std::string entry_id;
+        unsigned int Int_Tables_number;
+        std::string pdbx_full_space_group_name_H_M;
+        std::string cell_setting;
+        std::string space_group_name_Hall;
+    };
 
     class Graph : public lemon::ListGraph {
 
@@ -50,10 +85,15 @@ namespace sylvanmats::constitution {
         public:
             lemon::ListGraph::NodeMap<_atom_site<double>> atomSites;
             lemon::ListGraph::EdgeMap<_comp_bond> compBond;
+            _cell<double> cell;
+            _symmetry symmetry;
+
             Graph() : atomSites(*this), compBond(*this){
             };
 
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};
+            _cell<double>& getCell(){return cell;};
+            _symmetry& getSymmetry(){return symmetry;};
     };
 
 }

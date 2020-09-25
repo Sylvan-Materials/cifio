@@ -21,8 +21,8 @@ UnsignedInteger : ( Digit )+;
 TextField : (SemiColonTextField ) Eol SemiColonTextField Eol Semi ( (AnyPrintChars|Digit|WhiteSpace|Eol)* Eol ((TextLeadChar (AnyPrintChars|Digit|WhiteSpace)*)? Eol)*) Semi;
 
 //UnquotedString : NonBlankChars;
-SingleQuotedString : Single_Quote (AnyPrintChars|Digit|WhiteSpace|Eol)* Single_Quote;
-DoubleQuotedString : Double_Quote (AnyPrintChars|Digit|WhiteSpace|Eol)* Double_Quote;
+SingleQuotedString : Single_Quote ~('\'')* Single_Quote;
+DoubleQuotedString : Double_Quote ~('"')* Double_Quote;
 SemiColonTextField : ((TextLeadChar (AnyPrintChars|Digit|WhiteSpace|Eol)*)? Eol*) Semi;
 
 AnyPrintChars : (PartialChar | Semi | LBracket | RBracket)+;
