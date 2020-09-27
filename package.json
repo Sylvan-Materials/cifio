@@ -2,23 +2,24 @@
   "name": "cifio",
   "version": "1.0.0",
   "devDependencies": {
-    "json-graph-specification" : "jsongraph/json-graph-specification",
-    "mio" : "mandreyel/mio",
-    "rapidjson" : "Tencent/rapidjson",
-    "zlib" : "madler/zlib",
+    "doctest": "onqtam/doctest",
+    "json-graph-specification": "jsongraph/json-graph-specification",
+    "mio": "mandreyel/mio",
     "openssl": "openssl/openssl#OpenSSL_1_1_1g",
-    "doctest" : "onqtam/doctest"
-  }, 
+    "rapidjson": "Tencent/rapidjson",
+    "urlcpp": "rimmartin/urlcpp",
+    "zlib": "madler/zlib"
+  },
   "description": "input/output of cif data",
   "main": "index.js",
   "scripts": {
     "clean": "make clean",
-    "zlib" : "cd node_modules/zlib && cmake -DCMAKE_INSTALL_PREFIX=dist . && make install",
-    "ssl": "cd node_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
-    "build": "cd test && pwd && mkdir -p build/src/parsing && mkdir -p build/src/constitution && which make && make -f Makefile all",
+    "zlib": "cd cpp_modules/zlib && cmake -DCMAKE_INSTALL_PREFIX=dist . && make install",
+    "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
+    "urlcpp": "cd cpp_modules/urlcpp && yarn install && make",
+    "build": "cd test && pwd && mkdir -p build/src/parsing && mkdir -p build/src/constitution && mkdir -p build/src/density && which make && make -f Makefile all",
     "test": "yarn build && cd test && pwd && ./test "
   },
   "author": "rimmartin",
   "license": "MIT"
 }
-

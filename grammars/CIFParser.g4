@@ -10,10 +10,11 @@ dataBlock : dataBlockHeading ((WhiteSpace | Eol | TokenizedComments)+( dataItems
 dataBlockHeading : DATA_ blockHeading;
 blockHeading : (NonBlankChars|Numeric|Period|Questionmark|Digit|Underscore)+;
 
-dataItems : tag (WhiteSpace | Eol )+ value | loop;
+dataItems : (tag (WhiteSpace | Eol )+ value) | loop;
 tag : Underscore (NonBlankChars|Underscore|Numeric|Period | Digit|DATA_|LOOP_|SAVE_)+;
-value : singleQuotedString | ( DoubleQuotedString | Period | Questionmark | Numeric | NonBlankChars | Underscore | TextField )+;
+value : singleQuotedString | doubleQuotedString | ( NonBlankChars | Questionmark | Numeric | Underscore | TextField )+;
 singleQuotedString : SingleQuotedString;
+doubleQuotedString : DoubleQuotedString;
 
 loop : loopHeader loopBody;
 loopHeader : LOOP_ ((WhiteSpace | Eol | TokenizedComments)+ tag?)+;

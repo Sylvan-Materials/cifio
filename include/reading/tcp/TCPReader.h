@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <functional>
 
+#include "Url.h"
+
 #include <coroutine>
 #include <stdexcept>
 #include <thread>
@@ -278,22 +280,22 @@ namespace sylvanmats::reading{
         TCPReader(const TCPReader& orig) = delete;
         virtual ~TCPReader() = default;
 
-        void operator()(std::string& url, std::function<void(std::istream& content)> apply){
+        bool operator()(std::string ip, std::string& url, std::function<void(std::istream& content)> apply){
         int s;
         s = socket(AF_INET, SOCK_STREAM, 0);
         if (s < 0) {
             printf("Error creating socket.\n");
-            return;
+            return false;
         }
         struct sockaddr_in sa;
         memset (&sa, 0, sizeof(sa));
         sa.sin_family      = AF_INET;
-        sa.sin_addr.s_addr = inet_addr("128.6.244.95"); // address of files.rcsb.org
+        sa.sin_addr.s_addr = inet_addr(ip.c_str()); // address of files.rcsb.org
         sa.sin_port        = htons (443); 
         socklen_t socklen = sizeof(sa);
         if (connect(s, (struct sockaddr *)&sa, socklen)) {
             printf("Error connecting to server.\n");
-            return;
+            return false;
         }
         SSL_library_init();
         SSLeay_add_ssl_algorithms();
@@ -304,7 +306,7 @@ namespace sylvanmats::reading{
         if (!ssl) {
             printf("Error creating SSL.\n");
             log_ssl();
-            return;
+            return false;
         }
         sock = SSL_get_fd(ssl);
         SSL_set_fd(ssl, s);
@@ -313,10 +315,11 @@ namespace sylvanmats::reading{
             printf("Error creating SSL connection.  err=%x\n", err);
             log_ssl();
             fflush(stdout);
-            return ;
+            return false;
         }
         printf ("SSL connection using %s\n", SSL_get_cipher (ssl));
-
+        std::string escapedUrl=url::Url::escape_reserved_unsafe(url);
+std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
         std::string request = "GET "+url+" HTTP/1.0\r\n\r\n";
 
         SendPacket(request.c_str());
@@ -329,6 +332,7 @@ namespace sylvanmats::reading{
         ss<<content.substr(n+4);
         }
         apply(ss);
+        return true;
         };
 
         generator<std::pair<int, char *>> read(){

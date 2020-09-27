@@ -1,4 +1,5 @@
 build
 src/parsing
-node_modules/
+cpp_modules/
+test/examples/
 /tmp/

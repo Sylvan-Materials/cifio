@@ -6,6 +6,10 @@ doctest@onqtam/doctest:
   version "0.0.0"
   resolved "https://codeload.github.com/onqtam/doctest/tar.gz/1c8da00c978c19e00a434b2b1f854fcffc9fba35"
 
+json-graph-specification@jsongraph/json-graph-specification:
+  version "1.0.0"
+  resolved "https://codeload.github.com/jsongraph/json-graph-specification/tar.gz/d39ee6087bf89349efe5939c67908a4744d571fd"
+
 mio@mandreyel/mio:
   version "0.0.0"
   resolved "https://codeload.github.com/mandreyel/mio/tar.gz/8c0d3c7c23c595803d07c44a6088fc3ac920fa3d"
@@ -17,6 +21,10 @@ openssl@openssl/openssl#OpenSSL_1_1_1g:
 rapidjson@Tencent/rapidjson:
   version "1.0.4"
   resolved "https://codeload.github.com/Tencent/rapidjson/tar.gz/ce81bc9edfe773667a7a4454ba81dac72ed4364c"
+
+urlcpp@rimmartin/urlcpp:
+  version "1.0.0"
+  resolved "https://codeload.github.com/rimmartin/urlcpp/tar.gz/cb150f26e74bbb92e33d6a7699adc1253114ef77"
 
 zlib@madler/zlib:
   version "0.0.0"
