@@ -27,7 +27,7 @@ namespace sylvanmats::density {
                 if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                     bool once=true;
                     auto tags=r->loopHeader()->tag();
-                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("_refln.", 0) == 0; })){
+                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_refln.", 0) == 0; })){
                         once=false;
                         unsigned int columnCount=0;
                         structureFactors.push_back(_refln<double>());

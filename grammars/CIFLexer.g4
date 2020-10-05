@@ -1,8 +1,18 @@
 lexer grammar CIFLexer;
 
-DATA_ : ([Dd] [Aa] [Tt] [Aa] Underscore);
-LOOP_ : [Ll] [Oo] [Oo] [Pp] Underscore;
-SAVE_ : [Ss] [Aa] [Vv] [Ee] Underscore;
+DATA_ : [Dd] [Aa] [Tt] [Aa] Underscore ->pushMode(BlockHeadingMode);
+LOOP_ : Eol [Ll] [Oo] [Oo] [Pp] Underscore ;
+SAVE_ : Eol [Ss] [Aa] [Vv] [Ee] Underscore;
+
+Comments : Pound (OrdinaryChar|WhiteSpace|Dash|Double_Quote | Pound | Single_Quote | Semi | LBracket | RBracket)*;
+Tag :  Eol Underscore OrdinaryChar(OrdinaryChar|Underscore|Dash|Numeric|Period|Digit|Double_Quote | Pound | Single_Quote | Semi | LBracket | RBracket)+;
+SingleQuotedString : Single_Quote ( '\\\'' | . )*? Single_Quote;//(OrdinaryChar|WhiteSpace|Space|Tab|Dash|Numeric|Period|Digit|'\\\'')+ Single_Quote;
+DoubleQuotedString : Double_Quote ( '\\"' | . )*? Double_Quote;//(OrdinaryChar|Space|Tab|'\\"')* Double_Quote;
+SemiColonTextField : Semi (.)+? Semi;//Eol (WhiteSpace? (OrdinaryChar (OrdinaryChar|Space|Tab|Dash|Period|Underscore|Double_Quote|Single_Quote|Numeric)*)* Eol)* Semi ;
+Value : (Period | Questionmark | (OrdinaryChar|LBracket)(OrdinaryChar | LBracket | RBracket |Numeric|Period|Dash)* | Numeric);
+
+WhiteSpace : (TokenizedComments | Space | Tab)+ ;
+TokenizedComments : (Space | Tab | Eol)+  Comments+;
 
 Numeric : (Number | Number '(' UnsignedInteger ')' );
 Number : (Float | Integer );
@@ -13,25 +23,11 @@ Exponent : (('e' | 'E' ) | ('e' | 'E' )( Plus | Dash )) UnsignedInteger;
 Integer : ( Plus | Dash )? UnsignedInteger;
 UnsignedInteger : ( Digit )+;
 
+Eol : '\n\r'|'\n'|'\r';
 
-//UnquotedString : NonBlankChars;
-SingleQuotedString : Single_Quote (AnyPrintChars|Digit|WhiteSpace|Double_Quote|Eol)* Single_Quote;
-DoubleQuotedString : Double_Quote (AnyPrintChars|Digit|WhiteSpace|Single_Quote|Eol)* Double_Quote;
-//CharString : NonBlankChars | SingleQuotedString | DoubleQuotedString;
-TextField : (SemiColonTextField ) ;
-SemiColonTextField : Eol Semi ( (AnyPrintChars)* Eol ((TextLeadChar (AnyPrintChars|Digit|WhiteSpace|Eol)*)? Eol)* ) Semi;
-
-NonBlankChars : (AnyPrintChars | Period | Double_Quote | Single_Quote)+;
-
-AnyPrintChars : (PartialChar | Semi | LBracket | RBracket)+;
-TokenizedComments : (WhiteSpace | Eol)+  Comments;
-Comments : ( Pound (AnyPrintChars|WhiteSpace | Double_Quote | Single_Quote)* Eol)+;
-
-Eol : [\n\r];
-
-WhiteSpace : [ \t];
 Semi : ';';
 Pound : '#';
+//Dollar : '$';
 Underscore : '_';
 Period : '.';
 Questionmark : '?';
@@ -39,31 +35,22 @@ fragment
 LBracket : '[';
 fragment
 RBracket : ']';
-fragment
 Plus : '+';
-fragment
 Dash : '-';
+Space : ' ';
+Tab : '\t';
 
 Double_Quote : '"';
 
 Single_Quote : '\'';
 
-TextLeadChar : PartialChar | LBracket | RBracket;
-PartialChar : OrdinaryChar | Pound | '$' ;
+OrdinaryChar : ( [a-z] | [A-Z] | '!' | '%' | '&' | '(' | ')' | '*' | Plus | ',' | Dash | Period | '/' | Digit | ':' | '<' | '=' | '>' | Questionmark | '@' | '\\' | '^' | '`' | '{' | '|' | '}' | '~' | '$' ) ;
 
-OrdinaryChar : ( [a-z] | [A-Z] | '!' | '%' | '&' | '(' | ')' | '*' | Plus | ',' | Dash | Period | '/' | ':' | '<' | '=' | '>' | Questionmark | '@' | '\\' | '^' | '`' | '{' | '|' | '}' | '~' );
-
+fragment
 Digit : '0'..'9';
 
 //mode ANY;
 
-mode SEMI;
-EndSemi : Semi ->popMode;
+mode BlockHeadingMode;
+BHText : (OrdinaryChar|Dash|Underscore|Numeric|Double_Quote | Pound | Single_Quote | Semi | LBracket | RBracket)+ ->popMode;
 
-mode SINGLE;
-SingleQuote : Single_Quote ->popMode;
-STEXT : . -> more;
-
-mode DOUBLE;
-DoubleQuote : Double_Quote ->popMode;
-DTEXT : . -> more;

@@ -1,17 +1,22 @@
 
-all: LDFLAGS= -L../../lemon-main/dist/lib -L../cpp_modules/urlcpp -L../../antlr4/runtime/Cpp/run/usr/local/lib -L../cpp_modules/zlib/dist/lib -L../cpp_modules/openssl/openssl/lib -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -l crypto
-all: build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o build/src/constitution/Populator.o build/src/density/Populator.o test
-	$(CXX) $(LDFLAGS) -o test $(wildcard build/src/*.o) $(wildcard build/src/parsing/*.o) $(wildcard build/src/constitution/*.o) $(wildcard build/src/density/*.o)
+all: LDFLAGS= -fuse-ld=gold -L../../lemon-main/dist/lib -L../cpp_modules/urlcpp -L../../antlr4/runtime/Cpp/run/usr/local/lib -L../cpp_modules/zlib/dist/lib -L../cpp_modules/openssl/openssl/lib -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -l crypto
+all: build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o build/src/constitution/Populator.o build/src/density/Populator.o build/src/lattice/Populator.o test
+	$(CXX) $(LDFLAGS) -o test $(wildcard build/src/*.o) $(wildcard build/src/parsing/*.o) $(wildcard build/src/constitution/*.o) $(wildcard build/src/density/*.o) $(wildcard build/src/lattice/*.o)
 
 build/src/constitution/Populator.o: CXXFLAGS= -O3 -pthread -std=c++2a -I../include -I../src -I../../lemon-main/dist/include -I../cpp_modules/zlib/dist/include -I../../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime
 build/src/constitution/Populator.o: ../src/constitution/Populator.cpp
 	$(CXX) --version
 	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/Populator.o ../src/constitution/Populator.cpp
-
+ 
 build/src/density/Populator.o: CXXFLAGS= -O3 -pthread -std=c++2a -I../include -I../src -I../../lemon-main/dist/include -I../cpp_modules/zlib/dist/include -I../../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime
 build/src/density/Populator.o: ../src/density/Populator.cpp
 	$(CXX) --version
 	$(CXX) $(CXXFLAGS) -c -o build/src/density/Populator.o ../src/density/Populator.cpp
+
+build/src/lattice/Populator.o: CXXFLAGS= -O3 -pthread -std=c++2a -I../include -I../src -I../../lemon-main/dist/include -I../cpp_modules/zlib/dist/include -I../../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime
+build/src/lattice/Populator.o: ../src/lattice/Populator.cpp
+	$(CXX) --version
+	$(CXX) $(CXXFLAGS) -c -o build/src/lattice/Populator.o ../src/lattice/Populator.cpp
 
 #build/src/constitution/graph.o: CXXFLAGS= -fmodules-ts -O3 -pthread -std=c++2a -I../../lemon-main/dist/include
 #build/src/constitution/graph.o: ../src/constitution/graph.cpp

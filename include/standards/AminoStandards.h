@@ -93,11 +93,11 @@ namespace sylvanmats::standards{
                     //std::cout<<" "<<(*it)->toStringTree()<<std::endl;
                 bool atomSites=false;
                 if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*it))) {
-                    if(r->dataItems().size()>0 && r->dataItems(0)->tag()!=nullptr &&  r->dataItems(0)->tag()->getText().compare("_chem_comp.id")==0){
+                    if(r->dataItems().size()>0 && r->dataItems(0)->tag()!=nullptr &&  r->dataItems(0)->tag()->getText().compare("\n_chem_comp.id")==0){
                         if(r->dataItems(0)->value()->getText().compare(comp_id)==0){
                         //std::cout<<""<<comp_id<<" ? "<<r->dataItems(0)->value()->getText()<<std::endl;
                             auto oi=r->dataItems();
-                            for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("_chem_comp_bond.", 0) == 0; })){
+                            for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("\n_chem_comp_bond.", 0) == 0; })){
                                 unsigned int columnCount=0;
                                  chem_comp_bond ccb;
                                  for(unsigned int valueIndex=0;valueIndex<l->loop()->loopBody()->value().size();valueIndex++){

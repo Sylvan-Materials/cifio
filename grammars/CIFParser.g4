@@ -3,23 +3,24 @@ parser grammar CIFParser;
 
 options { tokenVocab = CIFLexer; }
 
-cif : Comments? (WhiteSpace | Eol | TokenizedComments)? (dataBlock ((WhiteSpace | Eol | TokenizedComments) dataBlock)* ( WhiteSpace | Eol | TokenizedComments)? )?;
+cif : (comments)* (WhiteSpace)? (dataBlock ((WhiteSpace)? dataBlock)* ( WhiteSpace|Eol)* )?;
+comments : Eol Comments | Comments;
+dataBlock : dataBlockHeading ((WhiteSpace)?( dataItems | saveFrame) )*;
 
-dataBlock : dataBlockHeading ((WhiteSpace | Eol | TokenizedComments)+( dataItems | saveFrame) )*;
+dataBlockHeading : Eol? DATA_ blockHeading;
+blockHeading : BHText;
 
-dataBlockHeading : DATA_ blockHeading;
-blockHeading : (NonBlankChars|Numeric|Period|Questionmark|Digit|Underscore)+;
-
-dataItems : (tag (WhiteSpace | Eol )+ value) | loop;
-tag : Underscore (NonBlankChars|Underscore|Numeric|Period | Digit|DATA_|LOOP_|SAVE_)+;
-value : singleQuotedString | doubleQuotedString | ( NonBlankChars | Questionmark | Numeric | Underscore | TextField )+;
-singleQuotedString : SingleQuotedString;
-doubleQuotedString : DoubleQuotedString;
+dataItems : (WhiteSpace? loop) | (tag (WhiteSpace|Eol)* value (WhiteSpace)*);
+tag : Tag;
+value : singleQuotedString | doubleQuotedString| semiColonTextField | (Value|Underscore )+;
+singleQuotedString : SingleQuotedString ;
+doubleQuotedString : DoubleQuotedString ;
+semiColonTextField : SemiColonTextField;
 
 loop : loopHeader loopBody;
-loopHeader : LOOP_ ((WhiteSpace | Eol | TokenizedComments)+ tag?)+;
-loopBody : value ((WhiteSpace | Eol)+ value)*;
+loopHeader : LOOP_ ((WhiteSpace)? tag)+;
+loopBody : (WhiteSpace|Eol)+ value ((WhiteSpace|Eol)+ value)*;
 
-saveFrame : saveFrameHeading ((WhiteSpace | Eol | TokenizedComments) dataItems)+ (WhiteSpace | Eol | TokenizedComments) SAVE_;
-saveFrameHeading : SAVE_ NonBlankChars;
+saveFrame : saveFrameHeading ((WhiteSpace) dataItems)+ (WhiteSpace) SAVE_;
+saveFrameHeading : SAVE_ OrdinaryChar+;
 

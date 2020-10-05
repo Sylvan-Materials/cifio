@@ -19,6 +19,7 @@
 #include "constitution/Graph.h"
 #include "constitution/Populator.h"
 #include "density/Populator.h"
+#include "lattice/Populator.h"
 #include "publishing/jgf/JGFPublisher.h"
 
 TEST_CASE("test tcp for a cif.gz"){
@@ -55,11 +56,10 @@ TEST_CASE("test tcp for a cif.gz"){
 }
 
 TEST_CASE("test tcp for COD hydroxyapatite"){
-    std::string url = "http://www.crystallography.net/cod/result*?text=hydroxyapatite&has_fobs=true&format=urls&el1=Ca&nel1=Na&nel2=C";
+    std::string url = "http://www.crystallography.net/cod/result*?text=hydroxyapatite&has_fobs&format=urls&el1=Ca&nel1=Na&nel2=C";
     sylvanmats::reading::TCPReader tcpReader;
     CHECK(tcpReader("193.219.81.210", url, [&](std::istream& is){
         std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-        std::cout<<"content: "<<content<<std::endl;
         std::vector<std::string> urls;
         std::string delim="\n";
         char *token = strtok(const_cast<char*>(content.c_str()), delim.c_str());
@@ -70,9 +70,9 @@ TEST_CASE("test tcp for COD hydroxyapatite"){
         }
         CHECK_EQ(urls.size(), 28);
         url=urls[5];
+        std::string hklUrl=url.substr(0, url.size()-4)+".hkl";
         CHECK(tcpReader("193.219.81.210", url, [&](std::istream& is){
             std::string cifContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-            std::cout<<"cifContent: "<<cifContent<<std::endl;
             CHECK_EQ(cifContent.size(), 4766);
             std::string path="./examples/hydroxyapatite.cif.gz";
             gzFile file=gzopen(path.c_str(), "wb");
@@ -97,7 +97,34 @@ TEST_CASE("test tcp for COD hydroxyapatite"){
             gzclose(file);
 
         }));
-        
+//        CHECK(tcpReader("193.219.81.210", hklUrl, [&](std::istream& is){
+//            std::string cifContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+//            std::cout<<"cifContent: "<<cifContent<<std::endl;
+//            CHECK_EQ(cifContent.size(), 4766);
+//            std::string path="./examples/hydroxyapatite.hkl.cif.gz";
+//            gzFile file=gzopen(path.c_str(), "wb");
+//            int uncomprLen=1024;
+//            char buf[uncomprLen+1];
+//            std::memset (buf, 0, uncomprLen+1);
+//            bool eofHit=false;
+//            unsigned long long count=0;
+//            while(!eofHit && uncomprLen>0){
+//                std::memset (buf, 0, uncomprLen+1);
+//                std:strncpy(buf, &cifContent[count], uncomprLen);
+//                buf[uncomprLen+1]=0;
+//                int ret=gzputs(file, (char*)buf);
+//                if(ret<=0)eofHit=true;
+//                else count+=ret;
+//                if(uncomprLen>cifContent.size()-count)uncomprLen=cifContent.size()-count;
+//                //std::cout<<ret<<" "<<eofHit<<" "<<count<<" "<<cifContent.size()<<" "<<uncomprLen<<std::endl;
+//            }
+//    //        count++;
+//    //        gzseek(file, 1L, SEEK_CUR);
+//            CHECK_EQ(count, 4766);
+//            gzclose(file);
+//
+//        }));
+//        
     }));
 
 }
@@ -188,6 +215,9 @@ TEST_CASE("test 3sgs") {
    std::cout<<" "<<jgfPublisher<<std::endl;
    
    });
+   CHECK_EQ(graph.getNumberOfAtomSites(), 46);
+   CHECK_EQ(lemon::countEdges(graph), 43);
+    
 }
 
 TEST_CASE("test 3sgs-sf") {
@@ -199,3 +229,17 @@ TEST_CASE("test 3sgs-sf") {
   
    //});
 }
+
+TEST_CASE("test hydroxyapatite to lattice") {
+    std::string filePath="./examples/hydroxyapatite.cif.gz";
+   
+    sylvanmats::lattice::Graph graph;
+
+    sylvanmats::lattice::Populator populator;
+    populator(filePath, graph, [](sylvanmats::lattice::Graph& graph){
+        CHECK_EQ(lemon::countNodes(graph), 7);
+  
+   });
+}
+
+

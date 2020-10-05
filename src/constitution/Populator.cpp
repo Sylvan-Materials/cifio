@@ -32,20 +32,20 @@ namespace sylvanmats::constitution {
             for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlock.begin();it!=dataBlock.end();it++){
                 if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*it))) {
                     auto oi=r->dataItems();
-                    for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().rfind("_cell.", 0) == 0; })){
-                        if(cdi->tag()->getText().compare("_cell.length_a")==0)graph.cell.length_a=std::strtod(cdi->value()->getText().c_str(), nullptr);
-                        else if(cdi->tag()->getText().compare("_cell.length_b")==0)graph.cell.length_b=std::strtod(cdi->value()->getText().c_str(), nullptr);
-                        else if(cdi->tag()->getText().compare("_cell.length_c")==0)graph.cell.length_c=std::strtod(cdi->value()->getText().c_str(), nullptr);
-                        else if(cdi->tag()->getText().compare("_cell.angle_alpha")==0)graph.cell.angle_alpha=std::strtod(cdi->value()->getText().c_str(), nullptr);
-                        else if(cdi->tag()->getText().compare("_cell.angle_beta")==0)graph.cell.angle_beta=std::strtod(cdi->value()->getText().c_str(), nullptr);
-                        else if(cdi->tag()->getText().compare("_cell.angle_gamma")==0)graph.cell.angle_gamma=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().rfind("\n_cell.", 0) == 0; })){
+                        if(cdi->tag()->getText().compare("\n_cell.length_a")==0)graph.cell.length_a=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                        else if(cdi->tag()->getText().compare("\n_cell.length_b")==0)graph.cell.length_b=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                        else if(cdi->tag()->getText().compare("\n_cell.length_c")==0)graph.cell.length_c=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                        else if(cdi->tag()->getText().compare("\n_cell.angle_alpha")==0)graph.cell.angle_alpha=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                        else if(cdi->tag()->getText().compare("\n_cell.angle_beta")==0)graph.cell.angle_beta=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                        else if(cdi->tag()->getText().compare("\n_cell.angle_gamma")==0)graph.cell.angle_gamma=std::strtod(cdi->value()->getText().c_str(), nullptr);
                     }
-                    for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().rfind("_symmetry.", 0) == 0; })){
-                        if(cdi->tag()->getText().compare("_symmetry.space_group_name_H-M")==0){
+                    for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().rfind("\n_symmetry.", 0) == 0; })){
+                        if(cdi->tag()->getText().compare("\n_symmetry.space_group_name_H-M")==0){
                             if(cdi->value()->singleQuotedString()!=nullptr) graph.symmetry.space_group_name_H_M=cdi->value()->singleQuotedString()->getText().substr(1, cdi->value()->singleQuotedString()->getText().size()-2);
                                 else graph.symmetry.space_group_name_H_M=cdi->value()->getText();
                         }
-                        else if(cdi->tag()->getText().compare("_symmetry.Int_Tables_number")==0)graph.symmetry.Int_Tables_number=std::strtol(cdi->value()->getText().c_str(), nullptr, 10);
+                        else if(cdi->tag()->getText().compare("\n_symmetry.Int_Tables_number")==0)graph.symmetry.Int_Tables_number=std::strtol(cdi->value()->getText().c_str(), nullptr, 10);
                     }
                 }
             }
@@ -59,7 +59,7 @@ namespace sylvanmats::constitution {
                 if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                     bool once=true;
                     auto tags=r->loopHeader()->tag();
-                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("_pdbx_poly_seq_scheme.", 0) == 0; })){
+                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_pdbx_poly_seq_scheme.", 0) == 0; })){
                         once=false;
                         unsigned int columnCount=0;
                         _pdbx_poly_seq_scheme ppss;
@@ -91,7 +91,7 @@ namespace sylvanmats::constitution {
                 if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                     bool once=true;
                     auto tags=r->loopHeader()->tag();
-                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("_atom_site.", 0) == 0; })){
+                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_atom_site.", 0) == 0; })){
                         once=false;
                         unsigned int columnCount=0;
                         unsigned int entityCount=0;

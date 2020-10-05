@@ -35,6 +35,8 @@ cd ..
 yarn install
 
 #run once
+yarn urlcpp
+#run once
 yarn zlib
 #run once
 yarn ssl
