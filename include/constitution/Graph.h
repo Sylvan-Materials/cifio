@@ -45,6 +45,12 @@ namespace sylvanmats::constitution {
         unsigned int pdbx_ordinal;
     };
 
+    enum TERMINATION{
+        NEUTRAL,
+        N_TERMINAL,
+        C_TERMINAL,
+        MONOMER
+    };
     struct _pdbx_poly_seq_scheme {
         std::string asym_id;
         long long entity_id;
@@ -58,6 +64,7 @@ namespace sylvanmats::constitution {
         std::string pdb_strand_id;
         std::string pdb_ins_code;
         std::string hetero;
+        TERMINATION termination=NEUTRAL;
     };
 
     template<typename T>
@@ -87,8 +94,10 @@ namespace sylvanmats::constitution {
             lemon::ListGraph::EdgeMap<_comp_bond> compBond;
             _cell<double> cell;
             _symmetry symmetry;
+            lemon::ListGraph componentGraph;
+            lemon::ListGraph::NodeMap<_pdbx_poly_seq_scheme> componentProperties;
 
-            Graph() : atomSites(*this), compBond(*this){
+            Graph() : atomSites(*this), compBond(*this), componentProperties(componentGraph){
             };
 
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};

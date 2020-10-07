@@ -53,8 +53,6 @@ namespace sylvanmats::constitution {
             const std::string thePath="/cif/dataBlock/dataItems/loop";
             antlr4::tree::xpath::XPath xPath(&parser, thePath);
             std::vector<antlr4::tree::ParseTree*> dataBlockLoop=xPath.evaluate(tree);
-            
-            std::vector<_pdbx_poly_seq_scheme> polymerStrands;
             for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlockLoop.begin();it!=dataBlockLoop.end();it++){
                 if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                     bool once=true;
@@ -62,28 +60,88 @@ namespace sylvanmats::constitution {
                     for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_pdbx_poly_seq_scheme.", 0) == 0; })){
                         once=false;
                         unsigned int columnCount=0;
-                        _pdbx_poly_seq_scheme ppss;
+                        unsigned int compCount=0;
+                        lemon::ListGraph::Node previousNode=lemon::INVALID;
+                        lemon::ListGraph::Node n=graph.componentGraph.addNode();
+                        std::string asym_id="";
+                        std::string previous_asym_id="";
+                        bool first=true;
                     for(unsigned int valueIndex=0;valueIndex<r->loopBody()->value().size();valueIndex++){
                         switch(columnCount){
                              case 0:
-                                 ppss.asym_id = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].asym_id = r->loopBody()->value(valueIndex)->getText();
                              break;
                              case 6:
-                                 ppss.auth_seq_num = std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                                 graph.componentProperties[n].auth_seq_num = std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
                              break;
                              case 8:
-                                 ppss.auth_mon_id = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].auth_mon_id = r->loopBody()->value(valueIndex)->getText();
                              break;
                              case 10:
-                                 ppss.pdb_ins_code = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].pdb_ins_code = r->loopBody()->value(valueIndex)->getText();
                              break;
                         }
                        columnCount++;
                         if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
                             columnCount=0;
-                            polymerStrands.push_back(ppss);
+                            if(first){
+                             first=false;
+                             graph.componentProperties[n].termination=N_TERMINAL;
+                            }
+                            else if((previous_asym_id.compare(asym_id)==0)){
+                             compCount++;
+                             if(compCount>1 && previousNode!=lemon::INVALID){
+                                graph.componentProperties[n].termination=NEUTRAL;
+                                lemon::ListGraph::Edge e=graph.componentGraph.addEdge(previousNode, n);
+                                 //std::cout<<"edge "<<" "<<std::endl;
+                             }
+                            }
+                            else if(previousNode!=lemon::INVALID){
+                                graph.componentProperties[previousNode].termination=C_TERMINAL;
+                                graph.componentProperties[n].termination=N_TERMINAL;
+                            }
+                            previous_asym_id=asym_id;
+                            previousNode=n;
+                            if(valueIndex<r->loopBody()->value().size()-1){
+                                n=graph.componentGraph.addNode();
+                            }
                         }
                     }
+                    }
+                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_pdbx_nonpoly_scheme.", 0) == 0; })){
+                        once=false;
+                        unsigned int columnCount=0;
+                        unsigned int compCount=0;
+                        lemon::ListGraph::Node n=graph.componentGraph.addNode();
+                        std::string asym_id="";
+                        std::string previous_asym_id="";
+                        bool first=true;
+                    for(unsigned int valueIndex=0;valueIndex<r->loopBody()->value().size();valueIndex++){
+                        switch(columnCount){
+                             case 0:
+                                 graph.componentProperties[n].asym_id = r->loopBody()->value(valueIndex)->getText();
+                             break;
+                             case 6:
+                                 graph.componentProperties[n].auth_seq_num = std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                             break;
+                             case 8:
+                                 graph.componentProperties[n].auth_mon_id = r->loopBody()->value(valueIndex)->getText();
+                             break;
+                             case 9:
+                                 graph.componentProperties[n].pdb_ins_code = r->loopBody()->value(valueIndex)->getText();
+                             break;
+                        }
+                       columnCount++;
+                        if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
+                            columnCount=0;
+                             graph.componentProperties[n].termination=MONOMER;
+                             previous_asym_id=asym_id;
+                            if(valueIndex<r->loopBody()->value().size()-1){
+                                n=graph.componentGraph.addNode();
+                            }
+                        }
+                    }
+    std::cout<<"comp size "<<lemon::countNodes(graph.componentGraph)<<" "<<lemon::countEdges(graph.componentGraph)<<std::endl;
                     }
                 }
             }
@@ -167,7 +225,7 @@ namespace sylvanmats::constitution {
                         columnCount++;
                         if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
                             columnCount=0;
-         //                   std::cout<<valueIndex<<" "<<(r->loopHeader()->tag().size() % valueIndex)<<" "<<(r->loopHeader()->tag().size()-1)<<" entityCount "<<entityCount<<" "<<previous_comp_id<<" "<<comp_id<<" "<<previous_seq_id<<" "<<seq_id<<" "<<previous_asym_id<<" "<<asym_id<<" "<<previous_alt_id<<" "<<alt_id<<" "<<previous_ins_code<<" "<<ins_code<<std::endl;
+//                            std::cout<<valueIndex<<" "<<(r->loopHeader()->tag().size() % valueIndex)<<" "<<(r->loopHeader()->tag().size()-1)<<" entityCount "<<entityCount<<" "<<previous_comp_id<<" "<<comp_id<<" "<<previous_seq_id<<" "<<seq_id<<" "<<previous_asym_id<<" "<<asym_id<<" "<<previous_alt_id<<" "<<alt_id<<" "<<previous_ins_code<<" "<<ins_code<<std::endl;
                             if(first){
                              first=false;
                              previous_seq_id=seq_id;
@@ -180,7 +238,14 @@ namespace sylvanmats::constitution {
                              //std::cout<<entityCount<<" "<<previous_comp_id<<" comp_id |"<<comp_id<<"|"<<std::endl;
                                 nNode=lemon::INVALID;
                                 cNode=lemon::INVALID;
-                                bool ret=aminoStandards(previous_comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
+                                lemon::ListGraph::Node currentCompNode=lemon::INVALID;
+                                 for(lemon::ListGraph::NodeIt nComp(graph.componentGraph); currentCompNode==lemon::INVALID && nComp!=lemon::INVALID; ++nComp){
+                                    if(graph.componentProperties[nComp].auth_seq_num==previous_seq_id && graph.componentProperties[nComp].asym_id.compare(previous_asym_id)==0 && graph.componentProperties[nComp].auth_mon_id.compare(previous_comp_id)==0 && graph.componentProperties[nComp].pdb_ins_code.compare(previous_ins_code)==0)currentCompNode=nComp;
+                                }
+                                std::string current_comp_id=previous_comp_id;
+                                if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::N_TERMINAL)current_comp_id+="_LSN3";
+            //std::cout<<"term ? "<<current_comp_id<<std::endl;
+                                bool ret=aminoStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
          //                        std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
                                  unsigned int countA=0;
                                  bool protoated=false;

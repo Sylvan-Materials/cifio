@@ -217,7 +217,9 @@ TEST_CASE("test 3sgs") {
    });
    CHECK_EQ(graph.getNumberOfAtomSites(), 46);
    CHECK_EQ(lemon::countEdges(graph), 43);
-    
+   CHECK_EQ(lemon::countNodes(graph.componentGraph), 8);
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 4);
+
 }
 
 TEST_CASE("test 3sgs-sf") {
