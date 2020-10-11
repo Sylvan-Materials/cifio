@@ -3,3 +3,4 @@ src/parsing
 cpp_modules/
 test/examples/
 /tmp/
+/db/

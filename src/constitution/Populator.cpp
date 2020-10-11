@@ -49,7 +49,6 @@ namespace sylvanmats::constitution {
                     }
                 }
             }
-            std::cout<<"graph.symmetry.space_group_name_H_M "<<graph.symmetry.space_group_name_H_M<<std::endl;
             const std::string thePath="/cif/dataBlock/dataItems/loop";
             antlr4::tree::xpath::XPath xPath(&parser, thePath);
             std::vector<antlr4::tree::ParseTree*> dataBlockLoop=xPath.evaluate(tree);
@@ -221,6 +220,9 @@ namespace sylvanmats::constitution {
                                  graph.atomSites[n].auth_seq_id =std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
                                  seq_id=graph.atomSites[n].auth_seq_id;
                              break;
+                             case 19:
+                                 graph.atomSites[n].auth_atom_id=r->loopBody()->value(valueIndex)->getText();
+                             break;
                         }
                         columnCount++;
                         if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
@@ -244,11 +246,12 @@ namespace sylvanmats::constitution {
                                 }
                                 std::string current_comp_id=previous_comp_id;
                                 if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::N_TERMINAL)current_comp_id+="_LSN3";
+                                if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::C_TERMINAL)current_comp_id+="_LEO2H";
             //std::cout<<"term ? "<<current_comp_id<<std::endl;
-                                bool ret=aminoStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
+                                bool ret=aminoStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double> cca1, sylvanmats::standards::chem_comp_bond ccb, sylvanmats::standards::chem_comp_atom<double> cca2){
          //                        std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
                                  unsigned int countA=0;
-                                 bool protoated=false;
+                                 bool matched=false;
                                  for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount+1 && nSiteA!=lemon::INVALID; ++nSiteA){
                                  unsigned int countB=0;
                                  for(lemon::ListGraph::NodeIt nSiteB(graph); countB<=entityCount+1 && nSiteB!=lemon::INVALID; ++nSiteB){
@@ -258,6 +261,7 @@ namespace sylvanmats::constitution {
 //                                            std::cout<<"\t"<<entityCount<<" "<<graph.atomSites[nSiteA].auth_seq_id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<graph.atomSites[nSiteB].auth_seq_id<<std::endl;
                                             lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
                                             graph.compBond[e].value_order=ccb.value_order;
+                                            matched=true;
                                          }
                                         if(graph.atomSites[nSiteA].label_atom_id.compare("N")==0)nNode=nSiteA;
                                         else if(graph.atomSites[nSiteA].label_atom_id.compare("C")==0)cNode=nSiteA;
@@ -269,20 +273,20 @@ namespace sylvanmats::constitution {
                                  }
                                  countA++;
                                  }
+                                 if(!matched){
                                  countA=0;
-                                 for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount+1 && nSiteA!=lemon::INVALID; ++nSiteA){
-                                 unsigned int countB=0;
-                                 for(lemon::ListGraph::NodeIt nSiteB(graph); countB<=entityCount+1 && nSiteB!=lemon::INVALID; ++nSiteB){
-                                     //std::cout<<"??? "<<countA<<" "<<countB<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
-                                     if(countA<countB && nSiteA!=nSiteB && graph.atomSites[nSiteA].auth_seq_id == graph.atomSites[nSiteB].auth_seq_id && graph.atomSites[nSiteA].auth_comp_id.compare(graph.atomSites[nSiteB].auth_comp_id)==0){
-                                         if((graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_1)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_2)==0) || (graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_2)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_1)==0)){
-//                                            std::cout<<"\t"<<entityCount<<" "<<graph.atomSites[nSiteA].auth_seq_id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<graph.atomSites[nSiteB].auth_seq_id<<std::endl;
-                                         }
-                                       
-                                     }                       
-                                     countB++;
+                                 bool proton1=cca1.type_symbol.compare("H")==0;
+                                 bool proton2=cca2.type_symbol.compare("H")==0;
+                                 for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount && nSiteA!=lemon::INVALID; ++nSiteA){
+//                                     std::cout<<"??? "<<countA<<" "<<proton1<<" "<<proton2<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" |"<<graph.atomSites[nSiteA].auth_atom_id<<"|"<<std::endl;
+                                     if(proton1 && graph.atomSites[nSiteA].auth_atom_id.compare(ccb.atom_id_2)==0){
+                                        graph.atomSites[nSiteA].proton_count++;
+                                     }
+                                     else if(proton2 && graph.atomSites[nSiteA].auth_atom_id.compare(ccb.atom_id_1)==0){
+                                        graph.atomSites[nSiteA].proton_count++;
+                                     } 
+                                    countA++;
                                  }
-                                 countA++;
                                  }
                              });
                              compCount++;

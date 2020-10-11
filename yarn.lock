@@ -10,9 +10,17 @@ json-graph-specification@jsongraph/json-graph-specification:
   version "1.0.0"
   resolved "https://codeload.github.com/jsongraph/json-graph-specification/tar.gz/d39ee6087bf89349efe5939c67908a4744d571fd"
 
+json@nlohmann/json:
+  version "0.0.0"
+  resolved "https://codeload.github.com/nlohmann/json/tar.gz/fd7a9f600712b2724463e9f7f703878ade676d6e"
+
 mio@mandreyel/mio:
   version "0.0.0"
   resolved "https://codeload.github.com/mandreyel/mio/tar.gz/8c0d3c7c23c595803d07c44a6088fc3ac920fa3d"
+
+multi_index@Alexhuszagh/multi_index:
+  version "0.0.0"
+  resolved "https://codeload.github.com/Alexhuszagh/multi_index/tar.gz/3996ce6bfb92307f47e58e93a64016018f626c34"
 
 openssl@openssl/openssl#OpenSSL_1_1_1g:
   version "0.0.0"
@@ -24,7 +32,7 @@ rapidjson@Tencent/rapidjson:
 
 urlcpp@rimmartin/urlcpp:
   version "1.0.0"
-  resolved "https://codeload.github.com/rimmartin/urlcpp/tar.gz/cb150f26e74bbb92e33d6a7699adc1253114ef77"
+  resolved "https://codeload.github.com/rimmartin/urlcpp/tar.gz/fa63b02b77566ea829798fd34158cc1ccd2876ee"
 
 zlib@madler/zlib:
   version "0.0.0"

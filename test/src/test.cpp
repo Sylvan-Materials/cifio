@@ -6,8 +6,12 @@
 #include <string>
 #include <string_view>
 #include <sstream>
+#include <regex>
+#include <iterator>
 
 #include "zlib.h"
+#include "mio/mmap.hpp"
+#include "nlohmann/json.hpp"
 
 #include "antlr4-runtime.h"
 #include "parsing/CIFLexer.h"
@@ -180,7 +184,7 @@ TEST_CASE("test decompression of aa-variants-v1.cif.gz") {
     sylvanmats::standards::AminoStandards aminoStandards;
    std::string_view comp_id="ALA";
    unsigned int counter=0;
-   CHECK(aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
+   CHECK(aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
        CHECK_EQ(standardChemCompBond[counter].comp_id, ccb.comp_id);
        CHECK_EQ(standardChemCompBond[counter].atom_id_1, ccb.atom_id_1);
        CHECK_EQ(standardChemCompBond[counter].atom_id_2, ccb.atom_id_2);
@@ -189,7 +193,7 @@ TEST_CASE("test decompression of aa-variants-v1.cif.gz") {
 
    comp_id="UNK";
    counter=0;
-   REQUIRE_FALSE(aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_bond ccb){
+   REQUIRE_FALSE(aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
        std::cout<<"unk? "<<ccb.comp_id<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<" "<<ccb.value_order<<" "<<std::endl;
    }));
    
@@ -219,7 +223,10 @@ TEST_CASE("test 3sgs") {
    CHECK_EQ(lemon::countEdges(graph), 43);
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 8);
    CHECK_EQ(lemon::countEdges(graph.componentGraph), 4);
-
+    
+       for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+            std::cout<<" "<<graph.atomSites[nSiteA].auth_atom_id<<" "<<graph.atomSites[nSiteA].type_symbol<<" "<<graph.atomSites[nSiteA].proton_count<<std::endl;
+        }
 }
 
 TEST_CASE("test 3sgs-sf") {
@@ -243,5 +250,61 @@ TEST_CASE("test hydroxyapatite to lattice") {
   
    });
 }
+    
+TEST_CASE("test component db") {
+    std::filesystem::path path="../db/components.cif";
+    CHECK(std::filesystem::exists(path));
+    if(std::filesystem::exists(path)){
+        mio::mmap_source mmap(path.string());
+        std::string content(mmap.begin(), mmap.end());
+        mmap.unmap();
+        std::regex r(R"(data_(\S*))");
 
+        nlohmann::json j;
+        std::string previousDataId="";
+        for(std::sregex_iterator it=std::sregex_iterator(content.begin(), content.end(), r);it!=std::sregex_iterator();++it)
+        {
+            //std::cout << sm.prefix().first << '\n';
+            if((*it).size()>1){
+                j[(*it)[1]]["start"]=(*it).position();
+                if(!previousDataId.empty())j[previousDataId]["end"]=(*it).position()-1;
+                previousDataId=(*it)[1];
+            }
+        }
+        path.replace_extension(".json");
+        std::ofstream ostrm(path, std::ios::trunc);
+        ostrm<<j<<std::endl;
+        ostrm.close();
+
+        std::ifstream file(path);
+        std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        nlohmann::json jin=nlohmann::json::parse(jsonContent);
+        file.close();
+
+        unsigned int start=jin["/ZZY/start"_json_pointer];
+        unsigned int end=jin["/ZZY/end"_json_pointer];
+        CHECK_EQ(start, 312821721);
+        CHECK_EQ(end, 312829779);
+        path.replace_extension(".cif");
+        mio::mmap_source mmap2nd(path.string(), start, end-start+1);
+        content=std::string(mmap2nd.begin(), mmap2nd.end());
+        mmap2nd.unmap();
+        std::shared_ptr<antlr4::ANTLRInputStream> input=std::make_shared<antlr4::ANTLRInputStream>(content);
+        std::shared_ptr<sylvanmats::CIFLexer> lexer=std::make_shared<sylvanmats::CIFLexer>(input.get());
+        std::shared_ptr<antlr4::CommonTokenStream> tokens=std::make_shared<antlr4::CommonTokenStream>(lexer.get());
+
+        std::shared_ptr<sylvanmats::CIFParser> parser=std::make_shared<sylvanmats::CIFParser>(tokens.get());
+        //parser->setBuildParseTree(true);
+        std::cout<<"parser "<<std::endl;
+        antlr4::tree::ParseTree* tree = parser->cif();
+
+        //std::cout << tree->toStringTree(&parser) << std::endl << std::endl;
+
+        const std::string thePath="/cif/dataBlock";
+        std::shared_ptr<antlr4::tree::xpath::XPath> xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath);
+        std::vector<antlr4::tree::ParseTree*> dataBlock=xPath->evaluate(tree);
+
+    }
+    
+}
 

@@ -25,7 +25,7 @@ namespace sylvanmats::standards{
         std::string atom_id;
         std::string alt_atom_id;
         std::string type_symbol;
-        short charge;
+        char8_t charge;
         short pdbx_align;
         std::string pdbx_aromatic_flag;
         std::string pdbx_leaving_atom_flag;
@@ -87,7 +87,7 @@ namespace sylvanmats::standards{
     virtual ~AminoStandards() = default;
 
     public:
-        bool operator()(const std::string_view& comp_id, std::function<void(chem_comp_bond ccb)> apply){
+        bool operator()(const std::string_view& comp_id, std::function<void(chem_comp_atom<double>& cca1, chem_comp_bond& ccb, chem_comp_atom<double>& cca2)> apply){
             bool ret=false;
             for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlock.begin();!ret && it!=dataBlock.end();it++){
                     //std::cout<<" "<<(*it)->toStringTree()<<std::endl;
@@ -97,6 +97,46 @@ namespace sylvanmats::standards{
                         if(r->dataItems(0)->value()->getText().compare(comp_id)==0){
                         //std::cout<<""<<comp_id<<" ? "<<r->dataItems(0)->value()->getText()<<std::endl;
                             auto oi=r->dataItems();
+                            std::vector<chem_comp_atom<double>> chemCompAtoms;
+                            for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("\n_chem_comp_atom.", 0) == 0; })){
+                                unsigned int columnCount=0;
+                                 chemCompAtoms.push_back(chem_comp_atom<double>());
+                                 for(unsigned int valueIndex=0;valueIndex<l->loop()->loopBody()->value().size();valueIndex++){
+                                     //std::cout<<l->loop()->loopBody()->value(valueIndex)->getText()<<" ";
+                                     switch(columnCount){
+                                          case 0:
+                                              chemCompAtoms.back().comp_id=l->loop()->loopBody()->value(valueIndex)->getText();
+                                          break;
+                                          case 1:
+                                              chemCompAtoms.back().atom_id=l->loop()->loopBody()->value(valueIndex)->getText();
+                                          break;
+                                          case 2:
+                                              chemCompAtoms.back().alt_atom_id=l->loop()->loopBody()->value(valueIndex)->getText();
+                                          break;
+                                          case 3:
+                                              chemCompAtoms.back().type_symbol=l->loop()->loopBody()->value(valueIndex)->getText();
+                                          break;
+                                          case 4:
+                                              chemCompAtoms.back().charge=std::strtol(l->loop()->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                                          break;
+                                          case 6:
+                                              chemCompAtoms.back().pdbx_aromatic_flag=l->loop()->loopBody()->value(valueIndex)->getText();
+                                          break;
+                                          case 7:
+                                              chemCompAtoms.back().pdbx_leaving_atom_flag=l->loop()->loopBody()->value(valueIndex)->getText();
+                                          break;
+                                          case 8:
+                                              chemCompAtoms.back().pdbx_stereo_config=l->loop()->loopBody()->value(valueIndex)->getText();
+                                          break;
+                                     }
+                                     columnCount++;
+                                     if(valueIndex % (l->loop()->loopHeader()->tag().size()) == l->loop()->loopHeader()->tag().size()-1){
+                                         //std::cout<<std::endl;
+                                         columnCount=0;
+                                        chemCompAtoms.push_back(chem_comp_atom<double>());
+                                     }
+                                  }
+                            }
                             for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("\n_chem_comp_bond.", 0) == 0; })){
                                 unsigned int columnCount=0;
                                  chem_comp_bond ccb;
@@ -125,7 +165,9 @@ namespace sylvanmats::standards{
                                      columnCount++;
                                      if(valueIndex % (l->loop()->loopHeader()->tag().size()) == l->loop()->loopHeader()->tag().size()-1){
                                          //std::cout<<std::endl;
-                                         apply(ccb);
+                                         std::vector<chem_comp_atom<double>>::iterator cca1=std::find_if(std::begin(chemCompAtoms), std::end(chemCompAtoms), [&](chem_comp_atom<double>& cca){return ccb.atom_id_1.compare(cca.atom_id)==0;});
+                                         std::vector<chem_comp_atom<double>>::iterator cca2=std::find_if(std::begin(chemCompAtoms), std::end(chemCompAtoms), [&](chem_comp_atom<double>& cca){return ccb.atom_id_2.compare(cca.atom_id)==0;});
+                                         apply((*cca1), ccb, (*cca2));
                                          columnCount=0;
                                          ret=true;
                                      }
