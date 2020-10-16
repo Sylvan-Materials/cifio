@@ -20,6 +20,6 @@ namespace sylvanmats::constitution {
         Populator(const Populator& orig) = delete;
         virtual ~Populator() = default;
 
-        void operator()(std::string& filePath, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply);
+        void operator()(std::filesystem::path& filePath, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply);
     };
 }

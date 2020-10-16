@@ -2,6 +2,7 @@
   "name": "cifio",
   "version": "1.0.0",
   "devDependencies": {
+    "brigand": "edouarda/brigand",
     "doctest": "onqtam/doctest",
     "json": "nlohmann/json",
     "json-graph-specification": "jsongraph/json-graph-specification",
@@ -18,7 +19,7 @@
     "zlib": "cd cpp_modules/zlib && cmake -DCMAKE_INSTALL_PREFIX=dist . && make install",
     "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
     "urlcpp": "cd cpp_modules/urlcpp && mkdir -p test && yarn install && make -f Makefile all",
-    "build": "cd test && pwd && mkdir -p build/src/parsing && mkdir -p build/src/constitution && mkdir -p build/src/density && mkdir -p build/src/lattice && which make && make -f Makefile all",
+    "build": "cd test && pwd && mkdir -p build/src/parsing && mkdir -p build/src/constitution && mkdir -p build/src/density && mkdir -p build/src/lattice && which make && make -j 3 -f Makefile all",
     "test": "yarn build && cd test && pwd && ./test "
   },
   "author": "rimmartin",

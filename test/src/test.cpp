@@ -182,7 +182,7 @@ TEST_CASE("test decompression of aa-variants-v1.cif.gz") {
     standardChemCompBond.push_back({.comp_id="ALA", .atom_id_1="OXT", .atom_id_2="HXT", .value_order=1});
  
     sylvanmats::standards::AminoStandards aminoStandards;
-   std::string_view comp_id="ALA";
+   std::string comp_id="ALA";
    unsigned int counter=0;
    CHECK(aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
        CHECK_EQ(standardChemCompBond[counter].comp_id, ccb.comp_id);
@@ -200,12 +200,12 @@ TEST_CASE("test decompression of aa-variants-v1.cif.gz") {
 }
 
 TEST_CASE("test 3sgs") {
-    std::string filePath="./examples/3sgs.cif.gz";
+    std::filesystem::path  filePath="./examples/3sgs.cif.gz";
    
     sylvanmats::constitution::Graph graph;
     
     sylvanmats::constitution::Populator populator;
-    populator(filePath, graph, [](sylvanmats::constitution::Graph& graph){
+    populator(filePath, graph, [&filePath](sylvanmats::constitution::Graph& graph){
     sylvanmats::publishing::JGFPublisher jgfPublisher(graph);   
    CHECK_EQ(graph.getNumberOfAtomSites(), 46);
    CHECK_EQ(graph.getCell().length_a, 4.821);
@@ -216,7 +216,10 @@ TEST_CASE("test 3sgs") {
    CHECK_EQ(graph.getCell().angle_gamma, 90.000);
    CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 1 21 1");
    CHECK_EQ(graph.getSymmetry().Int_Tables_number, 4);
-   std::cout<<" "<<jgfPublisher<<std::endl;
+    filePath.replace_extension(".json");
+    std::ofstream ofs(filePath);
+    ofs<<" "<<jgfPublisher<<std::endl;
+    ofs.close();
    
    });
    CHECK_EQ(graph.getNumberOfAtomSites(), 46);
@@ -229,8 +232,42 @@ TEST_CASE("test 3sgs") {
         }
 }
 
+TEST_CASE("test 1ebc") {
+    std::filesystem::path filePath="./examples/1ebc.cif.gz";
+   
+    sylvanmats::constitution::Graph graph;
+    
+    sylvanmats::constitution::Populator populator;
+    populator(filePath, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+    sylvanmats::publishing::JGFPublisher jgfPublisher(graph);   
+   CHECK_EQ(graph.getNumberOfAtomSites(), 1332);
+   CHECK_EQ(graph.getCell().length_a, 64.87);
+   CHECK_EQ(graph.getCell().length_b, 31.0);
+   CHECK_EQ(graph.getCell().length_c, 35.29);
+   CHECK_EQ(graph.getCell().angle_alpha, 90.000);
+   CHECK_EQ(graph.getCell().angle_beta, 105.63);
+   CHECK_EQ(graph.getCell().angle_gamma, 90.000);
+   CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 1 21 1");
+   CHECK_EQ(graph.getSymmetry().Int_Tables_number, 4);
+    filePath.replace_extension(".json");
+    std::ofstream ofs(filePath);
+    ofs<<" "<<jgfPublisher<<std::endl;
+    ofs.close();
+   
+   });
+   CHECK_EQ(graph.getNumberOfAtomSites(), 1332);
+   CHECK_EQ(lemon::countEdges(graph), 1244);
+   CHECK_EQ(lemon::countNodes(graph.componentGraph), 222);  
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 150);
+    graph.identifyFusedSystems();
+    
+       /*for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+            std::cout<<" "<<graph.atomSites[nSiteA].auth_atom_id<<" "<<graph.atomSites[nSiteA].type_symbol<<" "<<graph.atomSites[nSiteA].proton_count<<std::endl;
+       }*/
+}
+
 TEST_CASE("test 3sgs-sf") {
-    std::string filePath="./examples/3sgs-sf.cif.gz";
+    std::filesystem::path filePath="./examples/3sgs-sf.cif.gz";
    
     sylvanmats::density::Populator populator;
     populator(filePath);//, graph, [](sylvanmats::constitution::Graph& graph){
@@ -240,7 +277,7 @@ TEST_CASE("test 3sgs-sf") {
 }
 
 TEST_CASE("test hydroxyapatite to lattice") {
-    std::string filePath="./examples/hydroxyapatite.cif.gz";
+    std::filesystem::path filePath="./examples/hydroxyapatite.cif.gz";
    
     sylvanmats::lattice::Graph graph;
 

@@ -35,7 +35,7 @@ namespace sylvanmats::density {
         Populator(const Populator& orig) = delete;
         virtual ~Populator() = default;
 
-        void operator()(std::string& filePath);
+        void operator()(std::filesystem::path& filePath);
         std::vector<_refln<double>>& getStructureFactors(){return structureFactors;};
     };
 }

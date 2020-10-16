@@ -8,7 +8,7 @@
 namespace sylvanmats::lattice {
 
 
-    void Populator::operator()(std::string& filePath, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply){
+    void Populator::operator()(std::filesystem::path& filePath, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply){
         sylvanmats::reading::GZReader gzReader;
         gzReader(filePath, [&](std::istream& content){
 
@@ -54,31 +54,32 @@ namespace sylvanmats::lattice {
                         once=false;
                         unsigned int columnCount=0;
                         lemon::ListGraph::Node n=graph.addNode();
-                    for(unsigned int valueIndex=0;valueIndex<r->loopBody()->value().size();valueIndex++){
+                    std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                    for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
                         switch(columnCount){
                              case 0:
-                                 graph.atomSites[n].type_symbol =r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].type_symbol =values[valueIndex]->getText();
                              break;
                              case 1:
-                                 graph.atomSites[n].label =r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].label =values[valueIndex]->getText();
                              break;
                              case 2:
-                                 graph.atomSites[n].fract_x =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].fract_x =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 3:
-                                 graph.atomSites[n].fract_y =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].fract_y =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 4:
-                                 graph.atomSites[n].fract_z =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].fract_z =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 5:
-                                 graph.atomSites[n].U_iso_or_equiv =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].U_iso_or_equiv =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 6:
-                                 graph.atomSites[n].adp_type =r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].adp_type =values[valueIndex]->getText();
                              break;
                              case 7:
-                                 graph.atomSites[n].occupancy =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].occupancy =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                         }
                         columnCount++;

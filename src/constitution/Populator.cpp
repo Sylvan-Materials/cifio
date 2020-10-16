@@ -11,7 +11,8 @@
 namespace sylvanmats::constitution {
 
 
-    void Populator::operator()(std::string& filePath, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply){
+    void Populator::operator()(std::filesystem::path& filePath, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply){
+            unsigned int standardCompCount=0;
         sylvanmats::reading::GZReader gzReader;
         gzReader(filePath, [&](std::istream& content){
 
@@ -23,7 +24,6 @@ namespace sylvanmats::constitution {
             parser.setBuildParseTree(true);
             antlr4::tree::ParseTree* tree = parser.cif();
 
-            std::cout<<"AminoStandards "<<std::endl;
             sylvanmats::standards::AminoStandards aminoStandards;
 
             const std::string blockPath="/cif/dataBlock";
@@ -62,22 +62,24 @@ namespace sylvanmats::constitution {
                         unsigned int compCount=0;
                         lemon::ListGraph::Node previousNode=lemon::INVALID;
                         lemon::ListGraph::Node n=graph.componentGraph.addNode();
-                        std::string asym_id="";
-                        std::string previous_asym_id="";
+                        std::string_view asym_id="";
+                        std::string_view previous_asym_id="";
                         bool first=true;
-                    for(unsigned int valueIndex=0;valueIndex<r->loopBody()->value().size();valueIndex++){
+                    std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                    for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
                         switch(columnCount){
                              case 0:
-                                 graph.componentProperties[n].asym_id = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].asym_id.assign(values[valueIndex]->getText());
+                                 asym_id=graph.componentProperties[n].asym_id;
                              break;
                              case 6:
-                                 graph.componentProperties[n].auth_seq_num = std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                                 graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                              break;
                              case 8:
-                                 graph.componentProperties[n].auth_mon_id = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
                              break;
                              case 10:
-                                 graph.componentProperties[n].pdb_ins_code = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].pdb_ins_code.assign(values[valueIndex]->getText());
                              break;
                         }
                        columnCount++;
@@ -115,32 +117,32 @@ namespace sylvanmats::constitution {
                         std::string asym_id="";
                         std::string previous_asym_id="";
                         bool first=true;
-                    for(unsigned int valueIndex=0;valueIndex<r->loopBody()->value().size();valueIndex++){
+                    std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                    for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
                         switch(columnCount){
                              case 0:
-                                 graph.componentProperties[n].asym_id = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].asym_id.assign(values[valueIndex]->getText());
                              break;
                              case 6:
-                                 graph.componentProperties[n].auth_seq_num = std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                                 graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                              break;
                              case 8:
-                                 graph.componentProperties[n].auth_mon_id = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
                              break;
                              case 9:
-                                 graph.componentProperties[n].pdb_ins_code = r->loopBody()->value(valueIndex)->getText();
+                                 graph.componentProperties[n].pdb_ins_code.assign(values[valueIndex]->getText());
                              break;
                         }
                        columnCount++;
                         if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
                             columnCount=0;
                              graph.componentProperties[n].termination=MONOMER;
-                             previous_asym_id=asym_id;
+                             //previous_asym_id=asym_id;
                             if(valueIndex<r->loopBody()->value().size()-1){
                                 n=graph.componentGraph.addNode();
                             }
                         }
                     }
-    std::cout<<"comp size "<<lemon::countNodes(graph.componentGraph)<<" "<<lemon::countEdges(graph.componentGraph)<<std::endl;
                     }
                 }
             }
@@ -171,61 +173,63 @@ namespace sylvanmats::constitution {
                         lemon::ListGraph::Node previousCNode=lemon::INVALID;
                         
                         bool first=true;
-                    for(unsigned int valueIndex=0;valueIndex<r->loopBody()->value().size();valueIndex++){
+            auto start = std::chrono::high_resolution_clock::now();
+                    std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                    for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
                         switch(columnCount){
                              case 0:
 
                              break;
                              case 1:
-                                 graph.atomSites[n].id =std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                                 graph.atomSites[n].id =std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                              break;
                              case 2:
-                                 graph.atomSites[n].type_symbol=r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].type_symbol.assign(values[valueIndex]->getText());
                              break;
                              case 3:
-                                 graph.atomSites[n].label_atom_id=r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].label_atom_id.assign(values[valueIndex]->getText());
                              break;
                              case 4:
-                                 graph.atomSites[n].label_alt_id=r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].label_alt_id.assign(values[valueIndex]->getText());
                                  alt_id=graph.atomSites[n].label_alt_id;
                              break;
                              case 5:
-                                 graph.atomSites[n].label_comp_id=r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].label_comp_id.assign(values[valueIndex]->getText());
                                  comp_id=graph.atomSites[n].label_comp_id;
                              break;
                              case 6:
-                                 graph.atomSites[n].label_asym_id=r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].label_asym_id.assign(values[valueIndex]->getText());
                                  asym_id=graph.atomSites[n].label_asym_id;
                              break;
                              case 9:
-                                 graph.atomSites[n].pdbx_PDB_ins_code=r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].pdbx_PDB_ins_code.assign(values[valueIndex]->getText());
                                  ins_code=graph.atomSites[n].pdbx_PDB_ins_code;
                              break;
                              case 10:
-                                 graph.atomSites[n].Cartn_x =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].Cartn_x =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 11:
-                                 graph.atomSites[n].Cartn_y =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].Cartn_y =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 12:
-                                 graph.atomSites[n].Cartn_z =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].Cartn_z =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 13:
-                                 graph.atomSites[n].occupancy =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].occupancy =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 14:
-                                 graph.atomSites[n].B_iso_or_equiv =std::strtod(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr);
+                                 graph.atomSites[n].B_iso_or_equiv =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                              break;
                              case 16:
-                                 graph.atomSites[n].auth_seq_id =std::strtol(r->loopBody()->value(valueIndex)->getText().c_str(), nullptr, 10);
+                                 graph.atomSites[n].auth_seq_id =std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                                  seq_id=graph.atomSites[n].auth_seq_id;
                              break;
                              case 19:
-                                 graph.atomSites[n].auth_atom_id=r->loopBody()->value(valueIndex)->getText();
+                                 graph.atomSites[n].auth_atom_id.assign(values[valueIndex]->getText());
                              break;
                         }
                         columnCount++;
-                        if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
+                        if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
                             columnCount=0;
 //                            std::cout<<valueIndex<<" "<<(r->loopHeader()->tag().size() % valueIndex)<<" "<<(r->loopHeader()->tag().size()-1)<<" entityCount "<<entityCount<<" "<<previous_comp_id<<" "<<comp_id<<" "<<previous_seq_id<<" "<<seq_id<<" "<<previous_asym_id<<" "<<asym_id<<" "<<previous_alt_id<<" "<<alt_id<<" "<<previous_ins_code<<" "<<ins_code<<std::endl;
                             if(first){
@@ -244,12 +248,12 @@ namespace sylvanmats::constitution {
                                  for(lemon::ListGraph::NodeIt nComp(graph.componentGraph); currentCompNode==lemon::INVALID && nComp!=lemon::INVALID; ++nComp){
                                     if(graph.componentProperties[nComp].auth_seq_num==previous_seq_id && graph.componentProperties[nComp].asym_id.compare(previous_asym_id)==0 && graph.componentProperties[nComp].auth_mon_id.compare(previous_comp_id)==0 && graph.componentProperties[nComp].pdb_ins_code.compare(previous_ins_code)==0)currentCompNode=nComp;
                                 }
-                                std::string current_comp_id=previous_comp_id;
+                                std::string current_comp_id(previous_comp_id.begin(), previous_comp_id.end());
                                 if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::N_TERMINAL)current_comp_id+="_LSN3";
                                 if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::C_TERMINAL)current_comp_id+="_LEO2H";
             //std::cout<<"term ? "<<current_comp_id<<std::endl;
-                                bool ret=aminoStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double> cca1, sylvanmats::standards::chem_comp_bond ccb, sylvanmats::standards::chem_comp_atom<double> cca2){
-         //                        std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
+                                bool ret=aminoStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
+//                                 std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
                                  unsigned int countA=0;
                                  bool matched=false;
                                  for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount+1 && nSiteA!=lemon::INVALID; ++nSiteA){
@@ -289,7 +293,7 @@ namespace sylvanmats::constitution {
                                  }
                                  }
                              });
-                             compCount++;
+                              compCount++;
                              if(compCount>1 && cNode!=lemon::INVALID  && nNode!=lemon::INVALID && previousNNode!=lemon::INVALID  && previousCNode!=lemon::INVALID){
                                 lemon::ListGraph::Edge e=graph.addEdge(previousCNode, nNode);
                                 graph.compBond[e].value_order=1;
@@ -303,17 +307,23 @@ namespace sylvanmats::constitution {
                              previous_asym_id=asym_id;
                              previous_alt_id=alt_id;
                              previous_ins_code=ins_code;
-                            }
+                             if(ret)standardCompCount++;
+                             if(!ret)std::cout<<"comp_id "<<comp_id<<" "<<ins_code<<std::endl;
+                             }
                             else entityCount++;
                             if(valueIndex<r->loopBody()->value().size()-1)n=graph.addNode();
-                        }
+                       }
                     }
+            auto end = std::chrono::high_resolution_clock::now();
+            std::cout << "elapsed time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count()*1.0e-9 << "s\n";
+
                     }
 
                 }
             }
             apply(graph);
         });
+        std::cout<<"standardCompCount "<<standardCompCount<<std::endl;
     };
     
 }

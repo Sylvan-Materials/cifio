@@ -5,6 +5,9 @@
 #include <memory>
 
 #include "lemon/list_graph.h"
+#include "lemon/connectivity.h"
+
+//#include "constitution/Selection.h"
 
 namespace sylvanmats::constitution {
 
@@ -103,6 +106,8 @@ namespace sylvanmats::constitution {
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};
             _cell<double>& getCell(){return cell;};
             _symmetry& getSymmetry(){return symmetry;};
+
+            void identifyFusedSystems();
     };
 
 }

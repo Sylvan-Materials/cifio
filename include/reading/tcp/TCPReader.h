@@ -349,8 +349,7 @@ std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
             int len=100;
             do {
                 generator<std::pair<int, char *>> rs = read();
-                auto it=rs.begin();
-                if(it !=rs.end()){
+                for(auto it=rs.begin();it !=rs.end();it++){
                     len=(*it).first;
                     if(len>0)ss<<(*it).second;
                 }

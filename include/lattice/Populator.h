@@ -20,7 +20,7 @@ namespace sylvanmats::lattice {
         Populator(const Populator& orig) = delete;
         virtual ~Populator() = default;
 
-        void operator()(std::string& filePath, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply);
+        void operator()(std::filesystem::path& filePath, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply);
     };
 }
 
