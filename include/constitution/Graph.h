@@ -46,6 +46,7 @@ namespace sylvanmats::constitution {
         bool pdbx_aromatic_flag=false;
         bool pdbx_stereo_config=false;
         unsigned int pdbx_ordinal;
+        int ring=0;
     };
 
     enum TERMINATION{
@@ -107,7 +108,8 @@ namespace sylvanmats::constitution {
             _cell<double>& getCell(){return cell;};
             _symmetry& getSymmetry(){return symmetry;};
 
-            void identifyFusedSystems();
+            void identifyFusedSystems(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph)> apply);
+            void identifyRings(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);
     };
 
 }

@@ -3,7 +3,7 @@ all: LDFLAGS= -fuse-ld=gold -L../../lemon-main/dist/lib -L../cpp_modules/urlcpp 
 all: build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o build/src/constitution/graph.o build/src/constitution/Populator.o build/src/density/Populator.o build/src/lattice/Populator.o test
 	$(CXX) $(LDFLAGS) -o test $(wildcard build/src/*.o) $(wildcard build/src/parsing/*.o) $(wildcard build/src/constitution/*.o) $(wildcard build/src/density/*.o) $(wildcard build/src/lattice/*.o)
 
-build/src/constitution/Populator.o: CXXFLAGS= -DNDEBUG -O3 -pthread -std=c++2a -I../include -I../src -I../../lemon-main/dist/include -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include -I../cpp_modules/zlib/dist/include -I../../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/constitution/Populator.o: CXXFLAGS= -DNDEBUG -O3 -pthread -std=c++2a -I../include -I../src -I../../lemon-main/dist/include -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include -I../cpp_modules/json/include -I../cpp_modules/mio/include -I../cpp_modules/zlib/dist/include -I../../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 build/src/constitution/Populator.o: ../src/constitution/Populator.cpp 
 	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/Populator.o ../src/constitution/Populator.cpp
  

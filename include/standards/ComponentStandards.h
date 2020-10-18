@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdio.h>
 #include <memory>
 #include <fstream>
 #include <string>
@@ -25,106 +26,30 @@
 #include <multi_index/identity.hpp>
 #include <multi_index/member.hpp>
 
+#include "mio/mmap.hpp"
+#include "nlohmann/json.hpp"
+
+#include "standards/AminoStandards.h"
+
 namespace sylvanmats::standards{
-
-    template<typename T>
-    struct chem_comp_atom{
-        std::string comp_id;
-        std::string atom_id;
-        std::string alt_atom_id;
-        std::string type_symbol;
-        char8_t charge;
-        short pdbx_align;
-        std::string pdbx_aromatic_flag;
-        std::string pdbx_leaving_atom_flag;
-        std::string pdbx_stereo_config;
-        T model_Cartn_x;
-        T model_Cartn_y;
-        T model_Cartn_z;
-        T pdbx_model_Cartn_x_ideal;
-        T pdbx_model_Cartn_y_ideal;
-        T pdbx_model_Cartn_z_ideal;
-        unsigned long long pdbx_ordinal;
-    };
-    struct chem_comp_bond{
-        std::string comp_id;
-        std::string atom_id_1;
-        std::string atom_id_2;
-        short value_order=1;
-        bool pdbx_aromatic_flag=false;
-        bool pdbx_stereo_config=false;
-        unsigned int pdbx_ordinal;
-    }; 
-
-    struct standard{
-        int id;
-        std::string name;
-        mutable std::vector<chem_comp_atom<double>> chemCompAtoms;
-        mutable std::vector<chem_comp_bond> chemCombonds;
-        long terminal;
-        standard(int id, std::string name, std::vector<chem_comp_atom<double>>& chemCompAtoms, std::vector<chem_comp_bond>& chemCombonds, long terminal=0): id (id), name (name), chemCompAtoms(chemCompAtoms), chemCombonds (chemCombonds), terminal (terminal) {};
-        standard(const standard& orig){
-            name=orig.name;
-            chemCompAtoms=orig.chemCompAtoms;
-            chemCombonds=orig.chemCombonds;
-            terminal=orig.terminal;
-        };
-        virtual ~standard() = default;
-        bool operator<(const standard& e)const{return id<e.id;}
-    };
-
-    struct name{};
-
-    typedef multi_index::multi_index_container<
-      standard,
-      multi_index::indexed_by<
-        // sort by standard
-        multi_index::ordered_unique<multi_index::identity<standard> >,
-
-        multi_index::ordered_non_unique<multi_index::tag<name>,multi_index::member<standard,std::string,&standard::name> >,
-
-        // sort by less<int> on terminal
-        multi_index::ordered_non_unique<multi_index::member<standard,long,&standard::terminal> >
-      >
-    > standard_set;
-    
-    typedef multi_index::index<standard_set,name>::type standard_set_by_name;
-
-  class AminoStandards{
+    class ComponentStandards{
     protected:
-        std::shared_ptr<antlr4::ANTLRInputStream> input;
-        std::shared_ptr<sylvanmats::CIFLexer> lexer;
-        std::shared_ptr<antlr4::CommonTokenStream> tokens;
-        std::shared_ptr<sylvanmats::CIFParser> parser;
-        std::shared_ptr<antlr4::tree::xpath::XPath> xPath;
-        antlr4::tree::ParseTree* tree;
-        std::vector<antlr4::tree::ParseTree*> dataBlock;
-        standard_set aminoStandardSet;
+        std::filesystem::path path="../db/components.cif";
+        nlohmann::json jin;
+        standard_set componentStandardSet;
         standard_set_by_name& nameIndex;
     public:
-    AminoStandards() : nameIndex (aminoStandardSet.get<name>()) {
-        std::filesystem::path filePath="~/Downloads/aa-variants-v1.cif.gz";
-    sylvanmats::reading::GZReader gzReader;
-    gzReader(filePath, [&](std::istream& content){
-
-        input=std::make_shared<antlr4::ANTLRInputStream>(content);
-        lexer=std::make_shared<sylvanmats::CIFLexer>(input.get());
-        tokens=std::make_shared<antlr4::CommonTokenStream>(lexer.get());
-
-        parser=std::make_shared<sylvanmats::CIFParser>(tokens.get());
-        //parser->setBuildParseTree(true);
-        tree = parser->cif();
-
-        //std::cout << tree->toStringTree(&parser) << std::endl << std::endl;
-
-        const std::string thePath="/cif/dataBlock";
-        xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath);
-        dataBlock=xPath->evaluate(tree);
-    });
-    };
-
-    AminoStandards(const AminoStandards& orig) = delete;
-    virtual ~AminoStandards() = default;
+        ComponentStandards() : nameIndex (componentStandardSet.get<name>()) {
+            path.replace_extension(".json");
+            std::ifstream file(path);
+            std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+//std::cout<<"jsonContent "<<jsonContent.substr(0, 50)<<std::endl;
+            jin=nlohmann::json::parse(jsonContent);
+            file.close();
+            path.replace_extension(".cif");
+        };
+    ComponentStandards(const ComponentStandards& orig) = delete;
+    virtual ~ComponentStandards() = default;
 
     public:
         bool operator()(const std::string& comp_id, std::function<void(chem_comp_atom<double>& cca1, chem_comp_bond& ccb, chem_comp_atom<double>& cca2)> apply){
@@ -139,8 +64,31 @@ namespace sylvanmats::standards{
                 }
                 return true;
             }*/
+            nlohmann::json::json_pointer startKey("/"+comp_id+"/start");
+            nlohmann::json::json_pointer endKey("/"+comp_id+"/end");
+            unsigned int start=jin[startKey];
+            unsigned int end=jin[endKey];
+//std::cout<<"start "<<start<<" end"<<end<<" "<<(end-start)<<std::endl;
+            mio::mmap_source mmap2nd(path.string(), start, end-start+1);
+            std::string content=std::string(mmap2nd.begin(), mmap2nd.end());
+//std::cout<<"content "<<content<<std::endl;
+            mmap2nd.unmap();
+            std::shared_ptr<antlr4::ANTLRInputStream> input=std::make_shared<antlr4::ANTLRInputStream>(content);
+            std::shared_ptr<sylvanmats::CIFLexer> lexer=std::make_shared<sylvanmats::CIFLexer>(input.get());
+            std::shared_ptr<antlr4::CommonTokenStream> tokens=std::make_shared<antlr4::CommonTokenStream>(lexer.get());
+
+            std::shared_ptr<sylvanmats::CIFParser> parser=std::make_shared<sylvanmats::CIFParser>(tokens.get());
+            //parser->setBuildParseTree(true);
+            //std::cout<<"parser "<<std::endl;
+            antlr4::tree::ParseTree* tree = parser->cif();
+
+            //std::cout << tree->toStringTree(&parser) << std::endl << std::endl;
+
+            const std::string thePath="/cif/dataBlock";
+            std::shared_ptr<antlr4::tree::xpath::XPath> xPath=std::make_shared<antlr4::tree::xpath::XPath>(parser.get(), thePath);
+            std::vector<antlr4::tree::ParseTree*> dataBlock=xPath->evaluate(tree);
             for(std::vector<antlr4::tree::ParseTree*>::iterator itDB=dataBlock.begin();!ret && itDB!=dataBlock.end();itDB++){
-                    //std::cout<<" "<<(*it)->toStringTree()<<std::endl;
+                    //std::cout<<" "<<(*itDB)->toStringTree()<<std::endl;
                 bool atomSites=false;
                 if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*itDB))) {
                     if(r->dataItems().size()>0 && r->dataItems(0)->tag()!=nullptr &&  r->dataItems(0)->tag()->getText().compare("\n_chem_comp.id")==0){
@@ -226,7 +174,7 @@ namespace sylvanmats::standards{
                                      }
                                   }
                             }
-                            aminoStandardSet.insert(standard(aminoStandardSet.size(), static_cast<std::string>(comp_id), chemCompAtoms, chemCombonds));
+                            componentStandardSet.insert(standard(componentStandardSet.size(), static_cast<std::string>(comp_id), chemCompAtoms, chemCombonds));
                             //dic->loop()
                             break;
                         }
@@ -235,7 +183,7 @@ namespace sylvanmats::standards{
             }
             return ret;
         };
-
-        unsigned int getNumberOfEntries(){return dataBlock.size();};
-  };
+            
+    };
 }
+

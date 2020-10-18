@@ -1,3 +1,4 @@
+#include <cstdio>
 
 #include "constitution/Populator.h"
 
@@ -6,12 +7,14 @@
 #include "parsing/CIFParser.h"
 #include "reading/gz/GZReader.h"
 
+#include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 
 namespace sylvanmats::constitution {
 
 
     void Populator::operator()(std::filesystem::path& filePath, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply){
+            unsigned int standardAACount=0;
             unsigned int standardCompCount=0;
         sylvanmats::reading::GZReader gzReader;
         gzReader(filePath, [&](std::istream& content){
@@ -25,6 +28,7 @@ namespace sylvanmats::constitution {
             antlr4::tree::ParseTree* tree = parser.cif();
 
             sylvanmats::standards::AminoStandards aminoStandards;
+            sylvanmats::standards::ComponentStandards componentStandards;
 
             const std::string blockPath="/cif/dataBlock";
             antlr4::tree::xpath::XPath xblockPath(&parser, blockPath);
@@ -299,6 +303,52 @@ namespace sylvanmats::constitution {
                                 graph.compBond[e].value_order=1;
                                  
                              }
+                             if(ret)standardAACount++;
+                             if(!ret){
+                                //std::cout<<"comp_id "<<comp_id<<" "<<ins_code<<std::endl;
+                                ret=componentStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
+                                 //std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
+                                 unsigned int countA=0;
+                                 bool matched=false;
+                                 for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount+1 && nSiteA!=lemon::INVALID; ++nSiteA){
+                                 unsigned int countB=0;
+                                 for(lemon::ListGraph::NodeIt nSiteB(graph); countB<=entityCount+1 && nSiteB!=lemon::INVALID; ++nSiteB){
+                                     //std::cout<<"??? "<<countA<<" "<<countB<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
+                                     if(countA<countB && nSiteA!=nSiteB && graph.atomSites[nSiteA].auth_seq_id == graph.atomSites[nSiteB].auth_seq_id && graph.atomSites[nSiteA].auth_comp_id.compare(graph.atomSites[nSiteB].auth_comp_id)==0){
+                                         if((graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_1)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_2)==0) || (graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_2)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_1)==0)){
+//                                            std::cout<<"\t"<<entityCount<<" "<<graph.atomSites[nSiteA].auth_seq_id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<graph.atomSites[nSiteB].auth_seq_id<<std::endl;
+                                            lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
+                                            graph.compBond[e].value_order=ccb.value_order;
+                                            matched=true;
+                                         }
+                                        //if(graph.atomSites[nSiteA].label_atom_id.compare("N")==0)nNode=nSiteA;
+                                        //else if(graph.atomSites[nSiteA].label_atom_id.compare("C")==0)cNode=nSiteA;
+                                        //if(graph.atomSites[nSiteB].label_atom_id.compare("N")==0)nNode=nSiteB;
+                                        //else if(graph.atomSites[nSiteB].label_atom_id.compare("C")==0)cNode=nSiteB;
+                                        
+                                     }                       
+                                     countB++;
+                                 }
+                                 countA++;
+                                 }
+                                 if(!matched){
+                                 countA=0;
+                                 bool proton1=cca1.type_symbol.compare("H")==0;
+                                 bool proton2=cca2.type_symbol.compare("H")==0;
+                                 for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount && nSiteA!=lemon::INVALID; ++nSiteA){
+//                                     std::cout<<"??? "<<countA<<" "<<proton1<<" "<<proton2<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" |"<<graph.atomSites[nSiteA].auth_atom_id<<"|"<<std::endl;
+                                     if(proton1 && graph.atomSites[nSiteA].auth_atom_id.compare(ccb.atom_id_2)==0){
+                                        graph.atomSites[nSiteA].proton_count++;
+                                     }
+                                     else if(proton2 && graph.atomSites[nSiteA].auth_atom_id.compare(ccb.atom_id_1)==0){
+                                        graph.atomSites[nSiteA].proton_count++;
+                                     } 
+                                    countA++;
+                                 }
+                                 }
+                                });
+                                if(ret)standardCompCount++;
+                             }
                              previousNNode=nNode;
                              previousCNode=cNode;
                              entityCount=0;
@@ -307,8 +357,6 @@ namespace sylvanmats::constitution {
                              previous_asym_id=asym_id;
                              previous_alt_id=alt_id;
                              previous_ins_code=ins_code;
-                             if(ret)standardCompCount++;
-                             if(!ret)std::cout<<"comp_id "<<comp_id<<" "<<ins_code<<std::endl;
                              }
                             else entityCount++;
                             if(valueIndex<r->loopBody()->value().size()-1)n=graph.addNode();
@@ -323,7 +371,7 @@ namespace sylvanmats::constitution {
             }
             apply(graph);
         });
-        std::cout<<"standardCompCount "<<standardCompCount<<std::endl;
+        std::cout<<"standardCompCount "<<standardCompCount<<" "<<standardAACount<<std::endl;
     };
     
 }

@@ -10,7 +10,7 @@ dataBlock : dataBlockHeading ((WhiteSpace)?( dataItems | saveFrame) )*;
 dataBlockHeading : Eol? DATA_ blockHeading;
 blockHeading : BHText;
 
-dataItems : (WhiteSpace? loop) | (tag (WhiteSpace|Eol)* value (WhiteSpace)*);
+dataItems : (WhiteSpace? loop) | ((tag | Eol tag) (WhiteSpace|Eol)* value (WhiteSpace)*);
 tag : Tag;
 value : singleQuotedString | doubleQuotedString| semiColonTextField | (Value|Underscore )+;
 singleQuotedString : SingleQuotedString ;

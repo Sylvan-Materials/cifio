@@ -18,8 +18,9 @@
 #ifdef __WIN32__
 # include <winsock2.h>
 #else
-# include <sys/socket.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -275,28 +276,132 @@ namespace sylvanmats::reading{
     class TCPReader{
     protected:
             char buf[1'000'000];
+            int port = 443;
     public:
         TCPReader() = default;
         TCPReader(const TCPReader& orig) = delete;
         virtual ~TCPReader() = default;
 
-        bool operator()(std::string ip, std::string& url, std::function<void(std::istream& content)> apply){
-        int s;
-        s = socket(AF_INET, SOCK_STREAM, 0);
-        if (s < 0) {
-            printf("Error creating socket.\n");
+        bool operator()(std::string& urlStr, std::function<void(std::istream& content)> apply){
+        url::Url url(urlStr);
+        struct addrinfo hints = {}, *infoptr;
+        char port_str[16] = {};
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+        sprintf(port_str, "%d", port);
+        int result = getaddrinfo(url.host().c_str(), port_str, &hints, &infoptr);
+        if (result) {
+            printf("getaddrinfo: %s\n", gai_strerror(result));
             return false;
         }
-        struct sockaddr_in sa;
-        memset (&sa, 0, sizeof(sa));
-        sa.sin_family      = AF_INET;
-        sa.sin_addr.s_addr = inet_addr(ip.c_str()); // address of files.rcsb.org
-        sa.sin_port        = htons (443); 
-        socklen_t socklen = sizeof(sa);
-        if (connect(s, (struct sockaddr *)&sa, socklen)) {
+        struct addrinfo *ptr;
+        struct sockaddr_in  *sockaddr_ipv4;
+            struct sockaddr_in6 *sockaddr_ipv6;
+        char host[256];
+        int sd = -1;
+        for (ptr = infoptr; ptr != NULL; ptr = ptr->ai_next) {
+
+            getnameinfo(ptr->ai_addr, ptr->ai_addrlen, host, sizeof (host), NULL, 0, NI_NUMERICHOST);
+            //puts(host);
+        std::cout<<"host: "<<host<<" "<<(ptr->ai_family==AF_INET)<<std::endl;
+            sd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+            if (sd < 0) {
+                printf("Error creating socket.\n");
+                break;
+            }
+            switch (ptr->ai_family) {
+            case AF_UNSPEC:
+                printf("Unspecified\n");
+                break;
+            case AF_INET:
+                printf("AF_INET (IPv4)\n");
+                sockaddr_ipv4 = (struct sockaddr_in *) ptr->ai_addr;
+                printf("\tIPv4 address %s\n",
+                    inet_ntoa(sockaddr_ipv4->sin_addr) );
+                break;
+            case AF_INET6:
+                printf("AF_INET6 (IPv6)\n");
+                // the InetNtop function is available on Windows Vista and later
+                // sockaddr_ipv6 = (struct sockaddr_in6 *) ptr->ai_addr;
+                // printf("\tIPv6 address %s\n",
+                //    InetNtop(AF_INET6, &sockaddr_ipv6->sin6_addr, ipstringbuffer, 46) );
+                
+                // We use WSAAddressToString since it is supported on Windows XP and later
+                sockaddr_ipv6 = (sockaddr_in6*) ptr->ai_addr;
+                // The buffer length is changed by each call to WSAAddresstoString
+                // So we need to set it for each iteration through the loop for safety
+                //ipbufferlength = 46;
+                /*iRetval = WSAAddressToString(sockaddr_ip, (DWORD) ptr->ai_addrlen, NULL, 
+                    ipstringbuffer, &ipbufferlength );
+                if (iRetval)
+                    printf("WSAAddressToString failed with %u\n", WSAGetLastError() );
+                else    
+                    printf("\tIPv6 address %s\n", ipstringbuffer);*/
+                break;
+            /*case AF_NETBIOS:
+                printf("AF_NETBIOS (NetBIOS)\n");
+                break;*/
+            default:
+                printf("Other %ld\n", ptr->ai_family);
+                break;
+        }
+        printf("\tSocket type: ");
+        switch (ptr->ai_socktype) {
+            case 0:
+                printf("Unspecified\n");
+                break;
+            case SOCK_STREAM:
+                printf("SOCK_STREAM (stream)\n");
+                break;
+            case SOCK_DGRAM:
+                printf("SOCK_DGRAM (datagram) \n");
+                break;
+            case SOCK_RAW:
+                printf("SOCK_RAW (raw) \n");
+                break;
+            case SOCK_RDM:
+                printf("SOCK_RDM (reliable message datagram)\n");
+                break;
+            case SOCK_SEQPACKET:
+                printf("SOCK_SEQPACKET (pseudo-stream packet)\n");
+                break;
+            default:
+                printf("Other %ld\n", ptr->ai_socktype);
+                break;
+        }
+        printf("\tProtocol: ");
+        switch (ptr->ai_protocol) {
+            case 0:
+                printf("Unspecified\n");
+                break;
+            case IPPROTO_TCP:
+                printf("IPPROTO_TCP (TCP)\n");
+                break;
+            case IPPROTO_UDP:
+                printf("IPPROTO_UDP (UDP) \n");
+                break;
+            default:
+                printf("Other %ld\n", ptr->ai_protocol);
+                break;
+        }
+        std::cout<<"connect: "<<host<<" "<<std::endl;
+            if (connect(sd, ptr->ai_addr, ptr->ai_addrlen) == 0) {
+                std::cout<<"connected: "<<std::endl;
+                break;
+            }
+            close(sd);
             printf("Error connecting to server.\n");
             return false;
         }
+
+        freeaddrinfo(infoptr);
+        //int s = socket(AF_UNSPEC, SOCK_STREAM, 0);
+        if (sd < 0) {
+            //printf("Error creating socket.\n");
+            return false;
+        }
+
         SSL_library_init();
         SSLeay_add_ssl_algorithms();
         SSL_load_error_strings();
@@ -309,7 +414,7 @@ namespace sylvanmats::reading{
             return false;
         }
         sock = SSL_get_fd(ssl);
-        SSL_set_fd(ssl, s);
+        SSL_set_fd(ssl, sd);
         int err = SSL_connect(ssl);
         if (err <= 0) {
             printf("Error creating SSL connection.  err=%x\n", err);
@@ -318,9 +423,9 @@ namespace sylvanmats::reading{
             return false;
         }
         printf ("SSL connection using %s\n", SSL_get_cipher (ssl));
-        std::string escapedUrl=url::Url::escape_reserved_unsafe(url);
+        std::string escapedUrl=url::Url::escape_reserved_unsafe(urlStr);
 std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
-        std::string request = "GET "+url+" HTTP/1.0\r\n\r\n";
+        std::string request = "GET "+urlStr+" HTTP/1.0\r\n\r\n";
 
         SendPacket(request.c_str());
         std::stringstream ss;

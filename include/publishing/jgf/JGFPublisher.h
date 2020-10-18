@@ -6,11 +6,17 @@
 
 namespace sylvanmats::publishing{
 
+    /**Json Graph
+    **/
     class JGFPublisher{
     protected:
         sylvanmats::constitution::Graph& graph;
+        lemon::ListGraph::NodeMap<bool> selectionNodes;
+        lemon::ListGraph::EdgeMap<bool> selectionEdges;
+        const lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> subgraph;
     public:
-        JGFPublisher(sylvanmats::constitution::Graph& graph): graph (graph) {};
+        JGFPublisher(sylvanmats::constitution::Graph& graph): graph (graph), selectionNodes(graph, true), selectionEdges(graph, true), subgraph (lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>(graph, selectionNodes, selectionEdges)) {std::cout<<"jgf construct "<<std::endl;};
+        JGFPublisher(sylvanmats::constitution::Graph& graph, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subgraph): graph (graph), selectionNodes(graph, false), selectionEdges(graph, false), subgraph (subgraph) {};
         JGFPublisher(const JGFPublisher& orig) = delete;
         virtual ~JGFPublisher() = default;
 
@@ -26,7 +32,7 @@ namespace sylvanmats::publishing{
     "nodes": {
        )";
         std::vector<lemon::ListGraph::Node> nodes;
-        for(lemon::ListGraph::NodeIt nSiteA(jgfp.graph); nSiteA!=lemon::INVALID; ++nSiteA){
+        for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(jgfp.subgraph); nSiteA!=lemon::INVALID; ++nSiteA){
            nodes.push_back(nSiteA);
         }
         unsigned long long count=0;
@@ -42,15 +48,16 @@ os << R"(
     "edges": [
                )";
        count=0;
-       for(lemon::ListGraph::EdgeIt e(jgfp.graph); e!=lemon::INVALID; ++e){
+       for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeIt e(jgfp.subgraph); e!=lemon::INVALID; ++e){
         os << R"(
           {
             "source": ")"+std::to_string(jgfp.graph.atomSites[jgfp.graph.u(e)].id)+R"(",
             "target": ")"+std::to_string(jgfp.graph.atomSites[jgfp.graph.v(e)].id)+R"(",
-            "label": ")"+std::to_string(jgfp.graph.compBond[e].value_order)+R"(")";
+            "label": ")"+std::to_string(jgfp.graph.compBond[e].value_order)+R"(",
+            "ring": )"+std::to_string(jgfp.graph.compBond[e].ring)+R"()";
         os << R"(
           })";
-            if(count<lemon::countEdges(jgfp.graph)-1) os << R"(,
+            if(count<lemon::countEdges(jgfp.subgraph)-1) os << R"(,
        )";
             count++;
        }
