@@ -7,11 +7,10 @@ Crystallographic Information Framework input/output to chemical constitutional g
 
 Build [antlr4](https://github.com/antlr/antlr4) as sibling project antlr4.  The c++ runtime too.
 
-Build [lemon](http://lemon.cs.elte.hu/hg/lemon-main) as sibling wher the install is lemon-main/dist
+Build [lemon](http://lemon.cs.elte.hu/hg/lemon-main) as sibling where the install is lemon-main/dist
 
-ftp://ftp.wwpdb.org/pub/pdb/data/monomers/aa-variants-v1.cif.gz in your ~/Downloads folder.
-https://files.rcsb.org/download/3SGS.cif.gz in your ~/Downloads folder.
-(Note: this will change as this project setup becomes mroe automated)
+ftp://ftp.wwpdb.org/pub/pdb/data/monomers/aa-variants-v1.cif.gz in your cifio/db folder.
+(Note: this will change as this project setup becomes more automated)
 
 Set compiler(>=10), antlr and zlib paths
 
