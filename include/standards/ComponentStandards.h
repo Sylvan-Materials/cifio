@@ -40,6 +40,8 @@ namespace sylvanmats::standards{
         standard_set_by_name& nameIndex;
     public:
         ComponentStandards() : nameIndex (componentStandardSet.get<name>()) {
+            std::string dbLocation = (getenv("CIFIO_DB_LOCATION")!=NULL) ? getenv("CIFIO_DB_LOCATION"): "../db";
+            path=dbLocation+"/components.cif";
             path.replace_extension(".json");
             std::ifstream file(path);
             std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());

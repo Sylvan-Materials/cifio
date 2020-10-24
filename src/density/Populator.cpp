@@ -1,3 +1,5 @@
+#include <ranges>
+
 #include "density/Populator.h"
 
 #include "antlr4-runtime.h"

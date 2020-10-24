@@ -46,6 +46,7 @@ namespace sylvanmats::constitution {
         bool pdbx_aromatic_flag=false;
         bool pdbx_stereo_config=false;
         unsigned int pdbx_ordinal;
+        bool flexible=false;
         int ring=0;
     };
 
@@ -91,7 +92,8 @@ namespace sylvanmats::constitution {
     };
 
     class Graph : public lemon::ListGraph {
-
+        protected:
+            unsigned int currRing=0;
         
         public:
             lemon::ListGraph::NodeMap<_atom_site<double>> atomSites;
@@ -110,6 +112,14 @@ namespace sylvanmats::constitution {
 
             void identifyFusedSystems(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph)> apply);
             void identifyRings(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);
+            unsigned int getNumberOfRings(){return currRing;};
+            unsigned int countFlexibles(){
+                unsigned int ret=0;
+                for(lemon::ListGraph::EdgeIt eSiteA(*this); eSiteA!=lemon::INVALID; ++eSiteA){
+                    if(compBond[eSiteA].flexible)ret++;
+                }
+                return ret;
+            };
     };
 
 }

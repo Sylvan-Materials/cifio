@@ -230,9 +230,17 @@ TEST_CASE("test 3sgs") {
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 8);
    CHECK_EQ(lemon::countEdges(graph.componentGraph), 4);
     
-       /*for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-            std::cout<<" "<<graph.atomSites[nSiteA].auth_atom_id<<" "<<graph.atomSites[nSiteA].type_symbol<<" "<<graph.atomSites[nSiteA].proton_count<<std::endl;
-        }*/
+    std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {};
+    sylvanmats::constitution::Selection selection(graph);
+    selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
+        graph.identifyFusedSystems(selectionGraph, [&graph, &filePath](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> subSelectionGraph){
+            CHECK_EQ(lemon::countNodes(subSelectionGraph), 24);
+            CHECK_EQ(lemon::countEdges(subSelectionGraph), 28);
+            graph.identifyRings(subSelectionGraph);
+        });
+    });
+    CHECK_EQ(graph.getNumberOfRings(), 0);
+    CHECK_EQ(graph.countFlexibles(), 35);
 }
 
 TEST_CASE("test 1ebc") {
@@ -256,9 +264,10 @@ TEST_CASE("test 1ebc") {
    CHECK_EQ(graph.getNumberOfAtomSites(), 1332);
    CHECK_EQ(lemon::countEdges(graph), 1298);
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 222);  
-   CHECK_EQ(lemon::countEdges(graph.componentGraph), 150);
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 149);
+    std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="HEM", .label_asym_id="D", .auth_seq_id=154}};
     sylvanmats::constitution::Selection selection(graph);
-    selection(154, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
+    selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
         graph.identifyFusedSystems(selectionGraph, [&graph, &filePath](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> subSelectionGraph){
             CHECK_EQ(lemon::countNodes(subSelectionGraph), 24);
             CHECK_EQ(lemon::countEdges(subSelectionGraph), 28);
@@ -269,8 +278,14 @@ TEST_CASE("test 1ebc") {
             ofs<<" "<<jgfPublisher<<std::endl;
             ofs.close();
         });
+        selection.compliment(selectionGraph, [](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>complimentGraph){
+            CHECK_EQ(lemon::countNodes(complimentGraph), 1290);
+            CHECK_EQ(lemon::countEdges(complimentGraph), 1248);
+        });
     });
-    
+    CHECK_EQ(graph.getNumberOfRings(), 4);
+    CHECK_EQ(graph.countFlexibles(), 31);
+
 }
 
 TEST_CASE("test 3sgs-sf") {

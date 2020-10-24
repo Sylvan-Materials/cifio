@@ -103,7 +103,8 @@ namespace sylvanmats::standards{
         standard_set_by_name& nameIndex;
     public:
     AminoStandards() : nameIndex (aminoStandardSet.get<name>()) {
-        std::filesystem::path filePath="../db/aa-variants-v1.cif.gz";
+        std::string dbLocation = (getenv("CIFIO_DB_LOCATION")!=NULL) ? getenv("CIFIO_DB_LOCATION"): "../db";
+        std::filesystem::path filePath=dbLocation+"/aa-variants-v1.cif.gz";
     sylvanmats::reading::GZReader gzReader;
     gzReader(filePath, [&](std::istream& content){
 

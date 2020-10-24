@@ -1,5 +1,5 @@
 
-all: LDFLAGS= -fuse-ld=gold -L../../lemon-main/dist/lib -L../cpp_modules/urlcpp -L../../antlr4/runtime/Cpp/run/usr/local/lib -L../cpp_modules/zlib/dist/lib -L../cpp_modules/openssl/openssl/lib -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -l crypto
+all: LDFLAGS= -fuse-ld=gold -L../../lemon-main/dist/lib -L../cpp_modules/urlcpp -L../../antlr4/runtime/Cpp/run/usr/local/lib -L../cpp_modules/zlib/dist/lib -L../cpp_modules/openssl/openssl/lib -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -lcrypto
 all: build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o build/src/constitution/graph.o build/src/constitution/Populator.o build/src/density/Populator.o build/src/lattice/Populator.o test
 	$(CXX) $(LDFLAGS) -o test $(wildcard build/src/*.o) $(wildcard build/src/parsing/*.o) $(wildcard build/src/constitution/*.o) $(wildcard build/src/density/*.o) $(wildcard build/src/lattice/*.o)
 
