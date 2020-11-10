@@ -5,6 +5,10 @@
 #include <lemon/suurballe.h>
 
 namespace sylvanmats::constitution {
+    bool operator==(symmetry_labels& a, symmetry_labels& b){
+        return (a.type_symbol.compare(b.type_symbol)==0);
+    };
+
     void Graph::identifyFusedSystems(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph)> apply){
             lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<int> compMap(selectionGraph);
             int compCount=lemon::biEdgeConnectedComponents(selectionGraph, compMap);
@@ -61,27 +65,27 @@ namespace sylvanmats::constitution {
         lemon::ListGraph::Node startNode=lemon::INVALID;
         do{
             startNode=lemon::INVALID;
-        for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(maskGraph); startNode==lemon::INVALID && nSiteA!=lemon::INVALID; ++nSiteA){
-            if(lemon::countIncEdges(subGraph, nSiteA)==2)startNode=nSiteA;
-        }
-        if(startNode!=lemon::INVALID){
-            lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::IncEdgeIt eSiteA(maskGraph, startNode);
-            suurballe.run(startNode, subGraph.oppositeNode(startNode, eSiteA));
-            for(unsigned int i=0;i<suurballe.pathNum();i++){
-                if(suurballe.path(i).length()<3 || suurballe.path(i).length()>8)continue;
-                currRing++;
-                compBond[eSiteA].ring=currRing;
-                std::cout<<i<<" ";
-                for(unsigned int j=0;j<suurballe.path(i).length();j++){
-                    compBond[suurballe.path(i).nth(j)].ring=currRing;
-                    std::cout<<atomSites[subGraph.source(suurballe.path(i).nth(j))].label_atom_id<<" ";
-                    if(j==suurballe.path(i).length()-1)std::cout<<atomSites[subGraph.target(suurballe.path(i).nth(j))].label_atom_id<<std::endl;
-                }
-                std::cout<<std::endl;
-             }
-            maskGraph.disable(startNode);
-            maskGraph.disable(eSiteA);
-        }
+            for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(maskGraph); startNode==lemon::INVALID && nSiteA!=lemon::INVALID; ++nSiteA){
+                if(lemon::countIncEdges(subGraph, nSiteA)==2)startNode=nSiteA;
+            }
+            if(startNode!=lemon::INVALID){
+                lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::IncEdgeIt eSiteA(maskGraph, startNode);
+                suurballe.run(startNode, subGraph.oppositeNode(startNode, eSiteA));
+                for(unsigned int i=0;i<suurballe.pathNum();i++){
+                    if(suurballe.path(i).length()<2 || suurballe.path(i).length()>8)continue;
+                    currRing++;
+                    compBond[eSiteA].ring=currRing;
+                    std::cout<<i<<" ";
+                    for(unsigned int j=0;j<suurballe.path(i).length();j++){
+                        compBond[suurballe.path(i).nth(j)].ring=currRing;
+                        std::cout<<atomSites[subGraph.source(suurballe.path(i).nth(j))].label_atom_id<<" ";
+                        if(j==suurballe.path(i).length()-1)std::cout<<atomSites[subGraph.target(suurballe.path(i).nth(j))].label_atom_id<<std::endl;
+                    }
+                    std::cout<<std::endl;
+                 }
+                maskGraph.disable(startNode);
+                maskGraph.disable(eSiteA);
+            }
         }while(startNode!=lemon::INVALID);
         
     };

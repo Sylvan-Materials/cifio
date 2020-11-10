@@ -132,14 +132,16 @@ namespace sylvanmats::standards{
             bool ret=false;
                      standard_set_by_name::iterator it=nameIndex.find(comp_id);
                    //std::cout<<comp_id<<" (it!=nameIndex.end())."<<(it!=nameIndex.end())<<std::endl;
-            /*if(it!=nameIndex.end()){
+            if(it!=nameIndex.end()){
                 for(std::vector<chem_comp_bond>::iterator itStd=(*it).chemCombonds.begin();itStd!=(*it).chemCombonds.end();itStd++){
                     std::vector<chem_comp_atom<double>>::iterator cca1=std::find_if((*it).chemCompAtoms.begin(), (*it).chemCompAtoms.end(), [&](chem_comp_atom<double>& cca){return (*itStd).atom_id_1.compare(cca.atom_id)==0;});
                     std::vector<chem_comp_atom<double>>::iterator cca2=std::find_if((*it).chemCompAtoms.begin(), (*it).chemCompAtoms.end(), [&](chem_comp_atom<double>& cca){return (*itStd).atom_id_2.compare(cca.atom_id)==0;});
+                    //std::cout<<"(*itStd).atom_id_1 "<<(*itStd).atom_id_1<<" "<<(cca1!=(*it).chemCompAtoms.end())<<" ";
+                    //std::cout<<"(*itStd).atom_id_2 "<<(*itStd).atom_id_2<<" "<<(cca1!=(*it).chemCompAtoms.end())<<std::endl;
                     apply((*cca1), (*itStd), (*cca2));
                 }
                 return true;
-            }*/
+            }
             for(std::vector<antlr4::tree::ParseTree*>::iterator itDB=dataBlock.begin();!ret && itDB!=dataBlock.end();itDB++){
                     //std::cout<<" "<<(*it)->toStringTree()<<std::endl;
                 bool atomSites=false;
@@ -222,6 +224,7 @@ namespace sylvanmats::standards{
                                          std::vector<chem_comp_atom<double>>::iterator cca1=std::find_if(std::begin(chemCompAtoms), std::end(chemCompAtoms), [&](chem_comp_atom<double>& cca){return chemCombonds.back().atom_id_1.compare(cca.atom_id)==0;});
                                          std::vector<chem_comp_atom<double>>::iterator cca2=std::find_if(std::begin(chemCompAtoms), std::end(chemCompAtoms), [&](chem_comp_atom<double>& cca){return chemCombonds.back().atom_id_2.compare(cca.atom_id)==0;});
                                          apply((*cca1), chemCombonds.back(), (*cca2));
+                                         chemCombonds.push_back(chem_comp_bond());
                                          columnCount=0;
                                          ret=true;
                                      }

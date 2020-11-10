@@ -11,6 +11,11 @@ namespace sylvanmats::lattice {
     void Populator::operator()(std::filesystem::path& filePath, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply){
         sylvanmats::reading::GZReader gzReader;
         gzReader(filePath, [&](std::istream& content){
+            this->operator()(content, graph, apply);
+        });
+    }
+
+    void Populator::operator()(std::istream& content, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply){
 
             antlr4::ANTLRInputStream input(content);
             sylvanmats::CIFLexer lexer(&input);
@@ -50,7 +55,7 @@ namespace sylvanmats::lattice {
                 if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                     bool once=true;
                     auto tags=r->loopHeader()->tag();
-                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("_atom_site_", 0) == 0; })){
+                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_atom_site_", 0) == 0; })){
                         once=false;
                         unsigned int columnCount=0;
                         lemon::ListGraph::Node n=graph.addNode();
@@ -92,7 +97,6 @@ namespace sylvanmats::lattice {
 
                 }
             }
-            
-        });
+            apply(graph);
     }
 }

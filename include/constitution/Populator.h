@@ -21,5 +21,6 @@ namespace sylvanmats::constitution {
         virtual ~Populator() = default;
 
         void operator()(std::filesystem::path& filePath, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply);
+        void operator()(std::istream& content, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply);
     };
 }

@@ -68,9 +68,11 @@ namespace sylvanmats::standards{
             }*/
             nlohmann::json::json_pointer startKey("/"+comp_id+"/start");
             nlohmann::json::json_pointer endKey("/"+comp_id+"/end");
+            try{
             unsigned int start=jin[startKey];
             unsigned int end=jin[endKey];
 //std::cout<<"start "<<start<<" end"<<end<<" "<<(end-start)<<std::endl;
+            if((end-start)<=0)return false;
             mio::mmap_source mmap2nd(path.string(), start, end-start+1);
             std::string content=std::string(mmap2nd.begin(), mmap2nd.end());
 //std::cout<<"content "<<content<<std::endl;
@@ -184,6 +186,11 @@ namespace sylvanmats::standards{
                 }
             }
             return ret;
+            }
+            catch(std::exception& ex){
+                std::cout<<"json ex: "<<ex.what()<<std::endl;
+                return false;
+            }
         };
             
     };

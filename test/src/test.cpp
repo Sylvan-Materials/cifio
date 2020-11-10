@@ -8,14 +8,14 @@
 #include <sstream>
 #include <regex>
 #include <iterator>
+#include <utility>
+#include <charconv>
 
 #include "zlib.h"
 #include "mio/mmap.hpp"
 #include "nlohmann/json.hpp"
 
 #include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
@@ -26,8 +26,50 @@
 #include "constitution/Selection.h"
 #include "density/Populator.h"
 #include "lattice/Populator.h"
+#include "density/ccp4/MapInput.h"
 #include "publishing/jgf/JGFPublisher.h"
 
+#include "lemon/vf2.h"
+
+
+TEST_CASE("test component db") {
+    std::filesystem::path path="../db/components.cif";
+    CHECK(std::filesystem::exists(path));
+    if(std::filesystem::exists(path)){
+        mio::mmap_source mmap(path.string());
+        std::string content(mmap.begin(), mmap.end());
+        mmap.unmap();
+        std::regex r(R"(\n?data_(\S*))");
+
+        nlohmann::json j;
+        std::string previousDataId="";
+        for(std::sregex_iterator it=std::sregex_iterator(content.begin(), content.end(), r);it!=std::sregex_iterator();++it)
+        {
+            //std::cout << sm.prefix().first << '\n';
+            if((*it).size()>1){
+                std::string s = (*it)[0];
+                unsigned long p=(s.starts_with('\n')) ? (*it).position()+1 : (*it).position();
+                j[(*it)[1]]["start"]=p;
+                if(!previousDataId.empty())j[previousDataId]["end"]=p-1;
+                previousDataId=(*it)[1];
+            }
+        }
+        path.replace_extension(".json");
+        std::ofstream ostrm(path, std::ios::trunc);
+        ostrm<<j<<std::endl;
+        ostrm.close();
+
+        std::string current_comp_id="HEM";
+        sylvanmats::standards::ComponentStandards componentStandards;
+        bool ret=componentStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
+            std::cout<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<std::endl;
+        });
+        CHECK(ret);
+
+    }
+    
+}
+    
 TEST_CASE("test tcp for a cif.gz"){
     std::string comp_id="3sgs";
     std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
@@ -62,7 +104,7 @@ TEST_CASE("test tcp for a cif.gz"){
 }
 
 TEST_CASE("test tcp for COD hydroxyapatite"){
-    std::string url = "http://www.crystallography.net/cod/result*?text=hydroxyapatite&has_fobs&format=urls&el1=Ca&nel1=Na&nel2=C";
+    std::string url = "http://www.crystallography.net/cod/result*?text=hydroxyapatite&format=urls&el1=Ca&nel1=Na&nel2=C";
     sylvanmats::reading::TCPReader tcpReader;
     CHECK(tcpReader(url, [&](std::istream& is){
         std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
@@ -76,7 +118,6 @@ TEST_CASE("test tcp for COD hydroxyapatite"){
         }
         CHECK_EQ(urls.size(), 28);
         url=urls[5];
-        std::string hklUrl=url.substr(0, url.size()-4)+".hkl";
         CHECK(tcpReader(url, [&](std::istream& is){
             std::string cifContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
             CHECK_EQ(cifContent.size(), 4766);
@@ -103,34 +144,36 @@ TEST_CASE("test tcp for COD hydroxyapatite"){
             gzclose(file);
 
         }));
-//        CHECK(tcpReader(hklUrl, [&](std::istream& is){
-//            std::string cifContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-//            std::cout<<"cifContent: "<<cifContent<<std::endl;
-//            CHECK_EQ(cifContent.size(), 4766);
-//            std::string path="./examples/hydroxyapatite.hkl.cif.gz";
-//            gzFile file=gzopen(path.c_str(), "wb");
-//            int uncomprLen=1024;
-//            char buf[uncomprLen+1];
-//            std::memset (buf, 0, uncomprLen+1);
-//            bool eofHit=false;
-//            unsigned long long count=0;
-//            while(!eofHit && uncomprLen>0){
-//                std::memset (buf, 0, uncomprLen+1);
-//                std:strncpy(buf, &cifContent[count], uncomprLen);
-//                buf[uncomprLen+1]=0;
-//                int ret=gzputs(file, (char*)buf);
-//                if(ret<=0)eofHit=true;
-//                else count+=ret;
-//                if(uncomprLen>cifContent.size()-count)uncomprLen=cifContent.size()-count;
-//                //std::cout<<ret<<" "<<eofHit<<" "<<count<<" "<<cifContent.size()<<" "<<uncomprLen<<std::endl;
-//            }
-//    //        count++;
-//    //        gzseek(file, 1L, SEEK_CUR);
-//            CHECK_EQ(count, 4766);
-//            gzclose(file);
-//
-//        }));
-//        
+        std::string hklUrl=url.substr(0, url.size()-4)+".hkl";
+std::cout<<"hklUrl "<<hklUrl<<std::endl;
+        /*CHECK(tcpReader(hklUrl, [&](std::istream& is){
+            std::string cifContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+            std::cout<<"cifContent: "<<cifContent<<std::endl;
+            CHECK_EQ(cifContent.size(), 4766);
+            std::string path="./examples/hydroxyapatite.hkl.cif.gz";
+            gzFile file=gzopen(path.c_str(), "wb");
+            int uncomprLen=1024;
+            char buf[uncomprLen+1];
+            std::memset (buf, 0, uncomprLen+1);
+            bool eofHit=false;
+            unsigned long long count=0;
+            while(!eofHit && uncomprLen>0){
+                std::memset (buf, 0, uncomprLen+1);
+                std:strncpy(buf, &cifContent[count], uncomprLen);
+                buf[uncomprLen+1]=0;
+                int ret=gzputs(file, (char*)buf);
+                if(ret<=0)eofHit=true;
+                else count+=ret;
+                if(uncomprLen>cifContent.size()-count)uncomprLen=cifContent.size()-count;
+                //std::cout<<ret<<" "<<eofHit<<" "<<count<<" "<<cifContent.size()<<" "<<uncomprLen<<std::endl;
+            }
+    //        count++;
+    //        gzseek(file, 1L, SEEK_CUR);
+            CHECK_EQ(count, 4766);
+            gzclose(file);
+
+        }));*/
+        
     }));
 
 }
@@ -264,7 +307,7 @@ TEST_CASE("test 1ebc") {
    CHECK_EQ(graph.getNumberOfAtomSites(), 1332);
    CHECK_EQ(lemon::countEdges(graph), 1298);
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 222);  
-   CHECK_EQ(lemon::countEdges(graph.componentGraph), 149);
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 150);
     std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="HEM", .label_asym_id="D", .auth_seq_id=154}};
     sylvanmats::constitution::Selection selection(graph);
     selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
@@ -307,44 +350,45 @@ TEST_CASE("test hydroxyapatite to lattice") {
     populator(filePath, graph, [](sylvanmats::lattice::Graph& graph){
         CHECK_EQ(lemon::countNodes(graph), 7);
   
-   });
+    });
 }
     
-TEST_CASE("test component db") {
-    std::filesystem::path path="../db/components.cif";
+TEST_CASE("test ccp4 map input") {
+    std::filesystem::path path="./examples/emd_8194.map";
+
     CHECK(std::filesystem::exists(path));
     if(std::filesystem::exists(path)){
-        mio::mmap_source mmap(path.string());
-        std::string content(mmap.begin(), mmap.end());
-        mmap.unmap();
-        std::regex r(R"(\n?data_(\S*))");
-
-        nlohmann::json j;
-        std::string previousDataId="";
-        for(std::sregex_iterator it=std::sregex_iterator(content.begin(), content.end(), r);it!=std::sregex_iterator();++it)
-        {
-            //std::cout << sm.prefix().first << '\n';
-            if((*it).size()>1){
-                std::string s = (*it)[0];
-                unsigned long p=(s.starts_with('\n')) ? (*it).position()+1 : (*it).position();
-                j[(*it)[1]]["start"]=p;
-                if(!previousDataId.empty())j[previousDataId]["end"]=p-1;
-                previousDataId=(*it)[1];
-            }
-        }
-        path.replace_extension(".json");
-        std::ofstream ostrm(path, std::ios::trunc);
-        ostrm<<j<<std::endl;
-        ostrm.close();
-
-        std::string current_comp_id="HEM";
-        sylvanmats::standards::ComponentStandards componentStandards;
-        bool ret=componentStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
-            std::cout<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<std::endl;
-        });
-        CHECK(ret);
-
+        sylvanmats::density::ccp4::MapInput mapInput;
+        mapInput(path);
+        CHECK_EQ(mapInput.getHeader().NC, 234);
+        CHECK_EQ(mapInput.getHeader().NR, 234);
+        CHECK_EQ(mapInput.getHeader().NS, 234);
+        CHECK_EQ(mapInput.getHeader().MODE, 2);
+        CHECK(mapInput.getHeader().X_length == doctest::Approx(149.058f));
+        CHECK(mapInput.getHeader().Y_length == doctest::Approx(149.058f));
+        CHECK(mapInput.getHeader().Z_length == doctest::Approx(149.058f));
+        //CHECK(mapInput.getHeader().Alpha == doctest::Approx(3.0f));
+        //CHECK(mapInput.getHeader().Beta == doctest::Approx(3.0f));
+        //CHECK(mapInput.getHeader().Gamma == doctest::Approx(3.0f));
+        CHECK(mapInput.getHeader().AMIN == doctest::Approx(-0.01429f));
+        CHECK(mapInput.getHeader().AMAX == doctest::Approx(0.03361f));
+        CHECK(mapInput.getHeader().AMEAN == doctest::Approx(-0.00011f));
+        CHECK_EQ(mapInput.getHeader().ISPG, 1);
+        CHECK_EQ(mapInput.getHeader().NSYMBT, 0);
+        CHECK_EQ(mapInput.getHeader().LSKFLG, 0);
+        CHECK_EQ(mapInput.getHeader().NVERSION, 0);
+         CHECK(mapInput.getHeader().ARMS == doctest::Approx(0.0029f));
+       CHECK_EQ(mapInput.getHeader().NLABL, 1);
+        CHECK_EQ(mapInput.getHeader().LABEL[0], "::::EMDATABANK.org::::EMD-8194::::                                              ");
+        
     }
     
+}
+    
+TEST_CASE("test integer sequence") {
+
+//auto [ptr, ec] = std::to_chars(
+    auto seq=std::make_integer_sequence<int,10>{};
+    //std::cout<<seq[0]<<std::endl;
 }
 

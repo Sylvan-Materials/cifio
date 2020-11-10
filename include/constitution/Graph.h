@@ -10,6 +10,12 @@
 //#include "constitution/Selection.h"
 
 namespace sylvanmats::constitution {
+    
+    struct symmetry_labels{
+        std::string type_symbol="";
+
+        friend bool operator==(symmetry_labels& a, symmetry_labels& b);
+    };
 
     template<typename T>
     struct _atom_site{
@@ -91,6 +97,15 @@ namespace sylvanmats::constitution {
         std::string space_group_name_Hall;
     };
 
+    struct _pdbx_struct_oper_list{
+        unsigned int id;
+        std::string type;
+        std::string name;
+        std::string symmetry_operation;
+        double matrix[3][3];
+        double vector[3];
+    };
+
     class Graph : public lemon::ListGraph {
         protected:
             unsigned int currRing=0;
@@ -100,6 +115,7 @@ namespace sylvanmats::constitution {
             lemon::ListGraph::EdgeMap<_comp_bond> compBond;
             _cell<double> cell;
             _symmetry symmetry;
+            std::vector<_pdbx_struct_oper_list> operationList;
             lemon::ListGraph componentGraph;
             lemon::ListGraph::NodeMap<_pdbx_poly_seq_scheme> componentProperties;
 

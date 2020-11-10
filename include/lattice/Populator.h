@@ -21,6 +21,7 @@ namespace sylvanmats::lattice {
         virtual ~Populator() = default;
 
         void operator()(std::filesystem::path& filePath, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply);
+        void operator()(std::istream& content, sylvanmats::lattice::Graph& graph, std::function<void(sylvanmats::lattice::Graph& graph)> apply);
     };
 }
 
