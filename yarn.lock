@@ -10,6 +10,10 @@ doctest@onqtam/doctest:
   version "0.0.0"
   resolved "https://codeload.github.com/onqtam/doctest/tar.gz/1c8da00c978c19e00a434b2b1f854fcffc9fba35"
 
+javatuples@javatuples/javatuples:
+  version "0.0.0"
+  resolved "https://codeload.github.com/javatuples/javatuples/tar.gz/5e24bbd91afebb2b71f2e505a3d8ced730039dd6"
+
 json-graph-specification@jsongraph/json-graph-specification:
   version "1.0.0"
   resolved "https://codeload.github.com/jsongraph/json-graph-specification/tar.gz/d39ee6087bf89349efe5939c67908a4744d571fd"
@@ -29,6 +33,10 @@ multi_index@Alexhuszagh/multi_index:
 openssl@openssl/openssl#OpenSSL_1_1_1g:
   version "0.0.0"
   resolved "https://codeload.github.com/openssl/openssl/tar.gz/e2e09d9fba1187f8d6aafaa34d4172f56f1ffb72"
+
+stringtemplate4@antlr/stringtemplate4:
+  version "0.0.0"
+  resolved "https://codeload.github.com/antlr/stringtemplate4/tar.gz/9a439491acc5b17d191316c9b3a99ab7bd340477"
 
 urlcpp@rimmartin/urlcpp:
   version "1.0.0"

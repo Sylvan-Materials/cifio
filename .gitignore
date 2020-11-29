@@ -5,3 +5,4 @@ test/examples/
 /tmp/
 /db/
 dictionaries
+/libcifio.so

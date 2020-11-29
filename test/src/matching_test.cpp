@@ -53,7 +53,7 @@ TEST_CASE("test 6jvm"){
    CHECK_EQ(graph.getNumberOfAtomSites(), 2710);
    CHECK_EQ(lemon::countEdges(graph), 2561);
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 528);
-   CHECK_EQ(lemon::countEdges(graph.componentGraph), 307);
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 308);
     
     std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="CGX", .label_asym_id="C", .auth_seq_id=200}};
     sylvanmats::constitution::Selection selection(graph);
@@ -73,7 +73,7 @@ TEST_CASE("test 6jvm"){
        //lemon::Vf2<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::Node>> vf2(selectionGraph, selectionGraph, symmetryMap);
        bool iso = lemon::vf2(selectionGraph, selectionGraph).iso().run();
        CHECK(iso);
-       lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<sylvanmats::constitution::symmetry_labels> selectionMap(selectionGraph);
+       /*lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<sylvanmats::constitution::symmetry_labels> selectionMap(selectionGraph);
         for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(selectionGraph); nSiteA!=lemon::INVALID; ++nSiteA){
              selectionMap[nSiteA].type_symbol=graph.atomSites[nSiteA].type_symbol;
         }
@@ -82,14 +82,14 @@ TEST_CASE("test 6jvm"){
 	if(symVf2.find())
 	while(symVf2.find()){
           //process the current mapping symmetryMap
-          std::cout<<"next "<<std::endl;
+          //std::cout<<"next "<<std::endl;
             for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(selectionGraph); nSiteA!=lemon::INVALID; ++nSiteA){
                  if(symmetryMap[nSiteA]!=lemon::INVALID && nSiteA!=symmetryMap[nSiteA]){
-                     std::cout<<"\t"<<graph.atomSites[nSiteA].auth_atom_id<<"<--> "<<graph.atomSites[symmetryMap[nSiteA]].auth_atom_id<<std::endl;
+                     //std::cout<<"\t"<<graph.atomSites[nSiteA].auth_atom_id<<"<--> "<<graph.atomSites[symmetryMap[nSiteA]].auth_atom_id<<std::endl;
                  }
             }
 
-        }
+        }*/
        
    });
     CHECK_EQ(graph.getNumberOfRings(), 3);

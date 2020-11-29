@@ -136,6 +136,10 @@ namespace sylvanmats::constitution {
                 }
                 return ret;
             };
+
+            std::string getXPath(lemon::ListGraph::Node& nSite){
+                return "/"+atomSites[nSite].label_asym_id+"/"+atomSites[nSite].label_comp_id+"/"+std::to_string(atomSites[nSite].auth_seq_id)+"/"+atomSites[nSite].pdbx_PDB_ins_code+"/";
+            };
     };
 
 }

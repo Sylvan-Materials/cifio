@@ -1,4 +1,61 @@
-all 
 
-zlib:
-	cd node_modules/zlib && cmake -DCMAKE_INSTALL_PREFIX=`pwd` . && $(MAKE) && $(MAKE) test && $(MAKE) install
+all: CXXFLAGS= -DNDEBUG -O3 -pthread -std=c++2a -Iinclude -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include  -Isrc -Icpp_modules/json/include -Icpp_modules/urlcpp -Icpp_modules/doctest -Icpp_modules/openssl/openssl/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+all: LDFLAGS= -shared -fuse-ld=gold -L../lemon-main/dist/lib -L$(JAVA_HOME)/lib -L$(JAVA_HOME)/lib/server -Lcpp_modules/urlcpp -L../antlr4/runtime/Cpp/run/usr/local/lib -Lcpp_modules/zlib/dist/lib -Lcpp_modules/openssl/openssl/lib -ljvm -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -lcrypto
+all: build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o build/src/parsing/DICLexer.o build/src/parsing/DICParser.o build/src/constitution/graph.o build/src/constitution/Populator.o build/src/density/Populator.o build/src/standards/AminoStandards.o build/src/standards/ComponentStandards.o build/src/lattice/Populator.o build/src/reading/tcp/TCPReader.o build/src/publishing/CIFPublisher.o build/src/publishing/jgf/JGFPublisher.o
+	$(CXX) $(LDFLAGS) -o libcifio.so $(wildcard build/src/*.o) $(wildcard build/src/parsing/*.o) $(wildcard build/src/standards/*.o) $(wildcard build/src/constitution/*.o) $(wildcard build/src/density/*.o) $(wildcard build/src/lattice/*.o) $(wildcard build/src/reading/tcp/*.o) $(wildcard build/src/publishing/jgf/*.o) $(wildcard build/src/publishing/*.o) 
+
+build/src/standards/AminoStandards.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/json/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/standards/AminoStandards.o: src/standards/AminoStandards.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/standards/AminoStandards.o src/standards/AminoStandards.cpp
+ 
+build/src/standards/ComponentStandards.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/json/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/standards/ComponentStandards.o: src/standards/ComponentStandards.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/standards/ComponentStandards.o src/standards/ComponentStandards.cpp
+ 
+build/src/constitution/Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/json/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/constitution/Populator.o: src/constitution/Populator.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/Populator.o src/constitution/Populator.cpp
+ 
+build/src/density/Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/density/Populator.o: src/density/Populator.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/density/Populator.o src/density/Populator.cpp
+
+build/src/lattice/Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/lattice/Populator.o: src/lattice/Populator.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/lattice/Populator.o src/lattice/Populator.cpp
+
+build/src/publishing/jgf/JGFPublisher.o: CXXFLAGS= -DNDEBUG -fPIC -O3 -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/publishing/jgf/JGFPublisher.o: src/publishing/jgf/JGFPublisher.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/publishing/jgf/JGFPublisher.o src/publishing/jgf/JGFPublisher.cpp
+
+build/src/publishing/CIFPublisher.o: CXXFLAGS= -DNDEBUG -fPIC -O3 -pthread -std=c++2a -Iinclude -Isrc -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I../lemon-main/dist/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/publishing/CIFPublisher.o: src/publishing/CIFPublisher.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/publishing/CIFPublisher.o src/publishing/CIFPublisher.cpp
+
+build/src/reading/tcp/TCPReader.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/urlcpp -Icpp_modules/openssl/openssl/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/reading/tcp/TCPReader.o: src/reading/tcp/TCPReader.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/reading/tcp/TCPReader.o src/reading/tcp/TCPReader.cpp
+
+build/src/constitution/graph.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -I../lemon-main/dist/include -MMD
+build/src/constitution/graph.o: src/constitution/graph.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/graph.o src/constitution/graph.cpp
+
+build/src/parsing/CIFLexer.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/parsing/CIFLexer.o: src/parsing/CIFLexer.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/CIFLexer.o src/parsing/CIFLexer.cpp
+
+build/src/parsing/CIFParser.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/parsing/CIFParser.o: src/parsing/CIFParser.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/CIFParser.o src/parsing/CIFParser.cpp
+
+build/src/parsing/DICLexer.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/parsing/DICLexer.o: src/parsing/DICLexer.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/DICLexer.o src/parsing/DICLexer.cpp
+
+build/src/parsing/DICParser.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/parsing/DICParser.o: src/parsing/DICParser.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/DICParser.o src/parsing/DICParser.cpp
+
+clean:
+	cd cpp_modules/zlib && $(MAKE) clean
+	cd cpp_modules/openssl && $(MAKE) clean

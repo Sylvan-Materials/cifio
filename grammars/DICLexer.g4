@@ -21,8 +21,9 @@ USsub_category_p_description : '_sub_category.description';
 UScategory_group_list_p_id : '_category_group_list.id';
 UScategory_group_list_p_parent_id : '_category_group_list.parent_id';
 UScategory_group_list_p_description : '_category_group_list.description';
-
 UScategory_examples_p_detail : '_category_examples.detail';
+
+USitem_p_name : '_item.name';
 USitem_p_category_id : '_item.category_id';
 USitem_p_mandatory_code : '_item.mandatory_code';
 
@@ -49,8 +50,8 @@ DoubleQuotedString : Double_Quote ( '\\"' | . )*? Double_Quote;//(OrdinaryChar|S
 SemiColonTextField : Eol Semi ( Semi | . )*? Eol Semi;//Eol (WhiteSpace? (OrdinaryChar (OrdinaryChar|Space|Tab|Dash|Period|Underscore|Double_Quote|Single_Quote|Numeric)*)* Eol)* Semi ;
 Value : (Period | Questionmark | (OrdinaryChar|LBracket)(OrdinaryChar | LBracket | RBracket |Numeric|Period|Dash)* | Numeric);
 
-WhiteSpace : (TokenizedComments | Space+ | Tab)+ ;
-TokenizedComments : (Space+ | Tab | Eol)+  Comments+;
+//WhiteSpace : (TokenizedComments | Space+ | Tab)+ ;
+WhiteSpace : ((Space+ | Tab+ | Eol)+  Comments?)+;
 
 Numeric : (Number | Number '(' UnsignedInteger ')' );
 Number : (Float | Integer );

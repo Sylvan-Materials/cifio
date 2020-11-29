@@ -35,10 +35,13 @@ namespace sylvanmats::constitution {
                 if(within(uniqueComponents, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].label_asym_id) && graph.atomSites[nSiteA].type_symbol.compare("FE")!=0){
                     selectionGraph.enable(nSiteA);
                     for(lemon::ListGraph::IncEdgeIt eSiteA(graph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
-//                    std::cout<<" "<<graph.atomSites[nSiteA].label_comp_id<<" "<<selectionGraph.status(nSiteA)<<" "<<selectionGraph.status(eSiteA)<<" "<<graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].auth_seq_id<<" "<<sequence<<std::endl;
-                        if(!selectionGraph.status(eSiteA) && within(uniqueComponents, graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].label_comp_id, graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].pdbx_PDB_ins_code, graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].auth_seq_id, graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].label_asym_id) && graph.atomSites[nSiteA].type_symbol.compare("FE")!=0){
-//std::cout<<"\t"<<graph.atomSites[nSiteA].label_comp_id<<" .. "<<graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].label_comp_id<<std::endl;
+                    //std::cout<<"inc count "<<lemon::countIncEdges(graph, nSiteA)<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteA].label_comp_id<<" "<<selectionGraph.status(nSiteA)<<" "<<selectionGraph.status(eSiteA)<<" "<<graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].auth_seq_id<<" "<<std::endl;
+                        if(!selectionGraph.status(eSiteA)){
+                        lemon::ListGraph::Node nSiteB=graph.oppositeNode(nSiteA, eSiteA);
+                        if(nSiteB!=nSiteA && within(uniqueComponents, graph.atomSites[nSiteB].label_comp_id, graph.atomSites[nSiteB].pdbx_PDB_ins_code, graph.atomSites[nSiteB].auth_seq_id, graph.atomSites[nSiteB].label_asym_id) && graph.atomSites[nSiteB].type_symbol.compare("FE")!=0){
+//std::cout<<"\t"<<graph.atomSites[nSiteA].label_asym_id<<"/"<<graph.atomSites[nSiteA].label_comp_id<<"/"<<graph.atomSites[nSiteA].label_atom_id<<" .. "<<graph.atomSites[nSiteB].label_asym_id<<"/"<<graph.atomSites[nSiteB].label_comp_id<<"/"<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                             selectionGraph.enable(eSiteA);
+                        }
                         }
                     }
                 }
@@ -47,13 +50,14 @@ namespace sylvanmats::constitution {
         };
 
         inline bool within(std::vector<unique_component>& uniqueComponents, std::string& label_comp_id, std::string pdbx_PDB_ins_code, int auth_seq_id, std::string& label_asym_id){
+            if(uniqueComponents.empty())return true;
             for(auto uc : uniqueComponents){
-                if(uc.auth_seq_id!=auth_seq_id || uc.label_comp_id.compare(label_comp_id)!=0 || uc.label_asym_id.compare(label_asym_id)!=0 || uc.pdbx_PDB_ins_code.compare(pdbx_PDB_ins_code)!=0)return false;
+                if(uc.auth_seq_id==auth_seq_id && uc.label_comp_id.compare(label_comp_id)==0 && uc.label_asym_id.compare(label_asym_id)==0 && uc.pdbx_PDB_ins_code.compare(pdbx_PDB_ins_code)==0)return true;
             }
-            return true;
+            return false;
         };
         
-        void compliment(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> complimentGraph)> apply){
+        void compliment(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& complimentGraph)> apply){
             lemon::ListGraph::NodeMap<bool> selectionNodes(graph, true);
             lemon::ListGraph::EdgeMap<bool> selectionEdges(graph, true);
             lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> selectionGraph(graph, selectionNodes, selectionEdges);
@@ -62,8 +66,11 @@ namespace sylvanmats::constitution {
                 if(subGraph.status(nSiteA)){
                     selectionGraph.disable(nSiteA);
                     for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::IncEdgeIt eSiteA(subGraph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
-                        if(selectionGraph.status(eSiteA) && subGraph.status(graph.oppositeNode(nSiteA, eSiteA))){
-                            selectionGraph.disable(eSiteA);
+                        if(selectionGraph.status(eSiteA)){
+                            lemon::ListGraph::Node nSiteB=graph.oppositeNode(nSiteA, eSiteA);
+                            if(nSiteB!=nSiteA && subGraph.status(nSiteB)){
+                                selectionGraph.disable(eSiteA);
+                            }
                         }
                     }
                 }

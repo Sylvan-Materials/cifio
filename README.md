@@ -9,14 +9,17 @@ Build [antlr4](https://github.com/antlr/antlr4) as sibling project antlr4.  The 
 
 Build [lemon](http://lemon.cs.elte.hu/hg/lemon-main) as sibling where the install is lemon-main/dist
 
-ftp://ftp.wwpdb.org/pub/pdb/data/monomers/aa-variants-v1.cif.gz in your cifio/db folder.
+ftp://ftp.wwpdb.org/pub/pdb/data/monomers/aa-variants-v1.cif.gz & ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz in your cifio/db folder. Untar
+components.cif.gz to components.cif and currently the unit test 'test component db' needs to run once 
+to generate a lookup json.
 (Note: this will change as this project setup becomes more automated)
+
 
 Set compiler(>=10), antlr and zlib paths
 
 ```
 export PATH=~/node-v14.9.0-linux-x64/bin:~/Software/gcc-dev/dist/bin:$PATH
-export LD_LIBRARY_PATH=`pwd`/../antlr4/runtime/Cpp/run/usr/local/lib:`pwd`/node_modules/zlib/dist/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=`pwd`/../antlr4/runtime/Cpp/run/usr/local/lib:`pwd`/cpp_modules/zlib/dist/lib:$LD_LIBRARY_PATH
 ```
 
 Generate the c++ lexer/parser code once from the grammar:
@@ -31,6 +34,10 @@ cd ..
 
 ```
 
+yarn config set PATH $PATH
+yarn config set LD_LIBRARY_PATH $LD_LIBRARY_PATH
+yarn config set CIFIO_DB_LOCATION `pwd`/db
+yarn config set JAVA_HOME ${JAVA_HOME}
 yarn install
 
 #run once
@@ -40,6 +47,7 @@ yarn zlib
 #run once
 yarn ssl
 
+yarn lib
 yarn test
 ```
 

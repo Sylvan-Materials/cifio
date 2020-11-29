@@ -41,7 +41,7 @@ us_item_units_list_p_detail : USitem_units_list_p_detail;
 item_units_conversion : (WhiteSpace|Eol)+ (us_item_units_conversion_p_from_code | us_item_units_conversion_p_to_code | us_item_units_conversion_p_operator | us_item_units_conversion_p_factor);
 us_item_units_conversion_p_from_code : USitem_units_conversion_p_from_code;
 us_item_units_conversion_p_to_code : USitem_units_conversion_p_to_code;
-us_item_units_conversion_p_operator : _item_units_conversion_p_operator;
+us_item_units_conversion_p_operator : USitem_units_conversion_p_operator;
 us_item_units_conversion_p_factor : USitem_units_conversion_p_factor;
 
 value : singleQuotedString | doubleQuotedString| semiColonTextField | (Value|Underscore )+;

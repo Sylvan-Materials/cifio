@@ -20,15 +20,16 @@
 
 TEST_CASE("test dictionary parsing") {
     std::ifstream file("../dictionaries/cif_mm.dic");
-    std::stringstream content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::stringstream sscontent(content);
 
-    antlr4::ANTLRInputStream input(content);
+    antlr4::ANTLRInputStream input(sscontent);
     sylvanmats::DICLexer lexer(&input);
     antlr4::CommonTokenStream tokens(&lexer);
 
-    sylvanmats::DICParser parser(&tokens);
+    /*sylvanmats::DICParser parser(&tokens);
     parser.setBuildParseTree(true);
-    antlr4::tree::ParseTree* tree = parser.dic();
+    antlr4::tree::ParseTree* tree = parser.dic();*/
     
 
 }
