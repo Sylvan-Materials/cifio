@@ -1,5 +1,7 @@
 lexer grammar CIF2Lexer;
 
+Magic_Code = '#\#CIF_2.0' ;
+
 Data_Token : [Dd] [Aa] [Tt] [Aa] '_';
 
 Save_Token : [Ss] [Aa] [Vv] [Ee] '_';

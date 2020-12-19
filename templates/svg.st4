@@ -1,0 +1,5 @@
+\<svg height="<height>" width="<width>">
+  \<g transform="translate(<offset_x> <offset_y>)">
+<circles:{ circle |    \<circle cx="<circle.value0>" cy="<circle.value1>" r="<circle.value2>" stroke="<circle.value3>" stroke-width="0.5" fill="none"/><\n>}>
+  \</g>
+\</svg> 

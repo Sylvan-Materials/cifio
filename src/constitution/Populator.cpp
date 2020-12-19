@@ -41,7 +41,7 @@ namespace sylvanmats::constitution {
         for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlock.begin();it!=dataBlock.end();it++){
             if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*it))) {
                 auto oi=r->dataItems();
-                for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().rfind("\n_cell.", 0) == 0; })){
+                for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().starts_with("\n_cell."); })){
                     if(cdi->tag()->getText().compare("\n_cell.length_a")==0)graph.cell.length_a=std::strtod(cdi->value()->getText().c_str(), nullptr);
                     else if(cdi->tag()->getText().compare("\n_cell.length_b")==0)graph.cell.length_b=std::strtod(cdi->value()->getText().c_str(), nullptr);
                     else if(cdi->tag()->getText().compare("\n_cell.length_c")==0)graph.cell.length_c=std::strtod(cdi->value()->getText().c_str(), nullptr);
@@ -49,12 +49,32 @@ namespace sylvanmats::constitution {
                     else if(cdi->tag()->getText().compare("\n_cell.angle_beta")==0)graph.cell.angle_beta=std::strtod(cdi->value()->getText().c_str(), nullptr);
                     else if(cdi->tag()->getText().compare("\n_cell.angle_gamma")==0)graph.cell.angle_gamma=std::strtod(cdi->value()->getText().c_str(), nullptr);
                 }
-                for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().rfind("\n_symmetry.", 0) == 0; })){
+                for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().starts_with("\n_symmetry."); })){
                     if(cdi->tag()->getText().compare("\n_symmetry.space_group_name_H-M")==0){
                         if(cdi->value()->singleQuotedString()!=nullptr) graph.symmetry.space_group_name_H_M=cdi->value()->singleQuotedString()->getText().substr(1, cdi->value()->singleQuotedString()->getText().size()-2);
                             else graph.symmetry.space_group_name_H_M=cdi->value()->getText();
                     }
                     else if(cdi->tag()->getText().compare("\n_symmetry.Int_Tables_number")==0)graph.symmetry.Int_Tables_number=std::strtol(cdi->value()->getText().c_str(), nullptr, 10);
+                }
+                
+                for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().starts_with("\n_pdbx_struct_oper_list."); })){
+                    if(graph.operationList.empty())graph.operationList.push_back(_pdbx_struct_oper_list());
+                    if(cdi->tag()->getText().ends_with(".id"))graph.operationList.back().id=std::strtol(cdi->value()->getText().c_str(), nullptr, 10);
+                    else if(cdi->tag()->getText().ends_with(".type"))graph.operationList.back().type=cdi->value()->singleQuotedString()->getText().substr(1, cdi->value()->singleQuotedString()->getText().size()-2);
+                    else if(cdi->tag()->getText().ends_with(".name"))graph.operationList.back().name=cdi->value()->getText();
+                    else if(cdi->tag()->getText().ends_with(".symmetry_operation"))graph.operationList.back().symmetry_operation=cdi->value()->getText();
+                    else if(cdi->tag()->getText().ends_with(".matrix[1][1]"))graph.operationList.back().matrix[0][0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[1][2]"))graph.operationList.back().matrix[0][1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[1][3]"))graph.operationList.back().matrix[0][2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".vector[1]"))graph.operationList.back().vector[0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[2][1]"))graph.operationList.back().matrix[1][0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[2][2]"))graph.operationList.back().matrix[1][1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[2][3]"))graph.operationList.back().matrix[1][2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".vector[2]"))graph.operationList.back().vector[1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[3][1]"))graph.operationList.back().matrix[2][0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[3][2]"))graph.operationList.back().matrix[2][1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".matrix[3][3]"))graph.operationList.back().matrix[2][2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".vector[3]"))graph.operationList.back().vector[2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
                 }
             }
         }

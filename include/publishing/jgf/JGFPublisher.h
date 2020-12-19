@@ -15,7 +15,7 @@ namespace sylvanmats::publishing{
         lemon::ListGraph::EdgeMap<bool> selectionEdges;
         const lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> subgraph;
     public:
-        JGFPublisher(sylvanmats::constitution::Graph& graph): graph (graph), selectionNodes(graph, true), selectionEdges(graph, true), subgraph (lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>(graph, selectionNodes, selectionEdges)) {std::cout<<"jgf construct "<<std::endl;};
+        JGFPublisher(sylvanmats::constitution::Graph& graph): graph (graph), selectionNodes(graph, true), selectionEdges(graph, true), subgraph (lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>(graph, selectionNodes, selectionEdges)) {};
         JGFPublisher(sylvanmats::constitution::Graph& graph, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subgraph): graph (graph), selectionNodes(graph, false), selectionEdges(graph, false), subgraph (subgraph) {};
         JGFPublisher(const JGFPublisher& orig) = delete;
         virtual ~JGFPublisher() = default;

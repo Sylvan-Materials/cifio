@@ -125,6 +125,7 @@ namespace sylvanmats::constitution {
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};
             _cell<double>& getCell(){return cell;};
             _symmetry& getSymmetry(){return symmetry;};
+            std::vector<_pdbx_struct_oper_list>& getOperationList(){return operationList;};
 
             void identifyFusedSystems(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph)> apply);
             void identifyRings(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);
@@ -139,6 +140,10 @@ namespace sylvanmats::constitution {
 
             std::string getXPath(lemon::ListGraph::Node& nSite){
                 return "/"+atomSites[nSite].label_asym_id+"/"+atomSites[nSite].label_comp_id+"/"+std::to_string(atomSites[nSite].auth_seq_id)+"/"+atomSites[nSite].pdbx_PDB_ins_code+"/";
+            };
+
+            std::string getUniqueName(lemon::ListGraph::Node& nSite){
+                return atomSites[nSite].label_asym_id+"_"+atomSites[nSite].label_comp_id+"_"+std::to_string(atomSites[nSite].auth_seq_id)+"_"+atomSites[nSite].pdbx_PDB_ins_code+"_"+atomSites[nSite].label_atom_id;
             };
     };
 

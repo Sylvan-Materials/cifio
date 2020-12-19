@@ -29,10 +29,36 @@
 #include "lattice/Populator.h"
 #include "density/ccp4/MapInput.h"
 #include "publishing/jgf/JGFPublisher.h"
-#include "publishing/CIFPublisher.h"
+#include "publishing/st/CIFPublisher.h"
 
 #include "lemon/vf2.h"
 
+#include "utils/JVMSingleton.h"
+
+TEST_CASE("test jvm singleton") {
+
+    sylvanmats::utils::JVMSingleton* jvmSingleton=sylvanmats::utils::JVMSingleton::getInstance();
+    JNIEnv *jniEnv=jvmSingleton->getEnv();
+    std::cout<<"jniEnv "<<jniEnv<<std::endl;
+    CHECK_NE(jniEnv, nullptr);
+    jclass jcls = jniEnv->FindClass("org/stringtemplate/v4/ST");
+    CHECK_NE(jcls, nullptr);
+    if (jcls == nullptr) {
+       jniEnv->ExceptionDescribe();
+    }
+    if (jcls != nullptr) {
+       jmethodID constructorId = jniEnv->GetMethodID(jcls, "<init>", "(Ljava/lang/String;)V");
+        CHECK_NE(constructorId, nullptr);
+       if (constructorId == nullptr) {
+          jniEnv->ExceptionDescribe();
+       }
+    }
+    std::filesystem::path path="../templates/cif.st4";
+    sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
+    cifPublisher.add("entry_id", "3SGS");
+    std::string&& content = cifPublisher.render();
+    CHECK(!content.empty());
+}
 
 TEST_CASE("test component db") {
     std::filesystem::path path="../db/components.cif";
@@ -211,6 +237,47 @@ TEST_CASE("test tcp for 4k7t.cif.gz"){
 
 }
 
+TEST_CASE("test tcp for 6u6j.cif.gz"){
+    std::string comp_id="6u6j";
+    std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
+    sylvanmats::constitution::Graph graph;
+    std::filesystem::path  filePath="./"+comp_id+".cif.gz";
+    sylvanmats::reading::TCPReader tcpReader;
+    tcpReader(url, [&graph, &filePath, &comp_id](std::istream& is){
+
+        sylvanmats::constitution::Populator populator;
+        populator(is, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+        sylvanmats::publishing::JGFPublisher jgfPublisher(graph);
+       CHECK_EQ(graph.getNumberOfAtomSites(), 745);
+       CHECK_EQ(graph.getCell().length_a, 43.304);
+       CHECK_EQ(graph.getCell().length_b, 43.304);
+       CHECK_EQ(graph.getCell().length_c, 84.303);
+       CHECK_EQ(graph.getCell().angle_alpha, 90.000);
+       CHECK_EQ(graph.getCell().angle_beta, 90.0);
+       CHECK_EQ(graph.getCell().angle_gamma, 120.0);
+       CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 3 2 1");
+       CHECK_EQ(graph.getSymmetry().Int_Tables_number, 150);
+        filePath.replace_extension(".json");
+        std::ofstream ofs(filePath);
+        ofs<<" "<<jgfPublisher<<std::endl;
+        ofs.close();
+
+            std::array<unsigned int, 8> terminals{3, 3, 2, 0, 0, 0, 0, 1};
+            unsigned int index=0;
+            for(lemon::ListGraph::NodeIt nCompA(graph.componentGraph); nCompA!=lemon::INVALID; ++nCompA){
+                //std::cout<<graph.componentProperties[nCompA].auth_mon_id<<" "<<graph.componentProperties[nCompA].termination<<std::endl;
+                //CHECK_EQ(graph.componentProperties[nCompA].termination, terminals[index++]);
+            }    
+       });
+       CHECK_EQ(graph.getNumberOfAtomSites(), 745);
+       CHECK_EQ(lemon::countEdges(graph), 122);
+       CHECK_EQ(lemon::countNodes(graph.componentGraph), 67);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 27);
+       
+    });
+
+}
+
 TEST_CASE("test tcp for COD hydroxyapatite"){
     std::string url = "http://www.crystallography.net/cod/result*?text=hydroxyapatite&format=urls&el1=Ca&nel1=Na&nel2=C";
     sylvanmats::reading::TCPReader tcpReader;
@@ -370,6 +437,16 @@ TEST_CASE("test 3sgs") {
    CHECK_EQ(graph.getCell().angle_gamma, 90.000);
    CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 1 21 1");
    CHECK_EQ(graph.getSymmetry().Int_Tables_number, 4);
+   CHECK_EQ(graph.getOperationList().size(), 1);
+    if(graph.getOperationList().size()==1){
+        CHECK_EQ(graph.getOperationList()[0].id, 1);
+        CHECK_EQ(graph.getOperationList()[0].type, "identity operation");
+        CHECK_EQ(graph.getOperationList()[0].name, "1_555");
+        CHECK_EQ(graph.getOperationList()[0].symmetry_operation, "x,y,z");
+        CHECK_EQ(graph.getOperationList()[0].vector[0], 0);
+        CHECK_EQ(graph.getOperationList()[0].vector[1], 0);
+        CHECK_EQ(graph.getOperationList()[0].vector[2], 0);
+    }
     filePath.replace_extension(".json");
     std::ofstream ofs(filePath);
     ofs<<" "<<jgfPublisher<<std::endl;
@@ -397,7 +474,8 @@ TEST_CASE("test 3sgs") {
     });
     CHECK_EQ(graph.getNumberOfRings(), 0);
     CHECK_EQ(graph.countFlexibles(), 35);
-    sylvanmats::publishing::CIFPublisher cifPublisher;
+    std::filesystem::path path="../templates/cif.st4";
+    sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
     cifPublisher.add("entry_id", "3SGS");
     std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>> atomSitesLoop;
     for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
@@ -481,7 +559,7 @@ TEST_CASE("test ccp4 map input") {
     CHECK(std::filesystem::exists(path));
     if(std::filesystem::exists(path)){
         sylvanmats::density::ccp4::MapInput mapInput;
-        mapInput(path);
+        mapInput(path, [](sylvanmats::density::ccp4::ccp4_header& ccp4Header, unsigned int sectionIndex, float* slice){});
         CHECK_EQ(mapInput.getHeader().NC, 234);
         CHECK_EQ(mapInput.getHeader().NR, 234);
         CHECK_EQ(mapInput.getHeader().NS, 234);

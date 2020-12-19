@@ -5,6 +5,7 @@
 #include <lemon/suurballe.h>
 
 namespace sylvanmats::constitution {
+
     bool operator==(symmetry_labels& a, symmetry_labels& b){
         return (a.type_symbol.compare(b.type_symbol)==0);
     };

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <filesystem>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -11,10 +12,10 @@
 #include <cstddef>
 #include <cstdarg>
 
-namespace sylvanmats::publishing{
-    class CIFPublisher{
+namespace sylvanmats::publishing::st{
+    class Publisher{
     protected:
-        JavaVM *javaVM;
+        std::filesystem::path stPath;
         JNIEnv *jniEnv;
         jclass jcls;
         jclass jshortcls;
@@ -28,12 +29,16 @@ namespace sylvanmats::publishing{
         jobject stObject;
 
         std::unordered_map<short, std::string> tupleMap = {{2, "Pair"}, {3, "Triplet"},{4, "Quartet"},{5, "Quintet"},{6, "Sextet"},{7, "Septet"},{8, "Octet"},{9, "Ennead"},{10, "Decade"},{11, "Hendecad"},{21, "TwentyOne"}};
-    public:
-        CIFPublisher();
-        CIFPublisher(const CIFPublisher& orig) = delete;
-        virtual ~CIFPublisher();
 
-        void add(std::string name, std::string value);
+    public:
+        Publisher(std::filesystem::path& stPath);
+        Publisher(const Publisher& orig) = delete;
+        virtual ~Publisher() =  default;
+
+        virtual void add(std::string name, std::string value);
+        virtual void add(std::string name, double value);
+
+        virtual std::string render();
 
         template< class... Types >
         void add(std::string name, std::vector<std::tuple<Types...>>& value){
@@ -48,7 +53,6 @@ namespace sylvanmats::publishing{
                    jniEnv->ExceptionDescribe();
                    jniEnv->ExceptionClear();
                 }
-            std::cout<<"jtcls "<<jtcls<<" "<<std::endl;
             std::string sigList="(";
             for(unsigned int index=0;index<std::tuple_size<std::tuple<Types...>>::value;index++){
                 sigList.append("Ljava/lang/Object;");
@@ -152,7 +156,6 @@ namespace sylvanmats::publishing{
             }
 
         };
-        std::string render();
 
         protected:
 
@@ -208,3 +211,4 @@ namespace sylvanmats::publishing{
 
     };
 }
+
