@@ -58,7 +58,7 @@ namespace sylvanmats::constitution {
                 }
                 
                 for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().starts_with("\n_pdbx_struct_oper_list."); })){
-                    if(graph.operationList.empty())graph.operationList.push_back(_pdbx_struct_oper_list());
+                    if(graph.operationList.empty())graph.operationList.push_back(_pdbx_struct_oper_list<double>());
                     if(cdi->tag()->getText().ends_with(".id"))graph.operationList.back().id=std::strtol(cdi->value()->getText().c_str(), nullptr, 10);
                     else if(cdi->tag()->getText().ends_with(".type"))graph.operationList.back().type=cdi->value()->singleQuotedString()->getText().substr(1, cdi->value()->singleQuotedString()->getText().size()-2);
                     else if(cdi->tag()->getText().ends_with(".name"))graph.operationList.back().name=cdi->value()->getText();
@@ -75,6 +75,21 @@ namespace sylvanmats::constitution {
                     else if(cdi->tag()->getText().ends_with(".matrix[3][2]"))graph.operationList.back().matrix[2][1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
                     else if(cdi->tag()->getText().ends_with(".matrix[3][3]"))graph.operationList.back().matrix[2][2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
                     else if(cdi->tag()->getText().ends_with(".vector[3]"))graph.operationList.back().vector[2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                }
+                for(sylvanmats::CIFParser::DataItemsContext* cdi: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->tag()!=nullptr && di->tag()->getText().starts_with("\n_atom_sites."); })){
+                    if(cdi->tag()->getText().ends_with(".id"))graph.fractionalAtomSites.entry_id=cdi->value()->getText();
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[1][1]"))graph.fractionalAtomSites.fract_transf_matrix[0][0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[1][2]"))graph.fractionalAtomSites.fract_transf_matrix[0][1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[1][3]"))graph.fractionalAtomSites.fract_transf_matrix[0][2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[2][1]"))graph.fractionalAtomSites.fract_transf_matrix[1][0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[2][2]"))graph.fractionalAtomSites.fract_transf_matrix[1][1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[2][3]"))graph.fractionalAtomSites.fract_transf_matrix[1][2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[3][1]"))graph.fractionalAtomSites.fract_transf_matrix[2][0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[3][2]"))graph.fractionalAtomSites.fract_transf_matrix[2][1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_matrix[3][3]"))graph.fractionalAtomSites.fract_transf_matrix[2][2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_vector[1]"))graph.fractionalAtomSites.fract_transf_vector[0]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_vector[2]"))graph.fractionalAtomSites.fract_transf_vector[1]=std::strtod(cdi->value()->getText().c_str(), nullptr);
+                    else if(cdi->tag()->getText().ends_with(".fract_transf_vector[3]"))graph.fractionalAtomSites.fract_transf_vector[2]=std::strtod(cdi->value()->getText().c_str(), nullptr);
                 }
             }
         }
@@ -101,6 +116,12 @@ namespace sylvanmats::constitution {
                              graph.componentProperties[n].asym_id.assign(values[valueIndex]->getText());
                              asym_id=graph.componentProperties[n].asym_id;
                          break;
+                         case 2:
+                             graph.componentProperties[n].seq_id = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                         break;
+                         case 3:
+                             graph.componentProperties[n].mon_id.assign(values[valueIndex]->getText());
+                         break;
                          case 6:
                              graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                          break;
@@ -124,6 +145,7 @@ namespace sylvanmats::constitution {
                          if(compCount>1 && previousNode!=lemon::INVALID){
                             graph.componentProperties[n].termination=NEUTRAL;
                             lemon::ListGraph::Edge e=graph.componentGraph.addEdge(previousNode, n);
+                            graph.structConnType[e]=COVALE;
                              //std::cout<<"edge "<<" "<<std::endl;
                          }
                         }
@@ -154,10 +176,14 @@ namespace sylvanmats::constitution {
                          case 0:
                              graph.componentProperties[n].asym_id.assign(values[valueIndex]->getText());
                          break;
-                         case 6:
-                             graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                         case 2:
+                             graph.componentProperties[n].mon_id.assign(values[valueIndex]->getText());
                          break;
-                         case 8:
+                         case 4:
+                             graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                             graph.componentProperties[n].seq_id = graph.componentProperties[n].auth_seq_num;
+                         break;
+                         case 7:
                              graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
                          break;
                          case 9:
@@ -300,18 +326,14 @@ namespace sylvanmats::constitution {
                             else if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::C_TERMINAL)current_comp_id+="_LEO2H";
                             else if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::NEUTRAL)current_comp_id+="_LL";
 
-//        std::cout<<"term ? "<<current_comp_id<<std::endl;
                             bool ret=aminoStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
-//                                 std::cout<<"\tgot std "<<current_comp_id<<" "<<entityCount<<" "<<cca1.atom_id<<" "<<cca2.atom_id<<std::endl;
                              unsigned int countA=0;
                              bool matched=false;
                              for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount+1 && nSiteA!=lemon::INVALID; ++nSiteA){
                              unsigned int countB=0;
                              for(lemon::ListGraph::NodeIt nSiteB(graph); countB<=entityCount+1 && nSiteB!=lemon::INVALID; ++nSiteB){
-                                 //std::cout<<"??? "<<countA<<" "<<countB<<" "<<entityCount<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                                  if(countA<countB && nSiteA!=nSiteB && graph.atomSites[nSiteA].auth_seq_id == graph.atomSites[nSiteB].auth_seq_id && graph.atomSites[nSiteA].auth_comp_id.compare(graph.atomSites[nSiteB].auth_comp_id)==0){
                                      if((graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_1)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_2)==0) || (graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_2)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_1)==0)){
-//                                            std::cout<<"\t"<<entityCount<<" "<<graph.atomSites[nSiteA].auth_seq_id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<graph.atomSites[nSiteB].auth_seq_id<<std::endl;
                                         lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
                                         graph.compBond[e].value_order=ccb.value_order;
                                         matched=true;
@@ -413,6 +435,271 @@ namespace sylvanmats::constitution {
 
                 }
 
+         }
+         }
+        for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+             bool hit=false;
+             for(lemon::ListGraph::NodeIt nCompA(graph.componentGraph); !hit && nCompA!=lemon::INVALID; ++nCompA){
+                 if(graph.atomSites[nSiteA].auth_seq_id==graph.componentProperties[nCompA].seq_id && graph.atomSites[nSiteA].auth_asym_id.compare(graph.componentProperties[nCompA].asym_id)==0 && graph.atomSites[nSiteA].pdbx_PDB_ins_code.compare(graph.componentProperties[nCompA].pdb_ins_code)==0){
+                     graph.componentNavigation.set(nSiteA, nCompA);
+                     hit=true;
+                     //if(graph.atomSites[nSiteA].auth_seq_id<15)std::cout<<"componentNavigation "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteA].auth_seq_id<<" "<<graph.atomSites[nSiteA].pdbx_PDB_ins_code<<std::endl;
+                 }
+             }
+         }
+        for(std::vector<antlr4::tree::ParseTree*>::iterator it=dataBlockLoop.begin();it!=dataBlockLoop.end();it++){
+            if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
+                bool once=true;
+                auto tags=r->loopHeader()->tag();
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_pdbx_struct_oper_list.", 0) == 0; })){
+                    once=false;
+                    unsigned int columnCount=0;
+                    graph.operationList.push_back(_pdbx_struct_oper_list<double>());
+                    std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                    for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
+                         switch(columnCount){
+                            case 0:
+                                graph.operationList.back().id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case 1:
+                                graph.operationList.back().type.assign(values[valueIndex]->getText());
+                            break;
+                            case 2:
+                                graph.operationList.back().name.assign(values[valueIndex]->getText());
+                            break;
+                            case 3:
+                                graph.operationList.back().symmetry_operation.assign(values[valueIndex]->getText());
+                            break;
+                            case 4:
+                                graph.operationList.back().matrix[0][0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 5:
+                                graph.operationList.back().matrix[0][1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 6:
+                                graph.operationList.back().matrix[0][2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 7:
+                                graph.operationList.back().vector[0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 8:
+                                graph.operationList.back().matrix[1][0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 9:
+                                graph.operationList.back().matrix[1][1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 10:
+                                graph.operationList.back().matrix[1][2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 11:
+                                graph.operationList.back().vector[1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 12:
+                                graph.operationList.back().matrix[2][0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 13:
+                                graph.operationList.back().matrix[2][1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 14:
+                                graph.operationList.back().matrix[2][2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                            case 15:
+                                graph.operationList.back().vector[2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                            break;
+                        }
+                        columnCount++;
+                        if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
+                            columnCount=0;
+                            if(valueIndex<r->loopBody()->value().size()-1)graph.operationList.push_back(_pdbx_struct_oper_list<double>());
+                        }
+                    }
+                }
+                once=true;
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_struct_conn.", 0) == 0; })){
+                    once=false;
+                    unsigned int columnCount=0;
+                    graph.structureConnections.push_back(_struct_conn<double>());
+                    std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                    for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
+                         switch(columnCount){
+                            case 0:
+                                graph.structureConnections.back().id.assign(values[valueIndex]->getText());
+                            break;
+                            case 1:
+                                graph.structureConnections.back().conn_type_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 2:
+                                graph.structureConnections.back().pdbx_leaving_atom_flag.assign(values[valueIndex]->getText());
+                            break;
+                            case 3:
+                                graph.structureConnections.back().pdbx_PDB_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 4:
+                                graph.structureConnections.back().ptnr1_label_asym_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 5:
+                                graph.structureConnections.back().ptnr1_label_comp_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 6:
+                                graph.structureConnections.back().ptnr1_label_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case 7:
+                                graph.structureConnections.back().ptnr1_label_atom_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 8:
+                                graph.structureConnections.back().pdbx_ptnr1_label_alt_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 9:
+                                graph.structureConnections.back().pdbx_ptnr1_PDB_ins_code.assign(values[valueIndex]->getText());
+                            break;
+                            case 10:
+                                graph.structureConnections.back().pdbx_ptnr1_standard_comp_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 11:
+                                graph.structureConnections.back().ptnr1_symmetry.assign(values[valueIndex]->getText());
+                            break;
+                            case 12:
+                                graph.structureConnections.back().ptnr2_label_asym_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 13:
+                                graph.structureConnections.back().ptnr2_label_comp_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 14:
+                                graph.structureConnections.back().ptnr2_label_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case 15:
+                                graph.structureConnections.back().ptnr2_label_atom_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 16:
+                                graph.structureConnections.back().pdbx_ptnr2_label_alt_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 17:
+                                graph.structureConnections.back().pdbx_ptnr2_PDB_ins_code.assign(values[valueIndex]->getText());
+                            break;
+                            case 18:
+                                graph.structureConnections.back().ptnr1_auth_asym_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 19:
+                                graph.structureConnections.back().ptnr1_auth_comp_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 20:
+                                graph.structureConnections.back().ptnr1_auth_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case 21:
+                                graph.structureConnections.back().ptnr2_auth_asym_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 22:
+                                graph.structureConnections.back().ptnr2_auth_comp_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 23:
+                                graph.structureConnections.back().ptnr2_auth_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case 24:
+                                graph.structureConnections.back().ptnr2_symmetry.assign(values[valueIndex]->getText());
+                            break;
+                            case 25:
+                                graph.structureConnections.back().pdbx_ptnr3_label_atom_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 26:
+                                graph.structureConnections.back().pdbx_ptnr3_label_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case 27:
+                                graph.structureConnections.back().pdbx_ptnr3_label_comp_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 28:
+                                graph.structureConnections.back().pdbx_ptnr3_label_asym_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 29:
+                                graph.structureConnections.back().pdbx_ptnr3_label_alt_id.assign(values[valueIndex]->getText());
+                            break;
+                            case 30:
+                                graph.structureConnections.back().pdbx_ptnr3_PDB_ins_code.assign(values[valueIndex]->getText());
+                            break;
+                            case 31:
+                                graph.structureConnections.back().details.assign(values[valueIndex]->getText());
+                            break;
+                            case 32:
+                                graph.structureConnections.back().pdbx_dist_value=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
+                           break;
+                            case 33:
+                                graph.structureConnections.back().pdbx_value_order.assign(values[valueIndex]->getText());
+                            break;
+                        }
+                        columnCount++;
+                        if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
+                            columnCount=0;
+                            if(valueIndex<r->loopBody()->value().size()-1)graph.structureConnections.push_back(_struct_conn<double>());
+                        }
+                    }
+                    for(std::vector<_struct_conn<double>>::iterator it=graph.structureConnections.begin();it!=graph.structureConnections.end();it++){
+                        if((*it).ptnr1_symmetry.compare((*it).ptnr2_symmetry)!=0)continue;
+                        lemon::ListGraph::Node ptnr1Node=lemon::INVALID;
+                        lemon::ListGraph::Node ptnr2Node=lemon::INVALID;
+                        std::string conn_type_id="";
+                        for(lemon::ListGraph::NodeIt nComp(graph.componentGraph); (ptnr1Node==lemon::INVALID || ptnr2Node==lemon::INVALID) && nComp!=lemon::INVALID; ++nComp){
+                            if((*it).ptnr1_auth_seq_id==graph.componentProperties[nComp].seq_id && (*it).ptnr1_auth_comp_id.compare(graph.componentProperties[nComp].mon_id)==0 && (*it).ptnr1_label_asym_id.compare(graph.componentProperties[nComp].asym_id)==0 && (*it).pdbx_ptnr1_PDB_ins_code.compare(graph.componentProperties[nComp].pdb_ins_code)==0){
+                                ptnr1Node=nComp;
+                                conn_type_id=(*it).conn_type_id;
+                            }
+                            /*else if((*it).ptnr1_auth_comp_id.compare("CA")==0 && graph.componentProperties[nComp].mon_id.compare("CA")==0){
+                            std::cout<<"seq? "<<(*it).ptnr1_auth_seq_id<<" "<<graph.componentProperties[nComp].seq_id<<std::endl;
+                            std::cout<<"comp? "<<(*it).ptnr1_auth_comp_id<<" "<<graph.componentProperties[nComp].mon_id<<std::endl;
+                            std::cout<<"asym? "<<(*it).ptnr1_label_asym_id<<" "<<graph.componentProperties[nComp].asym_id<<std::endl;
+                            std::cout<<"ins? "<<(*it).pdbx_ptnr1_PDB_ins_code<<" "<<graph.componentProperties[nComp].pdb_ins_code<<std::endl;
+                            }*/
+                            if((*it).ptnr2_auth_seq_id==graph.componentProperties[nComp].seq_id && (*it).ptnr2_auth_comp_id.compare(graph.componentProperties[nComp].mon_id)==0 && (*it).ptnr2_label_asym_id.compare(graph.componentProperties[nComp].asym_id)==0 && (*it).pdbx_ptnr2_PDB_ins_code.compare(graph.componentProperties[nComp].pdb_ins_code)==0){
+                                ptnr2Node=nComp;
+                            }
+                        }
+                        //std::cout<<"adding structure connections "<<(ptnr1Node!=lemon::INVALID)<<" "<<(ptnr2Node!=lemon::INVALID)<<" "<<(conn_type_id.compare("metalc")!=0)<<std::endl;
+                        if(ptnr1Node!=lemon::INVALID && ptnr2Node!=lemon::INVALID ){
+                            lemon::ListGraph::Edge e=lemon::findEdge(graph.componentGraph, ptnr1Node, ptnr2Node);
+                            if(e!=lemon::INVALID){
+                                e=graph.componentGraph.addEdge(ptnr1Node, ptnr2Node);
+                                if(conn_type_id.compare("disulf")!=0){
+                                    graph.structConnType[e]=DISULF;
+                                }
+                                else if(conn_type_id.compare("hydrog")!=0){
+                                    graph.structConnType[e]=HYDROG;
+                                }
+                                else if(conn_type_id.compare("metalc")!=0){
+                                    graph.structConnType[e]=METALC;
+                                }
+                                else if(conn_type_id.compare("mismat")!=0){
+                                    graph.structConnType[e]=MISMAT;
+                                }
+                                else if(conn_type_id.compare("saltbr")!=0){
+                                    graph.structConnType[e]=SALTBR;
+                                }
+                                else if(conn_type_id.compare("modres")!=0){
+                                    graph.structConnType[e]=MODRES;
+                                }
+                                else if(conn_type_id.compare("covale_base")!=0){
+                                    graph.structConnType[e]=COVALE_BASE;
+                                }
+                                else if(conn_type_id.compare("covale_sugar")!=0){
+                                    graph.structConnType[e]=COVALE_SUGAR;
+                                }
+                                else if(conn_type_id.compare("covale_phosphate")!=0){
+                                    graph.structConnType[e]=COVALE_PHOSPHATE;
+                                }
+                                else graph.structConnType[e]=COVALE;
+                                lemon::ListGraph::Node n1=lemon::INVALID;
+                                for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemIt(graph.componentNavigation, ptnr1Node); n1==lemon::INVALID && itemIt!=lemon::INVALID; ++itemIt){
+                                    if(graph.atomSites[itemIt].label_atom_id.compare((*it).ptnr1_label_atom_id)==0)n1=itemIt;
+                                }
+                                lemon::ListGraph::Node n2=lemon::INVALID;
+                                for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemIt(graph.componentNavigation, ptnr2Node); n2==lemon::INVALID && itemIt!=lemon::INVALID; ++itemIt){
+                                    if(graph.atomSites[itemIt].label_atom_id.compare((*it).ptnr2_label_atom_id)==0)n2=itemIt;
+                                }
+                                if(n1!=lemon::INVALID && n2!=lemon::INVALID){
+                                    lemon::ListGraph::Edge e=graph.addEdge(n1, n2);
+                                    graph.compBond[e].value_order=1;//(*it)..value_order;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         apply(graph);

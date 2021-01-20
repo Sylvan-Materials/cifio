@@ -18,14 +18,17 @@ namespace sylvanmats::publishing::st{
         std::filesystem::path stPath;
         JNIEnv *jniEnv;
         jclass jcls;
+        jclass jboolcls;
         jclass jshortcls;
         jclass jintcls;
         jclass jlongcls;
         jclass jdoublecls;
+        jmethodID constructorBoolId;
         jmethodID constructorShortId;
         jmethodID constructorIntId;
         jmethodID constructorLongId;
         jmethodID constructorDoubleId;
+        jobject stGroupDirObject;
         jobject stObject;
 
         std::unordered_map<short, std::string> tupleMap = {{2, "Pair"}, {3, "Triplet"},{4, "Quartet"},{5, "Quintet"},{6, "Sextet"},{7, "Septet"},{8, "Octet"},{9, "Ennead"},{10, "Decade"},{11, "Hendecad"},{21, "TwentyOne"}};
@@ -36,7 +39,9 @@ namespace sylvanmats::publishing::st{
         virtual ~Publisher() =  default;
 
         virtual void add(std::string name, std::string value);
+        virtual void add(std::string name, bool value);
         virtual void add(std::string name, double value);
+        virtual void rawSetAttribute(std::string name, bool value);
 
         virtual std::string render();
 
@@ -166,6 +171,15 @@ namespace sylvanmats::publishing::st{
         
         inline jobject toArgs(long long arg){
             jobject lObject = jniEnv->NewObject(jlongcls, constructorLongId, (jlong) arg);
+            if (lObject == NULL) {
+               jniEnv->ExceptionDescribe();
+               jniEnv->ExceptionClear();
+            }
+            return lObject;
+        };
+
+        inline jobject toArgs(bool arg){
+            jobject lObject = jniEnv->NewObject(jlongcls, constructorLongId, (jboolean) arg);
             if (lObject == NULL) {
                jniEnv->ExceptionDescribe();
                jniEnv->ExceptionClear();

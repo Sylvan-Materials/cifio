@@ -50,16 +50,22 @@ namespace sylvanmats::constitution {
             }
     };
 
-    void Graph::identifyRings(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph){\
+    void Graph::identifyRings(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph){
         lemon::ListGraph::NodeMap<bool> maskNodes(*this, false);
         lemon::ListGraph::EdgeMap<bool> maskEdges(*this, false);
         lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> maskGraph(*this, maskNodes, maskEdges);
         for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(subGraph); nSiteA!=lemon::INVALID; ++nSiteA){
-            maskGraph.enable(nSiteA);
-            for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::IncEdgeIt eSiteA(subGraph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
-                    maskGraph.enable(eSiteA);
+            if(atomSites[nSiteA].type_symbol.compare("FE")!=0){
+                maskGraph.enable(nSiteA);
+                for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::IncEdgeIt eSiteA(subGraph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
+                        if(atomSites[subGraph.oppositeNode(nSiteA, eSiteA)].type_symbol.compare("FE")!=0){
+                            maskGraph.enable(eSiteA);
+                        }
+                }
             }
         }
+        //std::cout<<"subGraph "<<lemon::countNodes(subGraph)<<" "<<lemon::countEdges(subGraph)<<std::endl;
+        //std::cout<<"maskGraph "<<lemon::countNodes(maskGraph)<<" "<<lemon::countEdges(maskGraph)<<std::endl;
        lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeMap<int> lengthMap(maskGraph);
         lemon::Suurballe<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeMap<int>> suurballe(maskGraph, lengthMap);
 

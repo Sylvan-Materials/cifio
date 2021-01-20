@@ -8,7 +8,7 @@ namespace sylvanmats::utils{
     JNIEnv* JVMSingleton::jniEnv=nullptr;
 
     JVMSingleton::JVMSingleton(){
-        std::string classPath="../../cifio/src:../../ST-4.3.1.jar:../../javatuples-1.2.jar:../../antlr4/tool/target/antlr4-4.8-2-SNAPSHOT-complete.jar:../../:.";
+        std::string classPath="../../cifio/build/src:../../cifio/cpp_modules/stringtemplate4/target/classes:../../javatuples-1.2.jar:../../antlr4/tool/target/antlr4-4.8-2-SNAPSHOT-complete.jar:../../:.";
         if(getenv("CLASSPATH")!=NULL){
         }
         classPath="-Djava.class.path="+classPath;

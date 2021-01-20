@@ -1,14 +1,14 @@
 [
     { "directory": "./build",
-    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -DSOMEDEF=\"With spaces, quotes and \\-es.\" -c -o build/src/parsing/CIFLexer.o src/parsing/CIFLexer.cpp",
-    "CIFLexer": "src/parsing/CIFLexer.cpp" },
+    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -c -o build/src/parsing/CIFLexer.o src/parsing/CIFLexer.cpp",
+    "file": "src/parsing/CIFLexer.cpp" },
     { "directory": "./build",
-    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -DSOMEDEF=\"With spaces, quotes and \\-es.\" -c -o build/src/parsing/CIFParser.o src/parsing/CIFParser.cpp",
-    "CIFParser": "src/parsing/CIFParser.cpp" },
+    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -c -o build/src/parsing/CIFParser.o src/parsing/CIFParser.cpp",
+    "file": "src/parsing/CIFParser.cpp" },
     { "directory": "./build",
-    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -DSOMEDEF=\"With spaces, quotes and \\-es.\" -c -o build/src/constitution/graph.o src/constitution/graph.cpp",
-    "graph": "src/constitution/graph.cpp" },
+    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -c -o build/src/constitution/graph.o src/constitution/graph.cpp",
+    "file": "src/constitution/graph.cpp" },
     { "directory": "./build",
-    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -DSOMEDEF=\"With spaces, quotes and \\-es.\" -c -o build/src/constitution/Populator.o src/constitution/Populator.cpp",
-    "Populator": "src/constitution/Populator.cpp" }
+    "command": "~/Software/llvm-project/dist/bin/clang++ -std=c++17 -I./include -I./src/parsing -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -c -o build/src/constitution/Populator.o src/constitution/Populator.cpp",
+    "file": "src/constitution/Populator.cpp" }
 ]

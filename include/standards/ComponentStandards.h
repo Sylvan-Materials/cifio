@@ -32,6 +32,10 @@
 #include "standards/AminoStandards.h"
 
 namespace sylvanmats::standards{
+
+    /**
+    * ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz
+    **/
     class ComponentStandards{
     protected:
         std::filesystem::path path="../db/components.cif";

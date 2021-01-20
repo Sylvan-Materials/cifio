@@ -1,3 +1,4 @@
+obj(vertex_count, face_count, material_count, vertices, texture_vertices, normals, indices) ::= <<
 #	                Vertices: <vertex_count>
 #	                  Points: 0
 #	                   Lines: 0
@@ -15,3 +16,4 @@ usemtl Default
 s off
 <indices:{ index |f <index.value0>/<index.value0>/<index.value1> <index.value2>/<index.value2>/<index.value3> <index.value6>/<index.value6>/<index.value7> <index.value4>/<index.value4>/<index.value5><\n>}>
 # End of file
+>>

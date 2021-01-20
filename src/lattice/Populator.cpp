@@ -94,6 +94,28 @@ namespace sylvanmats::lattice {
                         }
                     }
                     }
+                    once=true;
+                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_symmetry_equiv_pos_", 0) == 0; })){
+                        once=false;
+                        unsigned int columnCount=0;
+                        graph.equivalentPositions.push_back(_symmetry_equiv_pos());
+                        std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                        for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
+                             switch(columnCount){
+                                case 0:
+                                    graph.equivalentPositions.back().site_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                                break;
+                                case 1:
+                                    graph.equivalentPositions.back().as_xyz.assign(values[valueIndex]->getText());
+                                break;
+                            }
+                            columnCount++;
+                            if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
+                                columnCount=0;
+                                if(valueIndex<r->loopBody()->value().size()-1)graph.equivalentPositions.push_back(_symmetry_equiv_pos());
+                            }
+                        }
+                    }
 
                 }
             }

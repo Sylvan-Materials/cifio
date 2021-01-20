@@ -8,6 +8,7 @@
 namespace sylvanmats::publishing::st{
 
     SVGPublisher::SVGPublisher(std::filesystem::path& stPath) : Publisher(stPath) {
+        add("has_arcs", false);
     };
 
 }

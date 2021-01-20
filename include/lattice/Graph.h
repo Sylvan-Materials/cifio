@@ -50,6 +50,11 @@ namespace sylvanmats::lattice {
         std::string space_group_name_Hall;
     };
 
+    struct _symmetry_equiv_pos {
+        int site_id;
+        std::string as_xyz;
+    };
+
     class Graph : public lemon::ListGraph {
 
         
@@ -58,6 +63,7 @@ namespace sylvanmats::lattice {
             lemon::ListGraph::EdgeMap<_comp_bond> compBond;
             _cell<double> cell;
             _symmetry symmetry;
+            std::vector<_symmetry_equiv_pos> equivalentPositions;
 
             Graph() : atomSites(*this), compBond(*this){
             };
@@ -65,6 +71,19 @@ namespace sylvanmats::lattice {
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};
             _cell<double>& getCell(){return cell;};
             _symmetry& getSymmetry(){return symmetry;};
+            std::vector<_symmetry_equiv_pos>& getEquivalentPositions(){return equivalentPositions;};
+            std::stringstream equivalentPositionsAsLua(){
+                std::stringstream ssLua;
+//                ssLua<<R"(local sym =  {}
+//
+//)";
+                for(unsigned int index=0;index<equivalentPositions.size();index++){
+                    ssLua<<"function f"<<equivalentPositions[index].site_id<<"(x,y,z) return "<<equivalentPositions[index].as_xyz<<" end"<<std::endl<<std::endl;
+                }
+//                ssLua<<R"(return sym
+//)";
+                return ssLua;
+            };
     };
 
 }

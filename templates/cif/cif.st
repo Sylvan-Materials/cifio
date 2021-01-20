@@ -1,3 +1,4 @@
+cif(entry_id, atom_sites) ::= <<
 data_<entry_id>
 # 
 _entry.id   <entry_id> 
@@ -29,3 +30,4 @@ _atom_site.auth_asym_id
 _atom_site.auth_atom_id 
 _atom_site.pdbx_PDB_model_num 
 <atom_sites:{ atom_site |<atom_site.value0> <atom_site.value1> <atom_site.value2> <atom_site.value3> <atom_site.value4> <atom_site.value5> <atom_site.value6> <atom_site.value7> <atom_site.value8> <atom_site.value9> <atom_site.value10> <atom_site.value11> <atom_site.value12> <atom_site.value13> <atom_site.value14> <atom_site.value15> <atom_site.value16> <atom_site.value17> <atom_site.value18> <atom_site.value19> <atom_site.value20> <\n>}>
+>>

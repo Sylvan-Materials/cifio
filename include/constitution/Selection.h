@@ -32,13 +32,13 @@ namespace sylvanmats::constitution {
             lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> selectionGraph(graph, selectionNodes, selectionEdges);
             bool firstSite=false;
             for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-                if(within(uniqueComponents, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].label_asym_id) && graph.atomSites[nSiteA].type_symbol.compare("FE")!=0){
+                if(within(uniqueComponents, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].label_asym_id)){
                     selectionGraph.enable(nSiteA);
                     for(lemon::ListGraph::IncEdgeIt eSiteA(graph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
                     //std::cout<<"inc count "<<lemon::countIncEdges(graph, nSiteA)<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteA].label_comp_id<<" "<<selectionGraph.status(nSiteA)<<" "<<selectionGraph.status(eSiteA)<<" "<<graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].auth_seq_id<<" "<<std::endl;
                         if(!selectionGraph.status(eSiteA)){
                         lemon::ListGraph::Node nSiteB=graph.oppositeNode(nSiteA, eSiteA);
-                        if(nSiteB!=nSiteA && within(uniqueComponents, graph.atomSites[nSiteB].label_comp_id, graph.atomSites[nSiteB].pdbx_PDB_ins_code, graph.atomSites[nSiteB].auth_seq_id, graph.atomSites[nSiteB].label_asym_id) && graph.atomSites[nSiteB].type_symbol.compare("FE")!=0){
+                        if(nSiteB!=nSiteA && within(uniqueComponents, graph.atomSites[nSiteB].label_comp_id, graph.atomSites[nSiteB].pdbx_PDB_ins_code, graph.atomSites[nSiteB].auth_seq_id, graph.atomSites[nSiteB].label_asym_id)){
 //std::cout<<"\t"<<graph.atomSites[nSiteA].label_asym_id<<"/"<<graph.atomSites[nSiteA].label_comp_id<<"/"<<graph.atomSites[nSiteA].label_atom_id<<" .. "<<graph.atomSites[nSiteB].label_asym_id<<"/"<<graph.atomSites[nSiteB].label_comp_id<<"/"<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                             selectionGraph.enable(eSiteA);
                         }

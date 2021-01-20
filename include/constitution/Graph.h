@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string>
 #include <memory>
+#include <sstream>
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
@@ -76,6 +77,58 @@ namespace sylvanmats::constitution {
         std::string pdb_ins_code;
         std::string hetero;
         TERMINATION termination=NEUTRAL;
+        bool disulfide=false;
+    };
+
+    enum STRUCT_CONN_TYPE{
+        COVALE,          //'covalent bond'
+        DISULF,           //'disulfide bridge'
+        HYDROG,           //'hydrogen bond'
+        METALC,           //'metal coordination'
+        MISMAT,           //'mismatched base pairs'
+        SALTBR,           //'ionic interaction'
+        MODRES,           //'covalent residue modification'
+        COVALE_BASE,      //'covalent modification of a nucleotide base'
+        COVALE_SUGAR,     //'covalent modification of a nucleotide sugar'
+        COVALE_PHOSPHATE  //'covalent modification of a nucleotide phosphate'
+    };
+
+    template<typename T>
+    struct _struct_conn {
+        std::string id;
+        std::string conn_type_id;
+        std::string pdbx_leaving_atom_flag;
+        std::string pdbx_PDB_id;
+        std::string ptnr1_label_asym_id;
+        std::string ptnr1_label_comp_id;
+        long long ptnr1_label_seq_id;
+        std::string ptnr1_label_atom_id;
+        std::string pdbx_ptnr1_label_alt_id;
+        std::string pdbx_ptnr1_PDB_ins_code;
+        std::string pdbx_ptnr1_standard_comp_id;
+        std::string ptnr1_symmetry;
+        std::string ptnr2_label_asym_id;
+        std::string ptnr2_label_comp_id;
+        long long ptnr2_label_seq_id;
+        std::string ptnr2_label_atom_id;
+        std::string pdbx_ptnr2_label_alt_id;
+        std::string pdbx_ptnr2_PDB_ins_code;
+        std::string ptnr1_auth_asym_id;
+        std::string ptnr1_auth_comp_id;
+        long long ptnr1_auth_seq_id;
+        std::string ptnr2_auth_asym_id;
+        std::string ptnr2_auth_comp_id;
+        long long ptnr2_auth_seq_id;
+        std::string ptnr2_symmetry;
+        std::string pdbx_ptnr3_label_atom_id;
+        long long pdbx_ptnr3_label_seq_id;
+        std::string pdbx_ptnr3_label_comp_id;
+        std::string pdbx_ptnr3_label_asym_id;
+        std::string pdbx_ptnr3_label_alt_id;
+        std::string pdbx_ptnr3_PDB_ins_code;
+        std::string details;
+        T pdbx_dist_value;
+        std::string pdbx_value_order;
     };
 
     template<typename T>
@@ -97,13 +150,21 @@ namespace sylvanmats::constitution {
         std::string space_group_name_Hall;
     };
 
+    template<typename T>
     struct _pdbx_struct_oper_list{
         unsigned int id;
         std::string type;
         std::string name;
         std::string symmetry_operation;
-        double matrix[3][3];
-        double vector[3];
+        T matrix[3][3];
+        T vector[3];
+    };
+
+    template<typename T>
+    struct _atom_sites{
+        std::string entry_id="";
+        T fract_transf_matrix[3][3];
+        T fract_transf_vector[3];
     };
 
     class Graph : public lemon::ListGraph {
@@ -115,17 +176,35 @@ namespace sylvanmats::constitution {
             lemon::ListGraph::EdgeMap<_comp_bond> compBond;
             _cell<double> cell;
             _symmetry symmetry;
-            std::vector<_pdbx_struct_oper_list> operationList;
+            std::vector<_pdbx_struct_oper_list<double>> operationList;
             lemon::ListGraph componentGraph;
             lemon::ListGraph::NodeMap<_pdbx_poly_seq_scheme> componentProperties;
+            lemon::ListGraph::EdgeMap<STRUCT_CONN_TYPE> structConnType;
+            lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node> componentNavigation;
+            std::vector<_struct_conn<double>> structureConnections;
+            _atom_sites<double> fractionalAtomSites;
 
-            Graph() : atomSites(*this), compBond(*this), componentProperties(componentGraph){
+            Graph() : atomSites(*this), compBond(*this), componentProperties(componentGraph), structConnType(componentGraph), componentNavigation(*this) {
             };
 
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};
             _cell<double>& getCell(){return cell;};
             _symmetry& getSymmetry(){return symmetry;};
-            std::vector<_pdbx_struct_oper_list>& getOperationList(){return operationList;};
+            std::vector<_pdbx_struct_oper_list<double>>& getOperationList(){return operationList;};
+            std::stringstream symmetryAsLua(){
+                std::stringstream ssLua;
+//                ssLua<<R"(local sym =  {}
+//
+//)";
+                for(unsigned int index=0;index<operationList.size();index++){
+                    ssLua<<"function f"<<operationList[index].id<<"(x,y,z) return "<<operationList[index].symmetry_operation<<" end"<<std::endl<<std::endl;
+                }
+//                ssLua<<R"(return sym
+//)";
+                return ssLua;
+            };
+            _atom_sites<double>& getFractionalAtomSites(){ return fractionalAtomSites;};
+            std::vector<_struct_conn<double>>& getStructureConnections(){return structureConnections;};
 
             void identifyFusedSystems(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph)> apply);
             void identifyRings(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);

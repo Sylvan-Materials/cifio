@@ -95,6 +95,7 @@ namespace sylvanmats::density::ccp4{
         virtual ~MapInput() = default;
     public:
         void operator()(std::filesystem::path& filePath, std::function<void(ccp4_header& ccp4Header, unsigned int sectionIndex, float*slice)> apply){
+            std::uintmax_t fileSize=std::filesystem::file_size(filePath);
             mio::mmap_source mmap2nd(filePath.string(), 0, 1024);
             std::strncpy((char*)&ccp4Header.NC, &mmap2nd[0], 4);
             std::strncpy((char*)&ccp4Header.NR, &mmap2nd[4], 4);
@@ -131,14 +132,14 @@ std::cout<<"EXTTYPE "<<ccp4Header.EXTTYPE<<std::endl;
             std::strncpy((char*)&ccp4Header.NLABL, &mmap2nd[220], 4);
             for(unsigned int index=0;index<ccp4Header.NLABL;index++){
                 ccp4Header.LABEL.push_back(std::string((char*)&mmap2nd[index*80+224], 80));
-std::cout<<"LABEL "<<ccp4Header.LABEL.back()<<" "<<ccp4Header.LABEL.back().size()<<std::endl;
+std::cout<<ccp4Header.NLABL<<" LABEL "<<ccp4Header.LABEL.back()<<" "<<ccp4Header.LABEL.back().size()<<std::endl;
             }
             mmap2nd.unmap();
-            unsigned int offset = ccp4Header.NLABL*80+224;
+            unsigned int offset = 1024;//ccp4Header.NLABL*80+224;
             std::cout<<"MACHST "<<std::hex<<" "<<ccp4Header.MACHST<<" "<<(ccp4Header.MACHST&0x0f)<<std::dec<<std::endl;
             //std::unique_ptr<float[]> slice(new float[ccp4Header.NR*ccp4Header.NC]);
-            for(unsigned int sectionIndex=0;sectionIndex<ccp4Header.NS/2;sectionIndex++){
-                mio::basic_mmap_source<std::byte> mmapSlice(filePath.string(), 4*sectionIndex*ccp4Header.NR*ccp4Header.NC+offset, 4*(sectionIndex+1)*ccp4Header.NR*ccp4Header.NC+offset);
+            for(unsigned int sectionIndex=0;sectionIndex<ccp4Header.NS;sectionIndex++){
+                mio::basic_mmap_source<std::byte> mmapSlice(filePath.string(), 4*sectionIndex*ccp4Header.NR*ccp4Header.NC+offset, 4*(1)*ccp4Header.NR*ccp4Header.NC);
                 apply(ccp4Header, sectionIndex, (float*)&mmapSlice[0]);
                 /*for(unsigned int index=0;index<mmapSlice.size();index+=4){
                     ((float*)&mmapSlice[index]);
