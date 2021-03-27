@@ -8,8 +8,6 @@
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
 
-//#include "constitution/Selection.h"
-
 namespace sylvanmats::constitution {
     
     struct symmetry_labels{

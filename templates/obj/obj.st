@@ -9,7 +9,7 @@ o 1
 
 # Vertex list
 
-<vertices:{ vertex |v <vertex.value0> <vertex.value1> <vertex.value2> <vertex.value3> <vertex.value4> <vertex.value5><\n>}><texture_vertices:{ texture_vertex |vt <texture_vertex.value0> <texture_vertex.value1> <texture_vertex.value2> <\n>}><normals:{ normal |vn <normal.value0> <normal.value1> <normal.value2> <\n>}>
+<vertices:{ vertex |v <vertex.value0; format="%,.4f"> <vertex.value1; format="%,.4f"> <vertex.value2; format="%,.4f"> <vertex.value3> <vertex.value4> <vertex.value5><\n>}><texture_vertices:{ texture_vertex |vt <texture_vertex.value0; format="%,.4f"> <texture_vertex.value1; format="%,.4f"> <texture_vertex.value2; format="%,.4f"> <\n>}><normals:{ normal |vn <normal.value0; format="%,.4f"> <normal.value1; format="%,.4f"> <normal.value2; format="%,.4f"> <\n>}>
 # Point/Line/Face list
 
 usemtl Default

@@ -36,7 +36,7 @@ import org.javatuples.valueintf.IValue10;
 
 /**
  * <p>
- * A tuple of ten elements.
+ * A tuple of eleven elements.
  * </p> 
  * 
  * @since 1.0
@@ -82,7 +82,7 @@ public final class Hendecad<A,B,C,D,E,F,G,H,I,J,K>
     
     /**
      * <p>
-     * Create tuple from array. Array has to have exactly ten elements.
+     * Create tuple from array. Array has to have exactly eleven elements.
      * </p>
      * 
      * @param <X> the array component type 

@@ -31,6 +31,8 @@
 
 #include "lemon/vf2.h"
 
+TEST_SUITE("matching"){
+
 TEST_CASE("test 6jvm"){
     std::string url = "https://files.rcsb.org/download/6jvm.cif";
     sylvanmats::reading::TCPReader tcpReader;
@@ -98,4 +100,4 @@ TEST_CASE("test 6jvm"){
 
 }
 
-
+}

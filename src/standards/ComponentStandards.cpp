@@ -1,9 +1,11 @@
 #include "standards/ComponentStandards.h"
 
 namespace sylvanmats::standards{
-        bool ComponentStandards::operator()(const std::string& comp_id, std::function<void(chem_comp_atom<double>& cca1, chem_comp_bond& ccb, chem_comp_atom<double>& cca2)> apply){
+        bool ComponentStandards::operator()(const std::vector<std::string>& comp_ids, std::function<void(chem_comp_atom<double>& cca1, chem_comp_bond& ccb, chem_comp_atom<double>& cca2)> apply){
             bool ret=false;
-                     standard_set_by_name::iterator it=nameIndex.find(comp_id);
+            unsigned int index=0;
+            do{
+                     standard_set_by_name::iterator it=nameIndex.find(comp_ids[index]);
                    //std::cout<<comp_id<<" (it!=nameIndex.end())."<<(it!=nameIndex.end())<<std::endl;
             /*if(it!=nameIndex.end()){
                 for(std::vector<chem_comp_bond>::iterator itStd=(*it).chemCombonds.begin();itStd!=(*it).chemCombonds.end();itStd++){
@@ -13,8 +15,8 @@ namespace sylvanmats::standards{
                 }
                 return true;
             }*/
-            nlohmann::json::json_pointer startKey("/"+comp_id+"/start");
-            nlohmann::json::json_pointer endKey("/"+comp_id+"/end");
+            nlohmann::json::json_pointer startKey("/"+comp_ids[index]+"/start");
+            nlohmann::json::json_pointer endKey("/"+comp_ids[index]+"/end");
             try{
             unsigned int start=jin[startKey];
             unsigned int end=jin[endKey];
@@ -43,7 +45,7 @@ namespace sylvanmats::standards{
                 bool atomSites=false;
                 if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*itDB))) {
                     if(r->dataItems().size()>0 && r->dataItems(0)->tag()!=nullptr &&  r->dataItems(0)->tag()->getText().compare("\n_chem_comp.id")==0){
-                        if(r->dataItems(0)->value()->getText().compare(comp_id)==0){
+                        if(r->dataItems(0)->value()->getText().compare(comp_ids[index])==0){
                         //std::cout<<""<<comp_id<<" ? "<<r->dataItems(0)->value()->getText()<<std::endl;
                             auto oi=r->dataItems();
                             std::vector<chem_comp_atom<double>> chemCompAtoms;
@@ -125,7 +127,7 @@ namespace sylvanmats::standards{
                                      }
                                   }
                             }
-                            componentStandardSet.insert(standard(componentStandardSet.size(), static_cast<std::string>(comp_id), chemCompAtoms, chemCombonds));
+                            componentStandardSet.insert(standard(componentStandardSet.size(), static_cast<std::string>(comp_ids[index]), chemCompAtoms, chemCombonds));
                             //dic->loop()
                             break;
                         }
@@ -135,9 +137,10 @@ namespace sylvanmats::standards{
             return ret;
             }
             catch(std::exception& ex){
-                std::cout<<"json ex: "<<ex.what()<<std::endl;
-                return false;
             }
+            index++;
+            }while(index<comp_ids.size());
+            return ret;
         };
 
 }

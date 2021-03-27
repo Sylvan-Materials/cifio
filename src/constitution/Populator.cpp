@@ -116,21 +116,39 @@ namespace sylvanmats::constitution {
                              graph.componentProperties[n].asym_id.assign(values[valueIndex]->getText());
                              asym_id=graph.componentProperties[n].asym_id;
                          break;
+                         case 1:
+                             graph.componentProperties[n].entity_id = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                         break;
                          case 2:
                              graph.componentProperties[n].seq_id = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                          break;
                          case 3:
                              graph.componentProperties[n].mon_id.assign(values[valueIndex]->getText());
                          break;
+                         case 4:
+                             graph.componentProperties[n].ndb_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                         break;
+                         case 5:
+                             graph.componentProperties[n].pdb_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                         break;
                          case 6:
                              graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                         break;
+                         case 7:
+                             graph.componentProperties[n].pdb_mon_id.assign(values[valueIndex]->getText());
                          break;
                          case 8:
                              graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
                          break;
+                         case 9:
+                             graph.componentProperties[n].pdb_strand_id.assign(values[valueIndex]->getText());
+                         break;
                          case 10:
                              graph.componentProperties[n].pdb_ins_code.assign(values[valueIndex]->getText());
                              if(graph.componentProperties[n].pdb_ins_code.compare(".")==0)graph.componentProperties[n].pdb_ins_code="?";
+                         break;
+                         case 11:
+                             graph.componentProperties[n].hetero.assign(values[valueIndex]->getText());
                          break;
                     }
                    columnCount++;
@@ -322,11 +340,20 @@ namespace sylvanmats::constitution {
                             std::string current_comp_id(previous_comp_id.begin(), previous_comp_id.end());
                             //if(currentCompNode!=lemon::INVALID)std::cout<<" "<<graph.componentProperties[currentCompNode].mon_id<<" "<<graph.componentProperties[currentCompNode].termination<<std::endl;
                             //else std::cout<<lemon::countNodes(graph.componentGraph)<<" no comp graph "<<previous_comp_id<<std::endl;
-                            if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::N_TERMINAL)current_comp_id+="_LSN3";
-                            else if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::C_TERMINAL)current_comp_id+="_LEO2H";
-                            else if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::NEUTRAL)current_comp_id+="_LL";
+                            std::vector<std::string> comp_ids;
+                            if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::N_TERMINAL){
+                                comp_ids.push_back(current_comp_id+"_LSN3");
+                            }
+                            else if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::C_TERMINAL){
+                                comp_ids.push_back(current_comp_id+"_LEO2H");
+                            }
+                            else if(currentCompNode!=lemon::INVALID && graph.componentProperties[currentCompNode].termination==sylvanmats::constitution::NEUTRAL){
+                                comp_ids.push_back(current_comp_id+"_LL");
+                                comp_ids.push_back(current_comp_id);
+                            }
+                            else comp_ids.push_back(current_comp_id);
 
-                            bool ret=aminoStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
+                            bool ret=aminoStandards(comp_ids[0], [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
                              unsigned int countA=0;
                              bool matched=false;
                              for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount+1 && nSiteA!=lemon::INVALID; ++nSiteA){
@@ -373,7 +400,7 @@ namespace sylvanmats::constitution {
                          if(ret)standardAACount++;
                          if(!ret){
                             //if(current_comp_id.compare("SO4")==0)std::cout<<current_comp_id<<" comp_id "<<comp_id<<" "<<ins_code<<std::endl;
-                            ret=componentStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
+                            ret=componentStandards(comp_ids, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
                              //std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
                              unsigned int countA=0;
                              bool matched=false;

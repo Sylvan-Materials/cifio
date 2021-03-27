@@ -11,6 +11,8 @@
 #include <utility>
 #include <charconv>
 #include <array>
+#include <typeinfo>
+#include <cxxabi.h>
 
 #include "zlib.h"
 #include "mio/mmap.hpp"
@@ -36,6 +38,9 @@
 
 #include "utils/JVMSingleton.h"
 
+TEST_SUITE("main"){
+
+
 TEST_CASE("test jvm singleton") {
 
     sylvanmats::utils::JVMSingleton* jvmSingleton=sylvanmats::utils::JVMSingleton::getInstance();
@@ -58,6 +63,14 @@ TEST_CASE("test jvm singleton") {
     cifPublisher.add("entry_id", "3SGS");
     std::string&& content = cifPublisher.render();
     CHECK(!content.empty());
+}
+
+TEST_CASE("test atom site struct") {
+    sylvanmats::constitution::_atom_site<double> atomSite;
+    const std::type_info  &ti = typeid(atomSite.id);
+    int     status;
+    char   *realname = abi::__cxa_demangle(ti.name(), 0, 0, &status);
+    std::cout <<"name: "<< ti.name()<<" "<< realname<<" "<<status<< '\n';
 }
 
 TEST_CASE("test component db") {
@@ -87,9 +100,10 @@ TEST_CASE("test component db") {
         ostrm<<j<<std::endl;
         ostrm.close();
 
-        std::string current_comp_id="HEM";
+        std::vector<std::string> comp_ids;
+        comp_ids.push_back("HEM");
         sylvanmats::standards::ComponentStandards componentStandards;
-        bool ret=componentStandards(current_comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
+        bool ret=componentStandards(comp_ids, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
             //std::cout<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<std::endl;
         });
         CHECK(ret);
@@ -229,7 +243,7 @@ TEST_CASE("test tcp for 4k7t.cif.gz"){
 
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 260);
-       CHECK_EQ(lemon::countEdges(graph), 173);
+       CHECK_EQ(lemon::countEdges(graph), 221);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 35);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 16);
        
@@ -270,7 +284,7 @@ TEST_CASE("test tcp for 6u6j.cif.gz"){
             }    
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 745);
-       CHECK_EQ(lemon::countEdges(graph), 131);
+       CHECK_EQ(lemon::countEdges(graph), 735);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 67);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 36);
        
@@ -315,7 +329,7 @@ TEST_CASE("test tcp for 1q8h.cif.gz"){
        });
        CHECK_EQ(graph.getStructureConnections().size(), 30);
        CHECK_EQ(graph.getNumberOfAtomSites(), 378);
-       CHECK_EQ(lemon::countEdges(graph), 289);
+       CHECK_EQ(lemon::countEdges(graph), 322);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 113);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 53);
        sylvanmats::publishing::CIFCompressor cifCompressor;
@@ -529,8 +543,19 @@ TEST_CASE("test 3sgs") {
         atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
     }
     cifPublisher.add("atom_sites", atomSitesLoop);
+    std::vector<std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string, std::string>> pdxPolySchemesLoop;
+    std::vector<std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string>> pdxNonpolySchemesLoop;
+    for(lemon::ListGraph::NodeIt nComponentA(graph.componentGraph); nComponentA!=lemon::INVALID; ++nComponentA){
+        if(graph.componentProperties[nComponentA].termination==sylvanmats::constitution::MONOMER)pdxNonpolySchemesLoop.insert(pdxNonpolySchemesLoop.begin(), std::make_tuple(graph.componentProperties[nComponentA].asym_id, graph.componentProperties[nComponentA].entity_id, graph.componentProperties[nComponentA].seq_id, graph.componentProperties[nComponentA].mon_id, graph.componentProperties[nComponentA].ndb_seq_num, graph.componentProperties[nComponentA].pdb_seq_num, graph.componentProperties[nComponentA].auth_seq_num, graph.componentProperties[nComponentA].pdb_mon_id, graph.componentProperties[nComponentA].auth_mon_id, graph.componentProperties[nComponentA].pdb_strand_id, graph.componentProperties[nComponentA].pdb_ins_code));
+        else pdxPolySchemesLoop.insert(pdxPolySchemesLoop.begin(), std::make_tuple(graph.componentProperties[nComponentA].asym_id, graph.componentProperties[nComponentA].entity_id, graph.componentProperties[nComponentA].seq_id, graph.componentProperties[nComponentA].mon_id, graph.componentProperties[nComponentA].ndb_seq_num, graph.componentProperties[nComponentA].pdb_seq_num, graph.componentProperties[nComponentA].auth_seq_num, graph.componentProperties[nComponentA].pdb_mon_id, graph.componentProperties[nComponentA].auth_mon_id, graph.componentProperties[nComponentA].pdb_strand_id, graph.componentProperties[nComponentA].pdb_ins_code, graph.componentProperties[nComponentA].hetero));
+    }
+    cifPublisher.add("pdbx_poly_seq_schemes", pdxPolySchemesLoop);
+    cifPublisher.add("pdbx_nonpoly_schemes", pdxNonpolySchemesLoop);
+    CHECK_EQ(pdxPolySchemesLoop.size(), 6);
+    CHECK_EQ(pdxNonpolySchemesLoop.size(), 2);
     std::string&& content = cifPublisher.render();
-    CHECK_EQ(content.size(), 3990);
+    //std::cout<<"content "<<content<<std::endl;
+    CHECK_EQ(content.size(), 5565);
 }
 
 TEST_CASE("test 1ebc") {
@@ -639,3 +664,4 @@ TEST_CASE("test integer sequence") {
     //std::cout<<seq[0]<<std::endl;
 }
 
+}

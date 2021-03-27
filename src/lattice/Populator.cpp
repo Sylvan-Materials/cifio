@@ -1,3 +1,5 @@
+//#include <meta>
+
 #include "lattice/Populator.h"
 
 #include "antlr4-runtime.h"
@@ -55,6 +57,10 @@ namespace sylvanmats::lattice {
                 if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                     bool once=true;
                     auto tags=r->loopHeader()->tag();
+                    /*consteval std::vector<decltype(reflexpr(void))> propList=std::experimental::meta::members_of(reflexpr(_atom_site<double>));
+                    for(unsigned int propertyIndex=0;propertyIndex<propList.size();propertyIndex++){
+                        std::cout<<" "<<std::meta::name_of(propList[propertyIndex])<<std::endl;
+                    }*/
                     for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_atom_site_", 0) == 0; })){
                         once=false;
                         unsigned int columnCount=0;

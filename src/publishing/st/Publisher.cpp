@@ -42,11 +42,18 @@ namespace sylvanmats::publishing::st{
                    jniEnv->ExceptionClear();
                 }
                 jclass jncls = jniEnv->FindClass("java/lang/Number");
+                jclass jscls = jniEnv->FindClass("java/lang/String");
                 jclass jnrcls = jniEnv->FindClass("org/stringtemplate/v4/NumberRenderer");
                 jmethodID constructorNRId = jniEnv->GetMethodID(jnrcls, "<init>", "()V");
                 jobject stNRObject = jniEnv->NewObject(jnrcls, constructorNRId);
+
+                jclass jsrcls = jniEnv->FindClass("org/stringtemplate/v4/StringRenderer");
+                jmethodID constructorSRId = jniEnv->GetMethodID(jsrcls, "<init>", "()V");
+                jobject stSRObject = jniEnv->NewObject(jsrcls, constructorSRId);
+
                 jmethodID methodId = jniEnv->GetMethodID(jdcls, "registerRenderer", "(Ljava/lang/Class;Lorg/stringtemplate/v4/AttributeRenderer;)V");
                 jniEnv->CallVoidMethod(stGroupDirObject, methodId, jncls, stNRObject);
+                jniEnv->CallVoidMethod(stGroupDirObject, methodId, jscls, stSRObject);
             }
           }
           else std::cout<<"no constructor "<<std::endl;
@@ -99,16 +106,17 @@ namespace sylvanmats::publishing::st{
           jniEnv->ExceptionDescribe();
           return;
        }
+          std::cout << "jdoublecls. ...\n";
        constructorDoubleId = jniEnv->GetMethodID(jdoublecls, "<init>", "(D)V");
     };
 
-    void Publisher::add(std::string name, std::string value){
+    void Publisher::add(std::string name, const char* value){
        if (jcls != NULL) {
           jmethodID methodId = jniEnv->GetMethodID(jcls,
              "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
           if (methodId != NULL) {
              jstring jname = jniEnv->NewStringUTF(name.c_str());
-             jstring jvalue = jniEnv->NewStringUTF(value.c_str());
+             jstring jvalue = jniEnv->NewStringUTF(value);
              jniEnv->CallObjectMethod(stObject, methodId, jname, jvalue);
              if (jniEnv->ExceptionCheck()) {
                 jniEnv->ExceptionDescribe();
@@ -118,7 +126,39 @@ namespace sylvanmats::publishing::st{
        }
     };
 
+    void Publisher::add(std::string name, std::string value){
+       Publisher::add(name, value.c_str());
+    };
+
     void Publisher::add(std::string name, bool value){
+       if (jcls != NULL) {
+          jmethodID methodId = jniEnv->GetMethodID(jcls,
+             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
+          if (methodId != NULL) {
+             jstring jname = jniEnv->NewStringUTF(name.c_str());
+             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
+             if (jniEnv->ExceptionCheck()) {
+                jniEnv->ExceptionDescribe();
+                jniEnv->ExceptionClear();
+             }
+          }
+       }
+    };
+    void Publisher::add(std::string name, long long value){
+       if (jcls != NULL) {
+          jmethodID methodId = jniEnv->GetMethodID(jcls,
+             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
+          if (methodId != NULL) {
+             jstring jname = jniEnv->NewStringUTF(name.c_str());
+             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
+             if (jniEnv->ExceptionCheck()) {
+                jniEnv->ExceptionDescribe();
+                jniEnv->ExceptionClear();
+             }
+          }
+       }
+    };
+    void Publisher::add(std::string name, unsigned long long value){
        if (jcls != NULL) {
           jmethodID methodId = jniEnv->GetMethodID(jcls,
              "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");

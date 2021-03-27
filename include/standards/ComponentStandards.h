@@ -58,7 +58,7 @@ namespace sylvanmats::standards{
     virtual ~ComponentStandards() = default;
 
     public:
-        bool operator()(const std::string& comp_id, std::function<void(chem_comp_atom<double>& cca1, chem_comp_bond& ccb, chem_comp_atom<double>& cca2)> apply);            
+        bool operator()(const std::vector<std::string>& comp_id, std::function<void(chem_comp_atom<double>& cca1, chem_comp_bond& ccb, chem_comp_atom<double>& cca2)> apply);            
     };
 }
 

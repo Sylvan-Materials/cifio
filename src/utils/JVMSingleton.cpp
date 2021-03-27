@@ -8,8 +8,9 @@ namespace sylvanmats::utils{
     JNIEnv* JVMSingleton::jniEnv=nullptr;
 
     JVMSingleton::JVMSingleton(){
-        std::string classPath="../../cifio/build/src:../../cifio/cpp_modules/stringtemplate4/target/classes:../../javatuples-1.2.jar:../../antlr4/tool/target/antlr4-4.8-2-SNAPSHOT-complete.jar:../../:.";
+        std::string classPath="../../build/src:../../cpp_modules/stringtemplate4/target/classes:../../javatuples-1.2.jar:../../antlr4/tool/target/antlr4-4.8-2-SNAPSHOT-complete.jar:../../:.";
         if(getenv("CLASSPATH")!=NULL){
+            classPath=std::string(getenv("CLASSPATH"));
         }
         classPath="-Djava.class.path="+classPath;
        JavaVMOption jvmopt[2];
@@ -23,6 +24,7 @@ namespace sylvanmats::utils{
        vmArgs.options = jvmopt;
        vmArgs.ignoreUnrecognized = JNI_TRUE;
 
+          std::cout << "attempt creating VM. ...\n";
        // Create the JVM
        long flag = JNI_CreateJavaVM(&javaVM, (void**)
           &jniEnv, &vmArgs);

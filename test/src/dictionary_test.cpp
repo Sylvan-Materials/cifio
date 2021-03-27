@@ -17,6 +17,7 @@
 #include "parsing/DICLexer.h"
 #include "parsing/DICParser.h"
 
+TEST_SUITE("dictionary"){
 
 TEST_CASE("test dictionary parsing") {
     std::ifstream file("../dictionaries/cif_mm.dic");
@@ -34,4 +35,4 @@ TEST_CASE("test dictionary parsing") {
 
 }
 
-
+}

@@ -31,15 +31,18 @@ namespace sylvanmats::publishing::st{
         jobject stGroupDirObject;
         jobject stObject;
 
-        std::unordered_map<short, std::string> tupleMap = {{2, "Pair"}, {3, "Triplet"},{4, "Quartet"},{5, "Quintet"},{6, "Sextet"},{7, "Septet"},{8, "Octet"},{9, "Ennead"},{10, "Decade"},{11, "Hendecad"},{21, "TwentyOne"}};
+        std::unordered_map<short, std::string> tupleMap = {{2, "Pair"}, {3, "Triplet"},{4, "Quartet"},{5, "Quintet"},{6, "Sextet"},{7, "Septet"},{8, "Octet"},{9, "Ennead"},{10, "Decade"},{11, "Hendecad"},{12, "Dodecad"},{21, "TwentyOne"}};
 
     public:
         Publisher(std::filesystem::path& stPath);
         Publisher(const Publisher& orig) = delete;
         virtual ~Publisher() =  default;
 
+        virtual void add(std::string name, const char* value);
         virtual void add(std::string name, std::string value);
         virtual void add(std::string name, bool value);
+        virtual void add(std::string name, long long value);
+        virtual void add(std::string name, unsigned long long value);
         virtual void add(std::string name, double value);
         virtual void rawSetAttribute(std::string name, bool value);
 
@@ -135,6 +138,16 @@ namespace sylvanmats::publishing::st{
                        jniEnv->ExceptionDescribe();
                        jniEnv->ExceptionClear();
                     }
+                }
+                else if constexpr(std::tuple_size<std::tuple<Types...>>::value==12){
+                    tObject = jniEnv->NewObject(jtcls, constructorTId, toArgs(std::get<0>(row)), toArgs(std::get<1>(row)), toArgs(std::get<2>(row)), toArgs(std::get<3>(row)), toArgs(std::get<4>(row)), toArgs(std::get<5>(row)), toArgs(std::get<6>(row)), toArgs(std::get<7>(row)), toArgs(std::get<8>(row)), toArgs(std::get<9>(row)), toArgs(std::get<10>(row)), toArgs(std::get<11>(row)));
+                    if (jniEnv->ExceptionCheck()) {
+                       jniEnv->ExceptionDescribe();
+                       jniEnv->ExceptionClear();
+                    }
+                }
+                else if constexpr(std::tuple_size<std::tuple<Types...>>::value>12 && std::tuple_size<std::tuple<Types...>>::value<21){
+             std::cout<<"unsupported "<<std::tuple_size<std::tuple<Types...>>::value<<" "<<tupleMap[std::tuple_size<std::tuple<Types...>>::value]<<std::endl;
                 }
                 else if constexpr(std::tuple_size<std::tuple<Types...>>::value==21){
                     tObject = jniEnv->NewObject(jtcls, constructorTId, toArgs(std::get<0>(row)), toArgs(std::get<1>(row)), toArgs(std::get<2>(row)), toArgs(std::get<3>(row)), toArgs(std::get<4>(row)), toArgs(std::get<5>(row)), toArgs(std::get<6>(row)), toArgs(std::get<7>(row)), toArgs(std::get<8>(row)), toArgs(std::get<9>(row)), toArgs(std::get<10>(row)),

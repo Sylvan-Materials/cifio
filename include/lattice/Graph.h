@@ -2,6 +2,10 @@
 
 #include <stdlib.h>
 #include <string>
+#include <sstream>
+#include <vector>
+#include <tuple>
+#include <functional>
 #include <memory>
 
 #include "lemon/list_graph.h"
@@ -72,17 +76,30 @@ namespace sylvanmats::lattice {
             _cell<double>& getCell(){return cell;};
             _symmetry& getSymmetry(){return symmetry;};
             std::vector<_symmetry_equiv_pos>& getEquivalentPositions(){return equivalentPositions;};
-            std::stringstream equivalentPositionsAsLua(){
+            std::tuple<std::vector<std::string>, std::string> equivalentPositionsAsLua(){
+                std::vector<std::string> functionNames;
                 std::stringstream ssLua;
 //                ssLua<<R"(local sym =  {}
 //
 //)";
                 for(unsigned int index=0;index<equivalentPositions.size();index++){
-                    ssLua<<"function f"<<equivalentPositions[index].site_id<<"(x,y,z) return "<<equivalentPositions[index].as_xyz<<" end"<<std::endl<<std::endl;
+                    if(!equivalentPositions[index].as_xyz.empty() && equivalentPositions[index].as_xyz.at(0)=='+')equivalentPositions[index].as_xyz.at(0)=' ';
+                    if(!equivalentPositions[index].as_xyz.empty()){
+                        size_t pos=std::string::npos;
+                        while ((pos = equivalentPositions[index].as_xyz.find(",+")) != std::string::npos) {
+                            equivalentPositions[index].as_xyz.replace(pos, 2, ", ");
+                        }
+                    }
+                    if(equivalentPositions[index].site_id>=0)
+                        functionNames.push_back("f"+std::to_string(equivalentPositions[index].site_id));
+                    else functionNames.push_back("f_"+std::to_string(std::abs(equivalentPositions[index].site_id)));
+                    ssLua<<"function "<<functionNames.back()<<"(x,y,z) return "<<equivalentPositions[index].as_xyz<<" end"<<std::endl<<std::endl;
+                    
                 }
 //                ssLua<<R"(return sym
 //)";
-                return ssLua;
+                std::string ret=ssLua.str();
+                return std::make_tuple(functionNames, ret);
             };
     };
 
