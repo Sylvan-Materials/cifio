@@ -1,3 +1,4 @@
+#include <ranges>
 #include "publishing/jgf/JGFPublisher.h"
 
 namespace sylvanmats::publishing{
@@ -15,7 +16,7 @@ namespace sylvanmats::publishing{
            nodes.push_back(nSiteA);
         }
         unsigned long long count=0;
-        for(lemon::ListGraph::Node n: nodes | std::views::reverse){
+        for(lemon::ListGraph::Node n: nodes | std::ranges::views::reverse){
             os << R"(")"<<jgfp.graph.atomSites[n].id<<R"(":{"label": ")"+jgfp.graph.atomSites[n].label_atom_id+R"(", "metadata": {"comp_id":")"+jgfp.graph.atomSites[n].label_comp_id+R"(","seq_id":")"+std::to_string(jgfp.graph.atomSites[n].auth_seq_id)+R"(","type_symbol":")"+jgfp.graph.atomSites[n].type_symbol+R"("}})";
             if(count<nodes.size()-1) os << R"(,
        )";

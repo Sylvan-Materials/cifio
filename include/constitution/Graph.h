@@ -130,6 +130,46 @@ namespace sylvanmats::constitution {
     };
 
     template<typename T>
+    struct _pdbx_struct_conn_angle {
+        std::string id;
+        std::string ptnr1_label_atom_id;
+        std::string ptnr1_label_alt_id;
+        std::string ptnr1_label_asym_id;
+        std::string ptnr1_label_comp_id;
+        std::string ptnr1_label_seq_id;
+        std::string ptnr1_auth_atom_id;
+        std::string ptnr1_auth_asym_id;
+        std::string ptnr1_auth_comp_id;
+        std::string ptnr1_auth_seq_id;
+        std::string ptnr1_PDB_ins_code;
+        std::string ptnr1_symmetry;
+        std::string ptnr2_label_atom_id;
+        std::string ptnr2_label_alt_id;
+        std::string ptnr2_label_asym_id;
+        std::string ptnr2_label_comp_id;
+        std::string ptnr2_label_seq_id;
+        std::string ptnr2_auth_atom_id;
+        std::string ptnr2_auth_asym_id;
+        std::string ptnr2_auth_comp_id;
+        std::string ptnr2_auth_seq_id;
+        std::string ptnr2_PDB_ins_code;
+        std::string ptnr2_symmetry;
+        std::string ptnr3_label_atom_id;
+        std::string ptnr3_label_alt_id;
+        std::string ptnr3_label_asym_id;
+        std::string ptnr3_label_comp_id;
+        std::string ptnr3_label_seq_id;
+        std::string ptnr3_auth_atom_id;
+        std::string ptnr3_auth_asym_id;
+        std::string ptnr3_auth_comp_id;
+        std::string ptnr3_auth_seq_id;
+        std::string ptnr3_PDB_ins_code;
+        std::string ptnr3_symmetry;
+        T value;
+        T value_esd;
+    };
+
+    template<typename T>
     struct _cell {
         T length_a;
         T length_b;
@@ -154,8 +194,8 @@ namespace sylvanmats::constitution {
         std::string type;
         std::string name;
         std::string symmetry_operation;
-        T matrix[3][3];
         T vector[3];
+        T matrix[3][3];
     };
 
     template<typename T>

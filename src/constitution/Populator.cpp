@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <ranges>
 
 #include "constitution/Populator.h"
 
@@ -100,9 +101,14 @@ namespace sylvanmats::constitution {
             if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                 bool once=true;
                 auto tags=r->loopHeader()->tag();
+                std::unordered_map<size_t, std::string> tagLabels;
+                unsigned int columnCount=0;
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return tag->getText().rfind("\n_pdbx_poly_seq_scheme.", 0) == 0; })){
+                   tagLabels[columnCount++]=t->getText().substr(23);
+                }
                 for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_pdbx_poly_seq_scheme.", 0) == 0; })){
                     once=false;
-                    unsigned int columnCount=0;
+                    columnCount=0;
                     unsigned int compCount=0;
                     lemon::ListGraph::Node previousNode=lemon::INVALID;
                     lemon::ListGraph::Node n=graph.componentGraph.addNode();
@@ -111,48 +117,48 @@ namespace sylvanmats::constitution {
                     bool first=true;
                 std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
                 for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
-                    switch(columnCount){
-                         case 0:
+                    switch(tagPolySeqMap[tagLabels[columnCount]]){
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, asym_id):
                              graph.componentProperties[n].asym_id.assign(values[valueIndex]->getText());
                              asym_id=graph.componentProperties[n].asym_id;
-                         break;
-                         case 1:
-                             graph.componentProperties[n].entity_id = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
-                         break;
-                         case 2:
-                             graph.componentProperties[n].seq_id = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
-                         break;
-                         case 3:
-                             graph.componentProperties[n].mon_id.assign(values[valueIndex]->getText());
-                         break;
-                         case 4:
-                             graph.componentProperties[n].ndb_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
-                         break;
-                         case 5:
-                             graph.componentProperties[n].pdb_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
-                         break;
-                         case 6:
-                             graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
-                         break;
-                         case 7:
-                             graph.componentProperties[n].pdb_mon_id.assign(values[valueIndex]->getText());
-                         break;
-                         case 8:
-                             graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
-                         break;
-                         case 9:
-                             graph.componentProperties[n].pdb_strand_id.assign(values[valueIndex]->getText());
-                         break;
-                         case 10:
-                             graph.componentProperties[n].pdb_ins_code.assign(values[valueIndex]->getText());
-                             if(graph.componentProperties[n].pdb_ins_code.compare(".")==0)graph.componentProperties[n].pdb_ins_code="?";
-                         break;
-                         case 11:
-                             graph.componentProperties[n].hetero.assign(values[valueIndex]->getText());
-                         break;
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, entity_id):
+                            graph.componentProperties[n].entity_id = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, seq_id):
+                           graph.componentProperties[n].seq_id = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, mon_id):
+                            graph.componentProperties[n].mon_id.assign(values[valueIndex]->getText());
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, ndb_seq_num):
+                            graph.componentProperties[n].ndb_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_seq_num):
+                            graph.componentProperties[n].pdb_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_seq_num):
+                            graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_mon_id):
+                            graph.componentProperties[n].pdb_mon_id.assign(values[valueIndex]->getText());
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_mon_id):
+                            graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_strand_id):
+                            graph.componentProperties[n].pdb_strand_id.assign(values[valueIndex]->getText());
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_ins_code):
+                            graph.componentProperties[n].pdb_ins_code.assign(values[valueIndex]->getText());
+                            if(graph.componentProperties[n].pdb_ins_code.compare(".")==0)graph.componentProperties[n].pdb_ins_code="?";
+                        break;
+                        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, hetero):
+                            graph.componentProperties[n].hetero.assign(values[valueIndex]->getText());
+                        break;
                     }
                    columnCount++;
-                    if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
+                    if((valueIndex % tags.size() == tags.size()-1) || valueIndex==values.size()-1){
                         columnCount=0;
                         if(first){
                          first=false;
@@ -173,16 +179,21 @@ namespace sylvanmats::constitution {
                         }
                         previous_asym_id=asym_id;
                         previousNode=n;
-                        if(valueIndex<r->loopBody()->value().size()-1){
+                        if(valueIndex<values.size()-1){
                             n=graph.componentGraph.addNode();
                         }
                     }
-                    if((valueIndex==r->loopBody()->value().size()-1) && previousNode!=lemon::INVALID)graph.componentProperties[previousNode].termination=C_TERMINAL;
+                    if((valueIndex==values.size()-1) && previousNode!=lemon::INVALID)graph.componentProperties[previousNode].termination=C_TERMINAL;
                 }
+                }
+                std::unordered_map<size_t, std::string> tagNonpolyLabels;
+                columnCount=0;
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return tag->getText().rfind("\n_pdbx_nonpoly_scheme.", 0) == 0; })){
+                   tagNonpolyLabels[columnCount++]=t->getText().substr(22);
                 }
                 for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_pdbx_nonpoly_scheme.", 0) == 0; })){
                     once=false;
-                    unsigned int columnCount=0;
+                    columnCount=0;
                     unsigned int compCount=0;
                     lemon::ListGraph::Node n=graph.componentGraph.addNode();
                     std::string asym_id="";
@@ -190,31 +201,31 @@ namespace sylvanmats::constitution {
                     bool first=true;
                 std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
                 for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
-                    switch(columnCount){
-                         case 0:
+                    switch(tagPolySeqMap[tagNonpolyLabels[columnCount]]){
+                         case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, asym_id):
                              graph.componentProperties[n].asym_id.assign(values[valueIndex]->getText());
                          break;
-                         case 2:
+                         case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, mon_id):
                              graph.componentProperties[n].mon_id.assign(values[valueIndex]->getText());
                          break;
-                         case 4:
+                         case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_seq_num):
                              graph.componentProperties[n].auth_seq_num = std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                              graph.componentProperties[n].seq_id = graph.componentProperties[n].auth_seq_num;
                          break;
-                         case 7:
+                         case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_mon_id):
                              graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
                          break;
-                         case 9:
+                         case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_ins_code):
                              graph.componentProperties[n].pdb_ins_code.assign(values[valueIndex]->getText());
                              if(graph.componentProperties[n].pdb_ins_code.compare(".")==0)graph.componentProperties[n].pdb_ins_code="?";
                          break;
                     }
                    columnCount++;
-                    if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==r->loopBody()->value().size()-1){
+                    if((valueIndex % tags.size() == tags.size()-1) || valueIndex==values.size()-1){
                         columnCount=0;
                          graph.componentProperties[n].termination=MONOMER;
                          //previous_asym_id=asym_id;
-                        if(valueIndex<r->loopBody()->value().size()-1){
+                        if(valueIndex<values.size()-1){
                             n=graph.componentGraph.addNode();
                         }
                     }
@@ -226,9 +237,15 @@ namespace sylvanmats::constitution {
             if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                 bool once=true;
                 auto tags=r->loopHeader()->tag();
+                size_t tagsSize=tags.size();
+                std::unordered_map<size_t, std::string> tagLabels;
+                unsigned int columnCount=0;
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return tag->getText().rfind("\n_atom_site.", 0) == 0; })){
+                   tagLabels[columnCount++]=t->getText().substr(12);
+                }
                 for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_atom_site.", 0) == 0; })){
                     once=false;
-                    unsigned int columnCount=0;
+                    columnCount=0;
                     unsigned int entityCount=0;
                     unsigned int compCount=0;
                     lemon::ListGraph::Node n=graph.addNode();
@@ -250,74 +267,75 @@ namespace sylvanmats::constitution {
 
                     bool first=true;
         auto start = std::chrono::high_resolution_clock::now();
+        size_t innerTime = 0;
                 std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
                 for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
-                    switch(columnCount){
-                         case 0:
+                    switch(tagAtomSiteMap[tagLabels[columnCount]]){
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, group_PDB):
                              graph.atomSites[n].group_PDB.assign(values[valueIndex]->getText());
                          break;
-                         case 1:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, id):
                              graph.atomSites[n].id =std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                          break;
-                         case 2:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, type_symbol):
                              graph.atomSites[n].type_symbol.assign(values[valueIndex]->getText());
                          break;
-                         case 3:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, label_atom_id):
                              graph.atomSites[n].label_atom_id.assign(values[valueIndex]->getText());
                          break;
-                         case 4:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, label_alt_id):
                              graph.atomSites[n].label_alt_id.assign(values[valueIndex]->getText());
                              alt_id=graph.atomSites[n].label_alt_id;
                          break;
-                         case 5:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, label_comp_id):
                              graph.atomSites[n].label_comp_id.assign(values[valueIndex]->getText());
                              comp_id=graph.atomSites[n].label_comp_id;
                          break;
-                         case 6:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, label_asym_id):
                              graph.atomSites[n].label_asym_id.assign(values[valueIndex]->getText());
                              asym_id=graph.atomSites[n].label_asym_id;
                          break;
-                         case 9:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, pdbx_PDB_ins_code):
                              graph.atomSites[n].pdbx_PDB_ins_code.assign(values[valueIndex]->getText());
                              ins_code=graph.atomSites[n].pdbx_PDB_ins_code;
                          break;
-                         case 10:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, Cartn_x):
                              graph.atomSites[n].Cartn_x =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                          break;
-                         case 11:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, Cartn_y):
                              graph.atomSites[n].Cartn_y =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                          break;
-                         case 12:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, Cartn_z):
                              graph.atomSites[n].Cartn_z =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                          break;
-                         case 13:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, occupancy):
                              graph.atomSites[n].occupancy =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                          break;
-                         case 14:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, B_iso_or_equiv):
                              graph.atomSites[n].B_iso_or_equiv =std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                          break;
-                         case 15:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, pdbx_formal_charge):
                              graph.atomSites[n].pdbx_formal_charge =(short)std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                          break;
-                         case 16:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, auth_seq_id):
                              graph.atomSites[n].auth_seq_id =std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                              seq_id=graph.atomSites[n].auth_seq_id;
                          break;
-                         case 17:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, auth_comp_id):
                              graph.atomSites[n].auth_comp_id.assign(values[valueIndex]->getText());
                          break;
-                         case 18:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, auth_asym_id):
                              graph.atomSites[n].auth_asym_id.assign(values[valueIndex]->getText());
                          break;
-                         case 19:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, auth_atom_id):
                              graph.atomSites[n].auth_atom_id.assign(values[valueIndex]->getText());
                          break;
-                         case 20:
+                         case offsetof(sylvanmats::constitution::_atom_site<double>, pdbx_PDB_model_num):
                              graph.atomSites[n].pdbx_PDB_model_num =(int)std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                          break;
                     }
                     columnCount++;
-                    if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
+                    if((valueIndex % tagsSize == tagsSize-1) || valueIndex==values.size()-1){
                         columnCount=0;
 //                            std::cout<<valueIndex<<" "<<(r->loopHeader()->tag().size() % valueIndex)<<" "<<(r->loopHeader()->tag().size()-1)<<" entityCount "<<entityCount<<" "<<previous_comp_id<<" "<<comp_id<<" "<<previous_seq_id<<" "<<seq_id<<" "<<previous_asym_id<<" "<<asym_id<<" "<<previous_alt_id<<" "<<alt_id<<" "<<previous_ins_code<<" "<<ins_code<<std::endl;
                         if(first){
@@ -328,7 +346,8 @@ namespace sylvanmats::constitution {
                          previous_alt_id=alt_id;
                          previous_ins_code=ins_code;
                         }
-                        else if((previous_seq_id!=seq_id || previous_comp_id.compare(comp_id)!=0 || previous_asym_id.compare(asym_id)!=0 || previous_alt_id.compare(alt_id)!=0 || previous_ins_code.compare(ins_code)!=0) || valueIndex==r->loopBody()->value().size()-1){
+                        else if((previous_seq_id!=seq_id || previous_comp_id.compare(comp_id)!=0 || previous_asym_id.compare(asym_id)!=0 || previous_alt_id.compare(alt_id)!=0 || previous_ins_code.compare(ins_code)!=0) || valueIndex==values.size()-1){
+//auto startInner = std::chrono::high_resolution_clock::now();
 //                         std::cout<<entityCount<<" "<<previous_comp_id<<" comp_id |"<<comp_id<<"|"<<seq_id<<std::endl;
                             nNode=lemon::INVALID;
                             cNode=lemon::INVALID;
@@ -352,7 +371,6 @@ namespace sylvanmats::constitution {
                                 comp_ids.push_back(current_comp_id);
                             }
                             else comp_ids.push_back(current_comp_id);
-
                             bool ret=aminoStandards(comp_ids[0], [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
                              unsigned int countA=0;
                              bool matched=false;
@@ -452,12 +470,15 @@ namespace sylvanmats::constitution {
                          previous_asym_id=asym_id;
                          previous_alt_id=alt_id;
                          previous_ins_code=ins_code;
+//                    auto endInner = std::chrono::high_resolution_clock::now();
+//                    innerTime+=std::chrono::duration_cast<std::chrono::nanoseconds>(endInner-startInner).count();
                          }
                         else entityCount++;
-                        if(valueIndex<r->loopBody()->value().size()-1)n=graph.addNode();
+                        if(valueIndex<values.size()-1)n=graph.addNode();
                    }
                 }
         auto end = std::chrono::high_resolution_clock::now();
+        std::cout << "inner time: " << innerTime*1.0e-9 << "s\n";
         std::cout << "elapsed time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count()*1.0e-9 << "s\n";
 
                 }
@@ -478,184 +499,194 @@ namespace sylvanmats::constitution {
             if (sylvanmats::CIFParser::LoopContext* r=dynamic_cast<sylvanmats::CIFParser::LoopContext*>((*it))) {
                 bool once=true;
                 auto tags=r->loopHeader()->tag();
+                std::unordered_map<size_t, std::string> tagLabels;
+                unsigned int columnCount=0;
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return tag->getText().rfind("\n_pdbx_struct_oper_list.", 0) == 0; })){
+                   tagLabels[columnCount++]=t->getText().substr(24);
+                }
                 for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_pdbx_struct_oper_list.", 0) == 0; })){
                     once=false;
-                    unsigned int columnCount=0;
+                    columnCount=0;
                     graph.operationList.push_back(_pdbx_struct_oper_list<double>());
                     std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
                     for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
-                         switch(columnCount){
-                            case 0:
-                                graph.operationList.back().id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                         switch(tagOperationsMap[tagLabels[columnCount]]){
+                            case offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, id):
+                                graph.operationList.back().id=std::strtoul(values[valueIndex]->getText().c_str(), nullptr, 10);
                             break;
-                            case 1:
+                            case offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, type):
                                 graph.operationList.back().type.assign(values[valueIndex]->getText());
                             break;
-                            case 2:
+                            case offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, name):
                                 graph.operationList.back().name.assign(values[valueIndex]->getText());
                             break;
-                            case 3:
+                            case offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, symmetry_operation):
                                 graph.operationList.back().symmetry_operation.assign(values[valueIndex]->getText());
                             break;
-                            case 4:
+                            case offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix):
                                 graph.operationList.back().matrix[0][0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 5:
+                            case (sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[0][1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 6:
+                            case (2*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[0][2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 7:
+                            case offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, vector):
                                 graph.operationList.back().vector[0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 8:
+                            case (3*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[1][0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 9:
+                            case (4*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[1][1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 10:
+                            case (5*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[1][2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 11:
+                            case (sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, vector)):
                                 graph.operationList.back().vector[1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 12:
+                            case (6*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[2][0]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 13:
+                            case (7*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[2][1]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 14:
+                            case (8*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, matrix)):
                                 graph.operationList.back().matrix[2][2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
-                            case 15:
+                            case (2*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, vector)):
                                 graph.operationList.back().vector[2]=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                             break;
                         }
                         columnCount++;
                         if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
                             columnCount=0;
-                            if(valueIndex<r->loopBody()->value().size()-1)graph.operationList.push_back(_pdbx_struct_oper_list<double>());
+                            if(valueIndex<values.size()-1)graph.operationList.push_back(_pdbx_struct_oper_list<double>());
                         }
                     }
                 }
                 once=true;
+                std::unordered_map<size_t, std::string> tagConnectionsLabels;
+                columnCount=0;
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return tag->getText().rfind("\n_struct_conn.", 0) == 0; })){
+                   tagConnectionsLabels[columnCount++]=t->getText().substr(14);
+                }
                 for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_struct_conn.", 0) == 0; })){
                     once=false;
-                    unsigned int columnCount=0;
+                    columnCount=0;
                     graph.structureConnections.push_back(_struct_conn<double>());
                     std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
                     for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
-                         switch(columnCount){
-                            case 0:
+                         switch(tagConnectionsMap[tagConnectionsLabels[columnCount]]){
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, id):
                                 graph.structureConnections.back().id.assign(values[valueIndex]->getText());
                             break;
-                            case 1:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, conn_type_id):
                                 graph.structureConnections.back().conn_type_id.assign(values[valueIndex]->getText());
                             break;
-                            case 2:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_leaving_atom_flag):
                                 graph.structureConnections.back().pdbx_leaving_atom_flag.assign(values[valueIndex]->getText());
                             break;
-                            case 3:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_PDB_id):
                                 graph.structureConnections.back().pdbx_PDB_id.assign(values[valueIndex]->getText());
                             break;
-                            case 4:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_label_asym_id):
                                 graph.structureConnections.back().ptnr1_label_asym_id.assign(values[valueIndex]->getText());
                             break;
-                            case 5:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_label_comp_id):
                                 graph.structureConnections.back().ptnr1_label_comp_id.assign(values[valueIndex]->getText());
                             break;
-                            case 6:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_label_seq_id):
                                 graph.structureConnections.back().ptnr1_label_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                             break;
-                            case 7:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_label_atom_id):
                                 graph.structureConnections.back().ptnr1_label_atom_id.assign(values[valueIndex]->getText());
                             break;
-                            case 8:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr1_label_alt_id):
                                 graph.structureConnections.back().pdbx_ptnr1_label_alt_id.assign(values[valueIndex]->getText());
                             break;
-                            case 9:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr1_PDB_ins_code):
                                 graph.structureConnections.back().pdbx_ptnr1_PDB_ins_code.assign(values[valueIndex]->getText());
                             break;
-                            case 10:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr1_standard_comp_id):
                                 graph.structureConnections.back().pdbx_ptnr1_standard_comp_id.assign(values[valueIndex]->getText());
                             break;
-                            case 11:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_symmetry):
                                 graph.structureConnections.back().ptnr1_symmetry.assign(values[valueIndex]->getText());
                             break;
-                            case 12:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_label_asym_id):
                                 graph.structureConnections.back().ptnr2_label_asym_id.assign(values[valueIndex]->getText());
                             break;
-                            case 13:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_label_comp_id):
                                 graph.structureConnections.back().ptnr2_label_comp_id.assign(values[valueIndex]->getText());
                             break;
-                            case 14:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_label_seq_id):
                                 graph.structureConnections.back().ptnr2_label_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                             break;
-                            case 15:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_label_atom_id):
                                 graph.structureConnections.back().ptnr2_label_atom_id.assign(values[valueIndex]->getText());
                             break;
-                            case 16:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr2_label_alt_id):
                                 graph.structureConnections.back().pdbx_ptnr2_label_alt_id.assign(values[valueIndex]->getText());
                             break;
-                            case 17:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr2_PDB_ins_code):
                                 graph.structureConnections.back().pdbx_ptnr2_PDB_ins_code.assign(values[valueIndex]->getText());
                             break;
-                            case 18:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_auth_asym_id):
                                 graph.structureConnections.back().ptnr1_auth_asym_id.assign(values[valueIndex]->getText());
                             break;
-                            case 19:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_auth_comp_id):
                                 graph.structureConnections.back().ptnr1_auth_comp_id.assign(values[valueIndex]->getText());
                             break;
-                            case 20:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr1_auth_seq_id):
                                 graph.structureConnections.back().ptnr1_auth_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                             break;
-                            case 21:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_auth_asym_id):
                                 graph.structureConnections.back().ptnr2_auth_asym_id.assign(values[valueIndex]->getText());
                             break;
-                            case 22:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_auth_comp_id):
                                 graph.structureConnections.back().ptnr2_auth_comp_id.assign(values[valueIndex]->getText());
                             break;
-                            case 23:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_auth_seq_id):
                                 graph.structureConnections.back().ptnr2_auth_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                             break;
-                            case 24:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, ptnr2_symmetry):
                                 graph.structureConnections.back().ptnr2_symmetry.assign(values[valueIndex]->getText());
                             break;
-                            case 25:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr3_label_atom_id):
                                 graph.structureConnections.back().pdbx_ptnr3_label_atom_id.assign(values[valueIndex]->getText());
                             break;
-                            case 26:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr3_label_seq_id):
                                 graph.structureConnections.back().pdbx_ptnr3_label_seq_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
                             break;
-                            case 27:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr3_label_comp_id):
                                 graph.structureConnections.back().pdbx_ptnr3_label_comp_id.assign(values[valueIndex]->getText());
                             break;
-                            case 28:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr3_label_asym_id):
                                 graph.structureConnections.back().pdbx_ptnr3_label_asym_id.assign(values[valueIndex]->getText());
                             break;
-                            case 29:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr3_label_alt_id):
                                 graph.structureConnections.back().pdbx_ptnr3_label_alt_id.assign(values[valueIndex]->getText());
                             break;
-                            case 30:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_ptnr3_PDB_ins_code):
                                 graph.structureConnections.back().pdbx_ptnr3_PDB_ins_code.assign(values[valueIndex]->getText());
                             break;
-                            case 31:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, details):
                                 graph.structureConnections.back().details.assign(values[valueIndex]->getText());
                             break;
-                            case 32:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_dist_value):
                                 graph.structureConnections.back().pdbx_dist_value=std::strtod(values[valueIndex]->getText().c_str(), nullptr);
                            break;
-                            case 33:
+                            case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_value_order):
                                 graph.structureConnections.back().pdbx_value_order.assign(values[valueIndex]->getText());
                             break;
                         }
                         columnCount++;
                         if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
                             columnCount=0;
-                            if(valueIndex<r->loopBody()->value().size()-1)graph.structureConnections.push_back(_struct_conn<double>());
+                            if(valueIndex<values.size()-1)graph.structureConnections.push_back(_struct_conn<double>());
                         }
                     }
                     for(std::vector<_struct_conn<double>>::iterator it=graph.structureConnections.begin();it!=graph.structureConnections.end();it++){

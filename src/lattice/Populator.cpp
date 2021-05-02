@@ -1,4 +1,5 @@
 //#include <meta>
+#include <ranges>
 
 #include "lattice/Populator.h"
 
@@ -101,7 +102,7 @@ namespace sylvanmats::lattice {
                     }
                     }
                     once=true;
-                    for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_symmetry_equiv_pos_", 0) == 0; })){
+                    for(sylvanmats::CIFParser::TagContext* t: tags | std::ranges::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_symmetry_equiv_pos_", 0) == 0; })){
                         once=false;
                         unsigned int columnCount=0;
                         graph.equivalentPositions.push_back(_symmetry_equiv_pos());

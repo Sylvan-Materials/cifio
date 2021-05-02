@@ -47,8 +47,8 @@ namespace sylvanmats::reading{
 			generator<T> get_return_object() noexcept;
 
 			constexpr std::suspend_always initial_suspend() const { return {}; }
-			constexpr std::suspend_always final_suspend() const { return {}; }
-
+			constexpr std::suspend_always final_suspend() const noexcept { return {}; }
+ 
 			template<
 				typename U = T,
 				std::enable_if_t<!std::is_rvalue_reference<U>::value, int> = 0>

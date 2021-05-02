@@ -55,7 +55,7 @@ TEST_CASE("test 6jvm"){
    CHECK_EQ(graph.getNumberOfAtomSites(), 2710);
    CHECK_EQ(lemon::countEdges(graph), 2561);
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 528);
-   CHECK_EQ(lemon::countEdges(graph.componentGraph), 307);
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 309);
     
     std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="CGX", .label_asym_id="C", .auth_seq_id=200}};
     sylvanmats::constitution::Selection selection(graph);

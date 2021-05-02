@@ -56,7 +56,7 @@ TEST_CASE("test writing mol2 from 1ebc's hem") {
    CHECK_EQ(graph.getNumberOfAtomSites(), 1332);
    CHECK_EQ(lemon::countEdges(graph), 1298);
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 222);  
-   CHECK_EQ(lemon::countEdges(graph.componentGraph), 150);
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 151);
     std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="HEM", .label_asym_id="D", .auth_seq_id=154}};
     sylvanmats::constitution::Selection selection(graph);
     selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){

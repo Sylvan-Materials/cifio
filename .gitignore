@@ -2,6 +2,7 @@ build
 src/parsing
 cpp_modules/
 test/examples/
+test/*.json
 /tmp/
 /db/
 dictionaries

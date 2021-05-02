@@ -65,14 +65,6 @@ TEST_CASE("test jvm singleton") {
     CHECK(!content.empty());
 }
 
-TEST_CASE("test atom site struct") {
-    sylvanmats::constitution::_atom_site<double> atomSite;
-    const std::type_info  &ti = typeid(atomSite.id);
-    int     status;
-    char   *realname = abi::__cxa_demangle(ti.name(), 0, 0, &status);
-    std::cout <<"name: "<< ti.name()<<" "<< realname<<" "<<status<< '\n';
-}
-
 TEST_CASE("test component db") {
     std::filesystem::path path="../db/components.cif";
     CHECK(std::filesystem::exists(path));
@@ -174,7 +166,7 @@ TEST_CASE("test tcp for 6yzq.cif.gz"){
        CHECK_EQ(graph.getNumberOfAtomSites(), 2487);
        CHECK_EQ(lemon::countEdges(graph), 2063);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 592);
-       CHECK_EQ(lemon::countEdges(graph.componentGraph), 257);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 258);
        
     });
 
@@ -210,7 +202,7 @@ TEST_CASE("test tcp for 6lp0.cif.gz"){
        CHECK_EQ(graph.getNumberOfAtomSites(), 2171);
        CHECK_EQ(lemon::countEdges(graph), 1994);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 490);
-       CHECK_EQ(lemon::countEdges(graph.componentGraph), 283);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 284);
        
     });
 
@@ -243,9 +235,9 @@ TEST_CASE("test tcp for 4k7t.cif.gz"){
 
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 260);
-       CHECK_EQ(lemon::countEdges(graph), 221);
+       CHECK_EQ(lemon::countEdges(graph), 229);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 35);
-       CHECK_EQ(lemon::countEdges(graph.componentGraph), 16);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 10);
        
     });
 
@@ -284,9 +276,9 @@ TEST_CASE("test tcp for 6u6j.cif.gz"){
             }    
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 745);
-       CHECK_EQ(lemon::countEdges(graph), 735);
+       CHECK_EQ(lemon::countEdges(graph), 726);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 67);
-       CHECK_EQ(lemon::countEdges(graph.componentGraph), 36);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 27);
        
     });
 
@@ -306,15 +298,34 @@ TEST_CASE("test tcp for 1q8h.cif.gz"){
         std::cout<<"populator "<<std::endl;
         populator(is, graph, [&filePath](sylvanmats::constitution::Graph& graph){
         sylvanmats::publishing::JGFPublisher jgfPublisher(graph);
-       CHECK_EQ(graph.getNumberOfAtomSites(), 378);
-       CHECK_EQ(graph.getCell().length_a, 51.491);
-       CHECK_EQ(graph.getCell().length_b, 51.491);
-       CHECK_EQ(graph.getCell().length_c, 35.389);
-       CHECK_EQ(graph.getCell().angle_alpha, 90.000);
-       CHECK_EQ(graph.getCell().angle_beta, 90.0);
-       CHECK_EQ(graph.getCell().angle_gamma, 120.0);
-       CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 31 2 1");
-       CHECK_EQ(graph.getSymmetry().Int_Tables_number, 152);
+        CHECK_EQ(graph.getNumberOfAtomSites(), 378);
+        CHECK_EQ(graph.getCell().length_a, 51.491);
+        CHECK_EQ(graph.getCell().length_b, 51.491);
+        CHECK_EQ(graph.getCell().length_c, 35.389);
+        CHECK_EQ(graph.getCell().angle_alpha, 90.000);
+        CHECK_EQ(graph.getCell().angle_beta, 90.0);
+        CHECK_EQ(graph.getCell().angle_gamma, 120.0);
+        CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 31 2 1");
+        CHECK_EQ(graph.getSymmetry().Int_Tables_number, 152);
+        CHECK_EQ(graph.getOperationList().size(), 2);
+        if(graph.getOperationList().size()==2){
+            CHECK_EQ(graph.getOperationList()[1].id, 2);
+            CHECK_EQ(graph.getOperationList()[1].type, "'crystal symmetry operation'");
+            CHECK_EQ(graph.getOperationList()[1].name, "4_557");
+            CHECK_EQ(graph.getOperationList()[1].symmetry_operation, "y,x,-z+2");
+            CHECK(graph.getOperationList()[1].matrix[0][0] == doctest::Approx(-0.5));
+            CHECK(graph.getOperationList()[1].matrix[0][1] == doctest::Approx(0.8660254));
+            CHECK(graph.getOperationList()[1].matrix[0][2] == doctest::Approx(0.0));
+            CHECK(graph.getOperationList()[1].matrix[1][0] == doctest::Approx(0.8660254));
+            CHECK(graph.getOperationList()[1].matrix[1][1] == doctest::Approx(0.5));
+            CHECK(graph.getOperationList()[1].matrix[1][2] == doctest::Approx(0.0));
+            CHECK(graph.getOperationList()[1].matrix[2][0] == doctest::Approx(0.0));
+            CHECK(graph.getOperationList()[1].matrix[2][1] == doctest::Approx(0.0));
+            CHECK(graph.getOperationList()[1].matrix[2][2] == doctest::Approx(-1.0));
+            CHECK_EQ(graph.getOperationList()[1].vector[0], 0);
+            CHECK_EQ(graph.getOperationList()[1].vector[1], 0);
+            CHECK(graph.getOperationList()[1].vector[2] == doctest::Approx(70.778));
+        }
         filePath.replace_extension(".json");
         std::ofstream ofs(filePath);
         ofs<<" "<<jgfPublisher<<std::endl;
@@ -329,9 +340,54 @@ TEST_CASE("test tcp for 1q8h.cif.gz"){
        });
        CHECK_EQ(graph.getStructureConnections().size(), 30);
        CHECK_EQ(graph.getNumberOfAtomSites(), 378);
-       CHECK_EQ(lemon::countEdges(graph), 322);
+       CHECK_EQ(lemon::countEdges(graph), 316);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 113);
-       CHECK_EQ(lemon::countEdges(graph.componentGraph), 53);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 47);
+       sylvanmats::publishing::CIFCompressor cifCompressor;
+       cifCompressor(comp_id, is);
+
+    });
+
+}
+
+TEST_CASE("test tcp for 4ac0.cif.gz"){
+    std::string comp_id="4ac0";
+    std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
+    sylvanmats::constitution::Graph graph;
+    std::filesystem::path  filePath="./"+comp_id+".cif.gz";
+    sylvanmats::reading::TCPReader tcpReader;
+     tcpReader(url, [&graph, &filePath, &comp_id](std::istream& is){
+
+        sylvanmats::constitution::Populator populator;
+        std::cout<<"populator "<<std::endl;
+        populator(is, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+        sylvanmats::publishing::JGFPublisher jgfPublisher(graph);
+       CHECK_EQ(graph.getNumberOfAtomSites(), 1623);
+       CHECK_EQ(graph.getCell().length_a, 71.88);
+       CHECK_EQ(graph.getCell().length_b, 71.88);
+       CHECK_EQ(graph.getCell().length_c, 93.43);
+       CHECK_EQ(graph.getCell().angle_alpha, 90.0);
+       CHECK_EQ(graph.getCell().angle_beta, 90.0);
+       CHECK_EQ(graph.getCell().angle_gamma, 90.0);
+       CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 41 21 2");
+       CHECK_EQ(graph.getSymmetry().Int_Tables_number, 92);
+        filePath.replace_extension(".json");
+        std::ofstream ofs(filePath);
+        ofs<<" "<<jgfPublisher<<std::endl;
+        ofs.close();
+
+            std::array<unsigned int, 8> terminals{3, 3, 2, 0, 0, 0, 0, 1};
+            unsigned int index=0;
+            for(lemon::ListGraph::NodeIt nCompA(graph.componentGraph); nCompA!=lemon::INVALID; ++nCompA){
+                //std::cout<<graph.componentProperties[nCompA].auth_mon_id<<" "<<graph.componentProperties[nCompA].termination<<std::endl;
+                //CHECK_EQ(graph.componentProperties[nCompA].termination, terminals[index++]);
+            }
+       });
+       CHECK_EQ(graph.getStructureConnections().size(), 6);
+       CHECK_EQ(graph.getNumberOfAtomSites(), 1623);
+       CHECK_EQ(lemon::countEdges(graph), 1626);
+       CHECK_EQ(lemon::countNodes(graph.componentGraph), 230);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 200);
        sylvanmats::publishing::CIFCompressor cifCompressor;
        cifCompressor(comp_id, is);
 
@@ -579,7 +635,7 @@ TEST_CASE("test 1ebc") {
    CHECK_EQ(graph.getNumberOfAtomSites(), 1332);
    CHECK_EQ(lemon::countEdges(graph), 1298);
    CHECK_EQ(lemon::countNodes(graph.componentGraph), 222);  
-   CHECK_EQ(lemon::countEdges(graph.componentGraph), 150);
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 151);
     std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="HEM", .label_asym_id="D", .auth_seq_id=154}};
     sylvanmats::constitution::Selection selection(graph);
     selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
@@ -662,6 +718,7 @@ TEST_CASE("test integer sequence") {
 //auto [ptr, ec] = std::to_chars(
     auto seq=std::make_integer_sequence<int,10>{};
     //std::cout<<seq[0]<<std::endl;
+    
 }
 
 }
