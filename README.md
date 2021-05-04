@@ -9,7 +9,7 @@ Build [antlr4](https://github.com/antlr/antlr4) as sibling project antlr4.  The 
 
 Build [lemon](http://lemon.cs.elte.hu/hg/lemon-main) as sibling where the install is lemon-main/dist
 
-Build [lua](http://www.lua.org/) and export LUA_HOME=<where you installed it>
+Build [lua](http://www.lua.org/) and export LUA_HOME=&lt;where you installed it>
 
 ftp://ftp.wwpdb.org/pub/pdb/data/monomers/aa-variants-v1.cif.gz & ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz in your cifio/db folder. Untar
 components.cif.gz to components.cif and currently the unit test 'test component db' needs to run once 
