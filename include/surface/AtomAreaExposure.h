@@ -78,6 +78,7 @@ namespace sylvanmats::surface{
         virtual ~AtomAreaExposure() = default;
 
         void operator()(){
+            try{
             do{
                 status.store(RUNNING);
                 siteV=0.0;
@@ -91,7 +92,7 @@ namespace sylvanmats::surface{
                     lemon::ListDigraph projectedGraph;
                     lemon::ListDigraph::ArcMap<arc<double>> arcMap(projectedGraph);
                     auto [clockwiseCount, countOverlays, countIntersections, countFulls] = graphProjection(projectedGraph, circles, arcMap);
-                    std::cout<<"clockwiseCount "<<clockwiseCount<<" "<<circles.size()<<" "<<countOverlays<<" "<<countIntersections<<" "<<countFulls<<std::endl;
+                    //std::cout<<"clockwiseCount "<<clockwiseCount<<" "<<circles.size()<<" "<<countOverlays<<" "<<countIntersections<<" "<<countFulls<<std::endl;
                     clockwiseCount=0;
                     auto [dV, dA] = integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraph, circles, arcMap, clockwiseCount);
                     if(clockwiseCount==0 || circles.size()<=1){
@@ -107,16 +108,19 @@ namespace sylvanmats::surface{
                 do{
                 cv.wait(lk, [&]{return status.load()!=DATA_READY;});
                 }while(status.load()==DATA_READY);
-                std::cout<<"done waiting "<<std::endl;
+                //std::cout<<"done waiting "<<std::endl;
             }while(status.load()!=FINISHED);
-            std::cout<<"aae finish finished "<<std::endl;
+            //std::cout<<"aae finish finished "<<std::endl;
+            } catch (const std::bad_alloc& e) {
+                std::cout << "Allocation failed: " << e.what() << '\n';
+            }
         };
 
         STATUS checkStatus(){return status.load();};
         void notifyAndContinue(){status.store(CONTINUE);std::this_thread::yield();cv.notify_one();};
         void notifyAndFinish(){status.store(FINISHED);std::this_thread::yield();cv.notify_one();};
         lemon::ListGraph::Node& getAtomSite(){return nSiteA;};
-        void setAtomSite(lemon::ListGraph::Node& nSiteA){this->nSiteA = nSiteA;};
+        void setAtomSite(lemon::ListGraph::Node& nSiteA){this->nSiteA = nSiteA;ri=(radii.contains(graph.atomSites[nSiteA].type_symbol)) ? radii[graph.atomSites[nSiteA].type_symbol]: 2.0;};
         double getVolume(){return siteV;};
         double getArea(){return siteA;};
 
@@ -297,7 +301,7 @@ namespace sylvanmats::surface{
                         //std::cout<<"componentMap "<<componentMap[nProjected]<<std::endl;
                         componentCounts[componentMap[nProjected]]++;
                     }
-                    if(componentCounts.size()>1)std::cout<<"componentCounts "<<componentCounts.transpose()<<std::endl;
+                    //if(componentCounts.size()>1)std::cout<<"componentCounts "<<componentCounts.transpose()<<std::endl;
                     lemon::ListDigraph::ArcMap<double> lengthMap(projectedGraph);
                     for(lemon::ListDigraph::ArcIt eSiteA(projectedGraph); eSiteA!=lemon::INVALID; ++eSiteA){
                         lengthMap[eSiteA]=arcMap[eSiteA].length;
@@ -315,7 +319,7 @@ namespace sylvanmats::surface{
                         bool negativeCycles=bellmanFord.checkedStart();
                         if(!negativeCycles)std::cout<<negativeCycles<<" bellmanFord.ran "<<std::endl;
                         for(lemon::ListDigraph::InArcIt aSiteA(projectedGraph, nIntersectionA);aSiteA!=lemon::INVALID; ++aSiteA){
-                            lemon::ListDigraph::Node inNode=projectedGraph.oppositeNode(nIntersectionA, aSiteA);
+                            lemon::ListDigraph::Node inNode=projectedGraph.runningNode(aSiteA);
                             double length=lengthMap[aSiteA];
                             lemon::pathCopy(bellmanFord.path(inNode), testPath);
                             for(unsigned int j=0;j<testPath.length();j++){
@@ -381,7 +385,7 @@ namespace sylvanmats::surface{
             //std::cout<<" ri "<<ri<<" zi "<<zi<<std::endl;
             double dV=(sign*((128.0*J3*std::pow(ri, 7)+8.0*J2*std::pow(ri,5)+ 2.0*J1*std::pow(ri,3))/3.0-8.0*std::pow(ri,4)*J2*(zi+ri))).sum();
             double dA=(sign*2*J1*ri*ri).sum();
-            std::cout<<" arc dV "<<(dV)<<" dA "<<dA<<std::endl;
+//            std::cout<<" arc dV "<<(dV)<<" dA "<<dA<<std::endl;
             return std::forward_as_tuple(dV, dA);
         }
 
@@ -408,7 +412,7 @@ namespace sylvanmats::surface{
                         dV=-dV;
                         dA=-dA;
                     }
-                    std::cout<<"full dV "<<(dV)<<" dA "<<dA<<std::endl;
+                    //std::cout<<"full dV "<<(dV)<<" dA "<<dA<<std::endl;
                     return std::forward_as_tuple(dV, dA);
         }
 

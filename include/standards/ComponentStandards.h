@@ -49,7 +49,6 @@ namespace sylvanmats::standards{
             path.replace_extension(".json");
             std::ifstream file(path);
             std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-//std::cout<<"jsonContent "<<jsonContent.substr(0, 50)<<std::endl;
             jin=nlohmann::json::parse(jsonContent);
             file.close();
             path.replace_extension(".cif");

@@ -6,4 +6,6 @@ test/*.json
 /tmp/
 /db/
 dictionaries
+private
 /libcifio.so
+/libguile-cifio.so

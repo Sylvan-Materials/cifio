@@ -137,11 +137,11 @@ TEST_CASE("test accessible projected arc integrals"){
     graph.atomSites[atomSiteA].Cartn_z=0.0;
     graph.atomSites[atomSiteA].type_symbol="C";
 
-    std::cout<<"acos(1.0) "<<std::acos(1.0)<<std::endl;
-    std::cout<<"acos(0.5) "<<std::acos(0.5)<<std::endl;
-    std::cout<<"acos(0.0) "<<std::acos(0.0)<<std::endl;
-    std::cout<<"acos(-0.5) "<<std::acos(-0.5)<<std::endl;
-    std::cout<<"acos(-1.0) "<<std::acos(-1.0)<<std::endl;
+//    std::cout<<"acos(1.0) "<<std::acos(1.0)<<std::endl;
+//    std::cout<<"acos(0.5) "<<std::acos(0.5)<<std::endl;
+//    std::cout<<"acos(0.0) "<<std::acos(0.0)<<std::endl;
+//    std::cout<<"acos(-0.5) "<<std::acos(-0.5)<<std::endl;
+//    std::cout<<"acos(-1.0) "<<std::acos(-1.0)<<std::endl;
 
     lemon::ListGraph::NodeIt nSiteA(graph);
     std::unordered_map<std::string, double> radii={{"C", 2.0}, {"N", 2.0}, {"O", 1.0}, {"P", 4.0}, {"S", 6.0}};
@@ -149,15 +149,15 @@ TEST_CASE("test accessible projected arc integrals"){
     sylvanmats::surface::AtomAreaExposure atomAreaExposure(graph, nSiteA, ri);
     sylvanmats::linear::Vector2d unitX=sylvanmats::linear::Vector2d::UnitX();
     sylvanmats::linear::Vector2d v1(1.0, 0.0);
-    std::cout<<"(1.0, 0.0) "<<atomAreaExposure.findAngleBetween(unitX, v1)<<std::endl;
+//    std::cout<<"(1.0, 0.0) "<<atomAreaExposure.findAngleBetween(unitX, v1)<<std::endl;
     sylvanmats::linear::Vector2d v2(0.0, 1.0);
-    std::cout<<"(0.0, 1.0) "<<atomAreaExposure.findAngleBetween(unitX, v2)<<std::endl;
+//    std::cout<<"(0.0, 1.0) "<<atomAreaExposure.findAngleBetween(unitX, v2)<<std::endl;
     sylvanmats::linear::Vector2d v3(-1.0, 0.0);
-    std::cout<<"-1.0, 0.0) "<<atomAreaExposure.findAngleBetween(unitX, v3)<<std::endl;
+//    std::cout<<"-1.0, 0.0) "<<atomAreaExposure.findAngleBetween(unitX, v3)<<std::endl;
     sylvanmats::linear::Vector2d v4(0.0, -1.0);
-    std::cout<<"(0.0, -1.0) "<<atomAreaExposure.findAngleBetween(unitX, v4)<<std::endl;
+//    std::cout<<"(0.0, -1.0) "<<atomAreaExposure.findAngleBetween(unitX, v4)<<std::endl;
     sylvanmats::linear::Vector2d v5(0.5, -0.5);
-    std::cout<<"(0.5, -0.5) "<<atomAreaExposure.findAngleBetween(unitX, v5)<<std::endl;
+//    std::cout<<"(0.5, -0.5) "<<atomAreaExposure.findAngleBetween(unitX, v5)<<std::endl;
     lemon::ListDigraph projectedGraph;
     lemon::ListDigraph::ArcMap<sylvanmats::surface::arc<double>> arcMap(projectedGraph);
     lemon::ListDigraph::Node nA=projectedGraph.addNode();
@@ -296,14 +296,14 @@ TEST_CASE("test accessible eight spheres"){
             lemon::ListDigraph projectedGraph;
             lemon::ListDigraph::ArcMap<sylvanmats::surface::arc<double>> arcMap(projectedGraph);
             auto [clockwiseCount, countOverlays, countIntersections, countFulls] = atomAreaExposure.graphProjection(projectedGraph, circles, arcMap);
-            std::cout<<" circles.size() "<<circles.size()<<" "<<graph.atomSites[nSiteA].id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" clockwiseCount "<<clockwiseCount<<" circles: "<<circles.size()<<" nodes: "<<lemon::countNodes(projectedGraph)<<" arcs: "<<lemon::countArcs(projectedGraph)<<" countOverlays: "<<countOverlays<<" countIntersections "<<countIntersections<<" "<<countFulls<<std::endl;
+//            std::cout<<" circles.size() "<<circles.size()<<" "<<graph.atomSites[nSiteA].id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" clockwiseCount "<<clockwiseCount<<" circles: "<<circles.size()<<" nodes: "<<lemon::countNodes(projectedGraph)<<" arcs: "<<lemon::countArcs(projectedGraph)<<" countOverlays: "<<countOverlays<<" countIntersections "<<countIntersections<<" "<<countFulls<<std::endl;
             clockwiseCount=0;
             auto [dV, dA] = atomAreaExposure.integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraph, circles, arcMap, clockwiseCount);
             if(clockwiseCount==0 || circles.size()<=1){
                 dV+=(4.0*std::numbers::pi*std::pow(ri, 3)/3.0);
                 dA+=(4.0*std::numbers::pi*std::pow(ri, 2));
             }
-            std::cout<<"atom site V "<<dV<<" "<<dA<<std::endl;
+//            std::cout<<"atom site V "<<dV<<" "<<dA<<std::endl;
             std::filesystem::path path="../../cifio/templates/svg";
             sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
             std::vector<std::tuple<double, double, double, std::string>> circleLoop;
@@ -323,14 +323,14 @@ TEST_CASE("test accessible eight spheres"){
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
                 arcLoop.insert(arcLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red"));
             }
-            std::cout<<"# of arcs "<<arcLoop.size()<<std::endl;
+//            std::cout<<"# of arcs "<<arcLoop.size()<<std::endl;
             svgPublisher.addWedges("arcs", arcLoop);
             svgPublisher.rawSetAttribute("has_text", true); 
             std::vector<std::tuple<double, double, double, double, double, int, std::string, double>> textLoop;
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
                 textLoop.insert(textLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red", (double)arcMap[aSiteA].length));
             }
-            std::cout<<"# of text listed "<<textLoop.size()<<std::endl;
+//            std::cout<<"# of text listed "<<textLoop.size()<<std::endl;
             svgPublisher.addLabelToWedges("text_list", textLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("eight_one.svg");
@@ -359,7 +359,7 @@ TEST_CASE("test accessible eight spheres"){
             ofs2<<content<<std::endl;
         });
         for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-            std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
+//            std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
         }
     }
 }
@@ -387,7 +387,7 @@ TEST_CASE("test accessible 3sgs.cif.gz"){
        CHECK_EQ(lemon::countEdges(graph), 43);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 8);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 4);
-       std::cout<<"Accessible "<<std::endl;
+//       std::cout<<"Accessible "<<std::endl;
         sylvanmats::surface::Accessible accessible(graph);
         
         accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){
@@ -409,7 +409,7 @@ TEST_CASE("test accessible 3sgs.cif.gz"){
             ofs2<<content<<std::endl;*/
         });
         for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-            std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
+//            std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
         }
     });
 

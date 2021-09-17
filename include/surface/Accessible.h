@@ -81,7 +81,7 @@ namespace sylvanmats::surface {
                 }
                 //apply(graph.getUniqueName(nSiteA)+".svg", circles);
             }
-            std::cout<<atomAreaExposures.size()<<" V "<<V<<" A "<<A<<" "<<count<<" "<<lemon::countNodes(graph)<<std::endl;
+            //std::cout<<atomAreaExposures.size()<<" V "<<V<<" A "<<A<<" "<<count<<" "<<lemon::countNodes(graph)<<std::endl;
             do{
                 for(auto aae : atomAreaExposures | std::views::filter([](std::shared_ptr<AtomAreaExposure>& a){ std::this_thread::yield();return a->checkStatus()==DATA_READY; })){
                          accessibles[aae->getAtomSite()].atom_site_volume = aae->getVolume();
@@ -92,7 +92,7 @@ namespace sylvanmats::surface {
                         //std::vector<std::shared_ptr<AtomAreaExposure>>::iterator pos=std::find(atomAreaExposures.begin(), atomAreaExposures.end(), aae);
                         //if(pos!=atomAreaExposures.end())atomAreaExposures.erase(pos);
                         count++;
-                        std::cout<<count<<" "<<lemon::countNodes(graph)<<std::endl;
+                        //std::cout<<count<<" "<<lemon::countNodes(graph)<<std::endl;
                         break;
                 }
                 std::this_thread::yield();

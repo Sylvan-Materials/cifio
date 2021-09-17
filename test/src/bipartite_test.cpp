@@ -7,6 +7,7 @@
 #include <regex>
 #include <iterator>
 #include <numbers>
+#include <valarray>
 #include <ranges>
 #include <cmath>
 
@@ -18,9 +19,13 @@
 #include "constitution/Graph.h"
 #include "constitution/Populator.h"
 #include "constitution/Selection.h"
+#include "PeriodicTable.h"
 #include "publishing/jgf/JGFPublisher.h"
 
+#include "surface/Accessible.h"
 #include "surface/BipartiteSurface.h"
+
+#include "nlohmann/json.hpp"
 
 TEST_SUITE("bipartite"){
 
@@ -50,32 +55,79 @@ TEST_CASE("test bipartite of 5aej.cif.gz"){
         ofs.close();
 
             std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="SO4", .label_asym_id="E", .auth_seq_id=1185},{.label_comp_id="SO4", .label_asym_id="F", .auth_seq_id=1185}};
-            sylvanmats::constitution::Selection selection(graph);
-            selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
-                CHECK_EQ(lemon::countNodes(selectionGraph), 10);
-                CHECK_EQ(lemon::countEdges(selectionGraph), 8);
-                selection.compliment(selectionGraph, [&graph,&selectionGraph](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& complimentGraph){
-                    CHECK_EQ(lemon::countNodes(complimentGraph), 4006);
-                    CHECK_EQ(lemon::countEdges(complimentGraph), 3797);
-                    sylvanmats::surface::BipartiteSurface bipartiteSurface;
-                    for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(selectionGraph); nSiteA!=lemon::INVALID; ++nSiteA){
-                        if(graph.atomSites[nSiteA].type_symbol.compare("O")==0){
-                            for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteB(complimentGraph); nSiteB!=lemon::INVALID; ++nSiteB){
-                                double d=std::sqrt(std::pow(graph.atomSites[nSiteA].Cartn_x-graph.atomSites[nSiteB].Cartn_x, 2)+std::pow(graph.atomSites[nSiteA].Cartn_y-graph.atomSites[nSiteB].Cartn_y, 2)+std::pow(graph.atomSites[nSiteA].Cartn_z-graph.atomSites[nSiteB].Cartn_z,2));
-                                if(d<5.0){
-                                    std::cout<<"d: "<<d<<" "<<graph.getXPath(nSiteA)<<graph.atomSites[nSiteA].label_atom_id<<"---"<<graph.getXPath(nSiteB)<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
-                                    //bipartiteSurface
-                                }
-                            }
-                        }
-                    }
-                });
-            });
+            sylvanmats::surface::BipartiteSurface bipartiteSurface(graph, uniqueComponents);
+            bipartiteSurface();
+            for (sylvanmats::surface::BipartiteSurface::BlueNodeIt n(bipartiteSurface); n!=lemon::INVALID; ++n){
+                lemon::ListGraph::Node nSiteA = bipartiteSurface.constitutionRefMap[n];
+//                std::cout<<"L: "<<graph.getXPath(nSiteA)<<std::endl;
+            }
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 4016);
        CHECK_EQ(lemon::countEdges(graph), 3805);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 893);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 603);
+       
+    });
+
+}
+
+TEST_CASE("test bipartite of 1a30.cif.gz"){
+    std::string comp_id="1a30";
+    std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
+    sylvanmats::constitution::Graph graph;
+    std::filesystem::path  filePath="./"+comp_id+".cif.gz";
+    sylvanmats::reading::TCPReader tcpReader;
+    tcpReader(url, [&graph, &filePath, &comp_id](std::istream& is){
+
+        sylvanmats::constitution::Populator populator;
+        populator(is, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+        sylvanmats::publishing::JGFPublisher jgfPublisher(graph);
+       CHECK_EQ(graph.getNumberOfAtomSites(), 1752);
+       CHECK_EQ(graph.getCell().length_a, 58.470);
+       CHECK_EQ(graph.getCell().length_b, 86.440);
+       CHECK_EQ(graph.getCell().length_c, 45.810);
+       CHECK_EQ(graph.getCell().angle_alpha, 90.000);
+       CHECK_EQ(graph.getCell().angle_beta, 90.000);
+       CHECK_EQ(graph.getCell().angle_gamma, 90.000);
+       CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 21 21 2");
+       CHECK_EQ(graph.getSymmetry().Int_Tables_number, 18);
+        filePath.replace_extension(".json");
+        std::ofstream ofs(filePath);
+        ofs<<" "<<jgfPublisher<<std::endl;
+        ofs.close();
+
+            std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="GLU", .label_asym_id="C", .auth_seq_id=506},{.label_comp_id="ASP", .label_asym_id="C", .auth_seq_id=507},{.label_comp_id="LEU", .label_asym_id="C", .auth_seq_id=508}};
+            sylvanmats::surface::BipartiteSurface bipartiteSurface(graph, uniqueComponents);
+            bipartiteSurface();
+            sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
+            
+            for (sylvanmats::surface::BipartiteSurface::BlueNodeIt n(bipartiteSurface); n!=lemon::INVALID; ++n){
+                lemon::ListGraph::Node nSiteA = bipartiteSurface.constitutionRefMap[n];
+                sylvanmats::element ele=periodicTable->index(graph.atomSites[nSiteA].type_symbol);
+//                std::cout<<"L: "<<graph.getXPath(nSiteA)<<" "<<graph.atomSites[nSiteA].type_symbol<<" "<<ele.mass<<std::endl;
+                //nlohmann::json::json_pointer eleKey("/elements/~0/symbol/"+graph.atomSites[nSiteA].type_symbol);
+                //auto start=jin[eleKey];
+                //std::cout<<"eleKey "<<eleKey.to_string()<<" "<<start<<std::endl;
+            }
+//            std::cout<<"BP: "<<lemon::countBlueNodes(bipartiteSurface)<<" "<<lemon::countRedNodes(bipartiteSurface)<<" "<<lemon::countEdges(bipartiteSurface)<<std::endl;
+            std::valarray<unsigned int> distanceBin(0u, 100);
+            for (sylvanmats::surface::BipartiteSurface::EdgeIt e(bipartiteSurface); e!=lemon::INVALID; ++e){
+                lemon::ListGraph::Node nSiteA=bipartiteSurface.constitutionRefMap[bipartiteSurface.asRedNode(bipartiteSurface.u(e))];
+                lemon::ListGraph::Node nSiteB=bipartiteSurface.constitutionRefMap[bipartiteSurface.asBlueNode(bipartiteSurface.v(e))];
+                sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
+                sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
+                double d=(pointB-pointA).norm();
+                unsigned int bin=(unsigned int)(d*100.0/6.0);
+                distanceBin[bin]++;
+            }
+//            std::cout<<"Bin: ";
+//            for(unsigned int binVal : distanceBin)std::cout<<" "<<binVal;
+//            std::cout<<std::endl;
+       });
+       CHECK_EQ(graph.getNumberOfAtomSites(), 1752);
+       CHECK_EQ(lemon::countEdges(graph), 1563);
+       CHECK_EQ(lemon::countNodes(graph.componentGraph), 417);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 197);
        
     });
 

@@ -64,6 +64,7 @@ namespace sylvanmats::standards{
         long terminal;
         standard(int id, std::string name, std::vector<chem_comp_atom<double>>& chemCompAtoms, std::vector<chem_comp_bond>& chemCombonds, long terminal=0): id (id), name (name), chemCompAtoms(chemCompAtoms), chemCombonds (chemCombonds), terminal (terminal) {};
         standard(const standard& orig){
+            id=orig.id;
             name=orig.name;
             chemCompAtoms=orig.chemCompAtoms;
             chemCombonds=orig.chemCombonds;

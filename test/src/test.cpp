@@ -26,6 +26,7 @@
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
 #include "constitution/Populator.h"
+#include "constitution/MOL2Populator.h"
 #include "constitution/Selection.h"
 #include "density/Populator.h"
 #include "lattice/Populator.h"
@@ -276,7 +277,7 @@ TEST_CASE("test tcp for 6u6j.cif.gz"){
             }    
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 745);
-       CHECK_EQ(lemon::countEdges(graph), 726);
+       CHECK_EQ(lemon::countEdges(graph), 668);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 67);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 27);
        
@@ -290,12 +291,12 @@ TEST_CASE("test tcp for 1q8h.cif.gz"){
     sylvanmats::constitution::Graph graph;
     std::filesystem::path  filePath="./"+comp_id+".cif.gz";
     sylvanmats::reading::TCPReader tcpReader;
-        std::cout<<"tcpReader "<<std::endl;
+//        std::cout<<"tcpReader "<<std::endl;
     tcpReader(url, [&graph, &filePath, &comp_id](std::istream& is){
-        std::cout<<"tcpReader 2 "<<std::endl;
+//        std::cout<<"tcpReader 2 "<<std::endl;
 
         sylvanmats::constitution::Populator populator;
-        std::cout<<"populator "<<std::endl;
+//        std::cout<<"populator "<<std::endl;
         populator(is, graph, [&filePath](sylvanmats::constitution::Graph& graph){
         sylvanmats::publishing::JGFPublisher jgfPublisher(graph);
         CHECK_EQ(graph.getNumberOfAtomSites(), 378);
@@ -359,7 +360,7 @@ TEST_CASE("test tcp for 4ac0.cif.gz"){
      tcpReader(url, [&graph, &filePath, &comp_id](std::istream& is){
 
         sylvanmats::constitution::Populator populator;
-        std::cout<<"populator "<<std::endl;
+//        std::cout<<"populator "<<std::endl;
         populator(is, graph, [&filePath](sylvanmats::constitution::Graph& graph){
         sylvanmats::publishing::JGFPublisher jgfPublisher(graph);
        CHECK_EQ(graph.getNumberOfAtomSites(), 1623);
@@ -437,7 +438,7 @@ TEST_CASE("test tcp for COD hydroxyapatite"){
 
         }));
         std::string hklUrl=url.substr(0, url.size()-4)+".hkl";
-std::cout<<"hklUrl "<<hklUrl<<std::endl;
+//std::cout<<"hklUrl "<<hklUrl<<std::endl;
         /*CHECK(tcpReader(hklUrl, [&](std::istream& is){
             std::string cifContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
             std::cout<<"cifContent: "<<cifContent<<std::endl;
@@ -532,7 +533,7 @@ CHECK_EQ(aminoStandards.getNumberOfEntries(), 218);
    comp_id="UNK";
    counter=0;
    REQUIRE_FALSE(aminoStandards(comp_id, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
-       std::cout<<"unk? "<<ccb.comp_id<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<" "<<ccb.value_order<<" "<<std::endl;
+//       std::cout<<"unk? "<<ccb.comp_id<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<" "<<ccb.value_order<<" "<<std::endl;
    }));
    
 }
@@ -611,7 +612,7 @@ TEST_CASE("test 3sgs") {
     CHECK_EQ(pdxNonpolySchemesLoop.size(), 2);
     std::string&& content = cifPublisher.render();
     //std::cout<<"content "<<content<<std::endl;
-    CHECK_EQ(content.size(), 5565);
+    CHECK_EQ(content.size(), 5591);
 }
 
 TEST_CASE("test 1ebc") {
@@ -713,11 +714,40 @@ TEST_CASE("test ccp4 map input") {
     
 }
     
-TEST_CASE("test integer sequence") {
-
-//auto [ptr, ec] = std::to_chars(
-    auto seq=std::make_integer_sequence<int,10>{};
-    //std::cout<<seq[0]<<std::endl;
+TEST_CASE("test QD0 ligand from mol2") {
+   std::filesystem::path filePath="../../CASF-2016/coreset/4bkt/4bkt_ligand.mol2";
+   
+    sylvanmats::constitution::Graph graph;
+    
+    sylvanmats::constitution::MOL2Populator populator;
+    populator(filePath, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+   CHECK_EQ(graph.getNumberOfAtomSites(), 36);
+   
+   });
+   CHECK_EQ(graph.getNumberOfAtomSites(), 36);
+   CHECK_EQ(lemon::countEdges(graph), 37);
+   CHECK_EQ(lemon::countNodes(graph.componentGraph), 1);  
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 0);
+    std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="QD0", .label_asym_id="*", .pdbx_PDB_ins_code="*", .auth_seq_id=1}};
+    sylvanmats::constitution::Selection selection(graph);
+    selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
+        graph.identifyFusedSystems(selectionGraph, [&graph, &filePath](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph){
+            CHECK_EQ(lemon::countNodes(subSelectionGraph), 5);
+            CHECK_EQ(lemon::countEdges(subSelectionGraph), 5);
+            graph.identifyRings(subSelectionGraph);
+            sylvanmats::publishing::JGFPublisher jgfPublisher(graph, subSelectionGraph);   
+            filePath.replace_extension(".json");
+            std::ofstream ofs(filePath);
+            ofs<<" "<<jgfPublisher<<std::endl;
+            ofs.close();
+        });
+        selection.compliment(selectionGraph, [](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& complimentGraph){
+            CHECK_EQ(lemon::countNodes(complimentGraph), 0);
+            CHECK_EQ(lemon::countEdges(complimentGraph), 0);
+        });
+    });
+    CHECK_EQ(graph.getNumberOfRings(), 2);
+    CHECK_EQ(graph.countFlexibles(), 31);
     
 }
 

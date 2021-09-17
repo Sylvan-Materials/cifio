@@ -48,16 +48,16 @@ TEST_CASE("test ways to use valarray, ranges & coroutines lazily evaluate matrix
 std::valarray<double> array {7.0,  8.0, 9.0, 10.0, 11.0, 12.0};
     //std::cout<<array[std::slice(0, 3, 1)]<<std::endl;;
     //std::cout<<array[std::slice(3, 3, 1)]<<std::endl;;
-    for (const double i : array) {
-        std::cout << i << ' ';
-    }
-    std::cout << '\n';
+//    for (const double i : array) {
+//        std::cout << i << ' ';
+//    }
+//    std::cout << '\n';
     auto r=std::views::counted(std::begin(array), 3);
     //std::cout<<" "<<decltype(r)<<std::endl;
-    for (auto i : r){
-        std::cout << i << ' ';
-    }
-    std::cout << '\n';
+//    for (auto i : r){
+//        std::cout << i << ' ';
+//    }
+//    std::cout << '\n';
 }
 
 }

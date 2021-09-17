@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -15,18 +16,18 @@ namespace sylvanmats::constitution {
 
     class Populator{
     protected:
-    std::unordered_map<std::string, size_t> tagPolySeqMap = { {"asym_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, asym_id)},
-                                                       {"entity_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, entity_id)},
-                                                       {"seq_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, seq_id)},
-                                                       {"mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, mon_id)},
-                                                       {"ndb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, ndb_seq_num)},
-                                                       {"pdb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_seq_num)},
-                                                       {"auth_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_seq_num)},
-                                                       {"pdb_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_mon_id)},
-                                                       {"auth_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_mon_id)},
-                                                       {"pdb_strand_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_strand_id)},
-                                                       {"pdb_ins_code", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_ins_code)},
-                                                       {"hetero", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, hetero)}
+    std::unordered_map<std::string, size_t> tagPolySeqMap = { {"asym_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, asym_id)},
+                                                       {"entity_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, entity_id)},
+                                                       {"seq_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, seq_id)},
+                                                       {"mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, mon_id)},
+                                                       {"ndb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, ndb_seq_num)},
+                                                       {"pdb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_seq_num)},
+                                                       {"auth_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, auth_seq_num)},
+                                                       {"pdb_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_mon_id)},
+                                                       {"auth_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, auth_mon_id)},
+                                                       {"pdb_strand_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_strand_id)},
+                                                       {"pdb_ins_code", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_ins_code)},
+                                                       {"hetero", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, hetero)}
                                                     };
 
     std::unordered_map<std::string, size_t> tagAtomSiteMap = {  {"group_PDB", offsetof(sylvanmats::constitution::_atom_site<double>, group_PDB)},
@@ -50,6 +51,26 @@ namespace sylvanmats::constitution {
                                                                 {"auth_asym_id", offsetof(sylvanmats::constitution::_atom_site<double>, auth_asym_id)}, 
                                                                 {"auth_atom_id", offsetof(sylvanmats::constitution::_atom_site<double>, auth_atom_id)}, 
                                                                 {"pdbx_PDB_model_num", offsetof(sylvanmats::constitution::_atom_site<double>, pdbx_PDB_model_num)}
+                                                            };
+
+    std::unordered_map<std::string, size_t> tagAtomSiteAnisotropMap = {  {"id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, id)},
+                                                                {"type_symbol", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, type_symbol)},
+                                                                {"pdbx_label_atom_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_label_atom_id)},
+                                                                {"pdbx_label_alt_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_label_alt_id)},
+                                                                {"pdbx_label_comp_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_label_comp_id)},
+                                                                {"pdbx_label_asym_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_label_asym_id)},
+                                                                {"pdbx_label_seq_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_label_seq_id)},
+                                                                {"pdbx_PDB_ins_code", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_PDB_ins_code)},
+                                                                {"U[1][1]", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, U)},
+                                                                {"U[2][2]", (sizeof(double)+offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, U))},
+                                                                {"U[3][3]", (2*sizeof(double)+offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, U))},
+                                                                {"U[1][2]", (3*sizeof(double)+offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, U))},
+                                                                {"U[1][3]", (4*sizeof(double)+offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, U))},
+                                                                {"U[2][3]", (5*sizeof(double)+offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, U))},
+                                                                {"pdbx_auth_seq_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_auth_seq_id)},
+                                                                {"pdbx_auth_comp_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_auth_comp_id)},
+                                                                {"pdbx_auth_asym_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_auth_asym_id)},
+                                                                {"pdbx_auth_atom_id", offsetof(sylvanmats::constitution::_atom_site_anisotrop<double>, pdbx_auth_atom_id)}
                                                             };
 
     std::unordered_map<std::string, size_t> tagOperationsMap = {  {"id", offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, id)},
@@ -143,6 +164,8 @@ namespace sylvanmats::constitution {
                                                                         {"value", offsetof(sylvanmats::constitution::_pdbx_struct_conn_angle<double>, value)},
                                                                         {"value_esd", offsetof(sylvanmats::constitution::_pdbx_struct_conn_angle<double>, value_esd)}
                                                                     };
+        unsigned int standardAACount=0;
+        unsigned int standardCompCount=0;
 
    public:
         Populator() = default;
@@ -151,5 +174,12 @@ namespace sylvanmats::constitution {
 
         void operator()(std::filesystem::path& filePath, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply);
         void operator()(std::istream& content, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply);
+
+        unsigned int getNumberOfStandardizedAminoAcids(){return standardAACount;};
+    protected:
+        bool compareInsertionCode(std::string_view a, std::string_view b){
+            if((a.compare("?")==0 || a.compare(".")==0) && (b.compare("?")==0 || b.compare(".")==0)) return true;
+            return a.compare(b)==0;
+        }
     };
 }

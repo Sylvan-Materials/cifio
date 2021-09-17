@@ -93,15 +93,15 @@ auto transposed_b = transposed<double>(B);
 std::valarray<double> array {7.0,  8.0, 9.0, 10.0, 11.0, 12.0};
     //std::cout<<array[std::slice(0, 3, 1)]<<std::endl;;
     //std::cout<<array[std::slice(3, 3, 1)]<<std::endl;;
-    for (const char i : range(65, 91)) {
-        std::cout << i << ' ';
-    }
-    std::cout << '\n';
+//    for (const char i : range(65, 91)) {
+//        std::cout << i << ' ';
+//    }
+//    std::cout << '\n';
 
     sylvanmats::linear::Matrix3l m {2.0l, 0.0l, 0.0l, 0.0l, 2.0l, 0.0l, 0.0l, 0.0l, 2.0l};
-    std::cout<<"m "<<std::setprecision(12)<<std::endl<<m<<std::endl;
-    std::cout<<"m det "<<std::endl<<m.det()<<std::endl;
-    std::cout<<"m inverse "<<std::endl<<m.inverse()<<std::endl;
+//    std::cout<<"m "<<std::setprecision(12)<<std::endl<<m<<std::endl;
+//    std::cout<<"m det "<<std::endl<<m.det()<<std::endl;
+//    std::cout<<"m inverse "<<std::endl<<m.inverse()<<std::endl;
     CHECK_EQ(m.rows(), 3);
     CHECK_EQ(m.cols(), 3);
     CHECK_EQ(m.size(), 9);
@@ -122,7 +122,7 @@ std::valarray<double> array {7.0,  8.0, 9.0, 10.0, 11.0, 12.0};
 
 TEST_CASE("test a dual quaternion or 4d motor"){
     long double θ = 2.0l*std::numbers::pi/3.0l;
-    std::cout<<(180.0l*θ/2/std::numbers::pi)<<" "<<std::sin(θ/2)<<" "<<std::cos(θ/2)<<std::endl;
+//    std::cout<<(180.0l*θ/2/std::numbers::pi)<<" "<<std::sin(θ/2)<<" "<<std::cos(θ/2)<<std::endl;
     sylvanmats::linear::Vector3l a {0.0l, 1.0l, 0.0l};
     sylvanmats::linear::Vector3l p1 {1.0l, 1.0l, 1.0l};
     sylvanmats::linear::Vector3l p2 {1.0l, 2.0l, 1.0l};
@@ -134,17 +134,17 @@ TEST_CASE("test a dual quaternion or 4d motor"){
     sylvanmats::algebra::geometric::Quaternion<long double> R(a, θ);
     sylvanmats::algebra::geometric::Quaternion<long double> T(t);
     sylvanmats::algebra::geometric::Motor<long double> M(t, a, θ);
-    std::cout<<"M: "<<M<<std::endl;
-    std::cout<<"M.m: "<<std::endl<<M.m<<std::endl;
+//    std::cout<<"M: "<<M<<std::endl;
+//    std::cout<<"M.m: "<<std::endl<<M.m<<std::endl;
     sylvanmats::linear::Vector3l pt = M*p;
-    std::cout<<"pt[0] "<<pt[0]<<std::endl;
-    std::cout<<"pt[1] "<<pt[1]<<std::endl;
-    std::cout<<"pt[2] "<<pt[2]<<std::endl;
+//    std::cout<<"pt[0] "<<pt[0]<<std::endl;
+//    std::cout<<"pt[1] "<<pt[1]<<std::endl;
+//    std::cout<<"pt[2] "<<pt[2]<<std::endl;
     sylvanmats::linear::Vector3l pt2 = M*pt;
     sylvanmats::linear::Vector3l pt3 = M*pt2;
-    std::cout<<"pt3[0] "<<pt3[0]<<std::endl;
-    std::cout<<"pt3[1] "<<pt3[1]<<std::endl;
-    std::cout<<"pt3[2] "<<pt3[2]<<std::endl;
+//    std::cout<<"pt3[0] "<<pt3[0]<<std::endl;
+//    std::cout<<"pt3[1] "<<pt3[1]<<std::endl;
+//    std::cout<<"pt3[2] "<<pt3[2]<<std::endl;
 
 }
 

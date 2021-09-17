@@ -13,6 +13,7 @@
 namespace sylvanmats::constitution {
     struct unique_component{
         std::string label_comp_id;
+        std::string label_alt_id;
         std::string label_asym_id;
         std::string pdbx_PDB_ins_code="?";
         int auth_seq_id;
@@ -35,10 +36,10 @@ namespace sylvanmats::constitution {
                 if(within(uniqueComponents, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].label_asym_id)){
                     selectionGraph.enable(nSiteA);
                     for(lemon::ListGraph::IncEdgeIt eSiteA(graph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
-                    //std::cout<<"inc count "<<lemon::countIncEdges(graph, nSiteA)<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteA].label_comp_id<<" "<<selectionGraph.status(nSiteA)<<" "<<selectionGraph.status(eSiteA)<<" "<<graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].auth_seq_id<<" "<<std::endl;
+//                    std::cout<<"inc count "<<lemon::countIncEdges(graph, nSiteA)<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteA].label_comp_id<<" "<<selectionGraph.status(nSiteA)<<" "<<selectionGraph.status(eSiteA)<<" "<<graph.atomSites[graph.oppositeNode(nSiteA, eSiteA)].auth_seq_id<<" "<<std::endl;
                         if(!selectionGraph.status(eSiteA)){
-                        lemon::ListGraph::Node nSiteB=graph.oppositeNode(nSiteA, eSiteA);
-                        if(nSiteB!=nSiteA && within(uniqueComponents, graph.atomSites[nSiteB].label_comp_id, graph.atomSites[nSiteB].pdbx_PDB_ins_code, graph.atomSites[nSiteB].auth_seq_id, graph.atomSites[nSiteB].label_asym_id)){
+                        lemon::ListGraph::Node nSiteB=graph.runningNode(eSiteA);
+                        if(within(uniqueComponents, graph.atomSites[nSiteB].label_comp_id, graph.atomSites[nSiteB].pdbx_PDB_ins_code, graph.atomSites[nSiteB].auth_seq_id, graph.atomSites[nSiteB].label_asym_id)){
 //std::cout<<"\t"<<graph.atomSites[nSiteA].label_asym_id<<"/"<<graph.atomSites[nSiteA].label_comp_id<<"/"<<graph.atomSites[nSiteA].label_atom_id<<" .. "<<graph.atomSites[nSiteB].label_asym_id<<"/"<<graph.atomSites[nSiteB].label_comp_id<<"/"<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
                             selectionGraph.enable(eSiteA);
                         }
@@ -52,7 +53,7 @@ namespace sylvanmats::constitution {
         inline bool within(std::vector<unique_component>& uniqueComponents, std::string& label_comp_id, std::string pdbx_PDB_ins_code, int auth_seq_id, std::string& label_asym_id){
             if(uniqueComponents.empty())return true;
             for(auto uc : uniqueComponents){
-                if(uc.auth_seq_id==auth_seq_id && uc.label_comp_id.compare(label_comp_id)==0 && uc.label_asym_id.compare(label_asym_id)==0 && uc.pdbx_PDB_ins_code.compare(pdbx_PDB_ins_code)==0)return true;
+                if(uc.auth_seq_id==auth_seq_id && uc.label_comp_id.compare(label_comp_id)==0 && (uc.label_asym_id.compare("*")==0 || uc.label_asym_id.compare(label_asym_id)==0) && (uc.pdbx_PDB_ins_code.compare("*")==0 || uc.pdbx_PDB_ins_code.compare(pdbx_PDB_ins_code)==0))return true;
             }
             return false;
         };
@@ -67,8 +68,8 @@ namespace sylvanmats::constitution {
                     selectionGraph.disable(nSiteA);
                     for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::IncEdgeIt eSiteA(subGraph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
                         if(selectionGraph.status(eSiteA)){
-                            lemon::ListGraph::Node nSiteB=graph.oppositeNode(nSiteA, eSiteA);
-                            if(nSiteB!=nSiteA && subGraph.status(nSiteB)){
+                            lemon::ListGraph::Node nSiteB=subGraph.runningNode(eSiteA);
+                            if(subGraph.status(nSiteB)){
                                 selectionGraph.disable(eSiteA);
                             }
                         }

@@ -108,7 +108,7 @@ namespace sylvanmats::publishing::st{
           jniEnv->ExceptionDescribe();
           return;
        }
-          std::cout << "jdoublecls. ...\n";
+//          std::cout << "jdoublecls. ...\n";
        constructorDoubleId = jniEnv->GetMethodID(jdoublecls, "<init>", "(D)V");
     };
 

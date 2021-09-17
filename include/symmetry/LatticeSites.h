@@ -18,7 +18,7 @@ namespace sylvanmats::symmetry {
 
     class LatticeSites{
         protected:
-            std::vector<std::string> functionNames;
+            std::vector<std::string>& functionNames;
             std::string& symmetryOperations;
             sylvanmats::linear::Matrix3d opMatrix;
             sylvanmats::linear::Vector3d opVector;

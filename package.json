@@ -10,7 +10,8 @@
     "urlcpp": "rimmartin/urlcpp",
     "zlib": "madler/zlib",
     "stringtemplate4" : "antlr/stringtemplate4",
-    "javatuples" : "javatuples/javatuples"
+    "javatuples" : "javatuples/javatuples",
+     "Periodic-Table-JSON" : "Bowserinator/Periodic-Table-JSON"
   },
   "devDependencies": {
     "doctest": "onqtam/doctest",
@@ -20,9 +21,9 @@
   "main": "index.js",
   "scripts": {
     "clean": "make clean",
-    "zlib": "cd cpp_modules/zlib && cmake -DCMAKE_INSTALL_PREFIX=dist . && make install",
+    "zlib": "cd cpp_modules/zlib && make clean && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install",
     "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
-    "urlcpp": "cd cpp_modules/urlcpp && mkdir -p test && yarn install && make -f Makefile all",
+    "urlcpp": "cd cpp_modules/urlcpp && mkdir -p test && yarn install && pwd && make -f Makefile all",
     "javatuples": "cd cpp_modules/javatuples && mvn clean:clean install",
     "stringtemplate4": "cd cpp_modules/stringtemplate4 && mvn compile",
     "build": "cd test && pwd && which make && make -j 3 -f Makefile all",

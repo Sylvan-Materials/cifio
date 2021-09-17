@@ -13,7 +13,7 @@ namespace sylvanmats::standards {
 
     class Protons{
         public:
-        Protons(){};
+        Protons() = default;
         Protons(const Protons& orig) = delete;
         virtual ~Protons() = default;
         void operator()(sylvanmats::constitution::Graph& graph){
@@ -35,11 +35,11 @@ namespace sylvanmats::standards {
                     }
                     else if(graph.atomSites[nSiteA].proton_count==2 && incA==2){
                         lemon::ListGraph::IncEdgeIt eSiteA(graph, nSiteA);
-                        lemon::ListGraph::Node nSiteB=graph.oppositeNode(nSiteA, eSiteA);
+                        lemon::ListGraph::Node nSiteB=graph.runningNode(eSiteA);
                         sylvanmats::linear::Vector3d aveHeavy=sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y,graph.atomSites[nSiteB].Cartn_z);
                         sylvanmats::linear::Vector3d vTilt=sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y,graph.atomSites[nSiteB].Cartn_z);
                         ++eSiteA;
-                        nSiteB=graph.oppositeNode(nSiteA, eSiteA);
+                        nSiteB=graph.runningNode(eSiteA);
                         aveHeavy+=sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y,graph.atomSites[nSiteB].Cartn_z);
                         vTilt-=sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y,graph.atomSites[nSiteB].Cartn_z);
                         aveHeavy/=incA;
@@ -60,7 +60,7 @@ namespace sylvanmats::standards {
                         short sumOfProtons=0;
                         sylvanmats::linear::Vector3d aveHeavy=sylvanmats::linear::Vector3d::Zero();
                         for(lemon::ListGraph::IncEdgeIt eSiteB(graph, nSiteB); eSiteB!=lemon::INVALID; ++eSiteB){
-                            lemon::ListGraph::Node nSiteO=graph.oppositeNode(nSiteB, eSiteB);
+                            lemon::ListGraph::Node nSiteO=graph.runningNode(eSiteB);
                             if(nSiteO!=nSiteA){
                                 nSiteC=nSiteO;
                                 sumOfBondOrder+=graph.compBond[eSiteB].value_order;

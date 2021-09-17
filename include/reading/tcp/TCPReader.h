@@ -8,6 +8,7 @@
 #include <iterator>
 #include <filesystem>
 #include <functional>
+#include <cstring>
 
 #include "Url.h"
 
@@ -316,7 +317,7 @@ namespace sylvanmats::reading{
 
         int SendPacket(const char *buf)
         {
-            int len = SSL_write(ssl, buf, strlen(buf));
+            int len = SSL_write(ssl, buf, std::strlen(buf));
             if (len < 0) {
                 int err = SSL_get_error(ssl, len);
                 switch (err) {

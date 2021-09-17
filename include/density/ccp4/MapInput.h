@@ -113,7 +113,7 @@ namespace sylvanmats::density::ccp4{
             std::strncpy((char*)&ccp4Header.Alpha, &mmap2nd[52], 4);
             std::strncpy((char*)&ccp4Header.Beta, &mmap2nd[56], 4);
             std::strncpy((char*)&ccp4Header.Gamma, &mmap2nd[60], 4);
-std::cout<<"Gamma "<<ccp4Header.Gamma<<std::endl;
+//std::cout<<"Gamma "<<ccp4Header.Gamma<<std::endl;
             std::strncpy((char*)&ccp4Header.MAPC, &mmap2nd[64], 4);
             std::strncpy((char*)&ccp4Header.MAPR, &mmap2nd[68], 4);
             std::strncpy((char*)&ccp4Header.MAPS, &mmap2nd[72], 4);
@@ -124,7 +124,7 @@ std::cout<<"Gamma "<<ccp4Header.Gamma<<std::endl;
             std::strncpy((char*)&ccp4Header.NSYMBT, &mmap2nd[92], 4);
             std::strncpy((char*)&ccp4Header.LSKFLG, &mmap2nd[96], 4);
             ccp4Header.EXTTYPE=std::string((char*)&mmap2nd[104], 4);
-std::cout<<"EXTTYPE "<<ccp4Header.EXTTYPE<<std::endl;
+//std::cout<<"EXTTYPE "<<ccp4Header.EXTTYPE<<std::endl;
             std::strncpy((char*)&ccp4Header.NVERSION, &mmap2nd[108], 4);
             ccp4Header.MAP=std::string((char*)&mmap2nd[208], 4);
             std::strncpy((char*)&ccp4Header.MACHST, &mmap2nd[212], 4);
@@ -132,11 +132,11 @@ std::cout<<"EXTTYPE "<<ccp4Header.EXTTYPE<<std::endl;
             std::strncpy((char*)&ccp4Header.NLABL, &mmap2nd[220], 4);
             for(unsigned int index=0;index<ccp4Header.NLABL;index++){
                 ccp4Header.LABEL.push_back(std::string((char*)&mmap2nd[index*80+224], 80));
-std::cout<<ccp4Header.NLABL<<" LABEL "<<ccp4Header.LABEL.back()<<" "<<ccp4Header.LABEL.back().size()<<std::endl;
+//std::cout<<ccp4Header.NLABL<<" LABEL "<<ccp4Header.LABEL.back()<<" "<<ccp4Header.LABEL.back().size()<<std::endl;
             }
             mmap2nd.unmap();
             unsigned int offset = 1024;//ccp4Header.NLABL*80+224;
-            std::cout<<"MACHST "<<std::hex<<" "<<ccp4Header.MACHST<<" "<<(ccp4Header.MACHST&0x0f)<<std::dec<<std::endl;
+//            std::cout<<"MACHST "<<std::hex<<" "<<ccp4Header.MACHST<<" "<<(ccp4Header.MACHST&0x0f)<<std::dec<<std::endl;
             //std::unique_ptr<float[]> slice(new float[ccp4Header.NR*ccp4Header.NC]);
             for(unsigned int sectionIndex=0;sectionIndex<ccp4Header.NS;sectionIndex++){
                 mio::basic_mmap_source<std::byte> mmapSlice(filePath.string(), 4*sectionIndex*ccp4Header.NR*ccp4Header.NC+offset, 4*(1)*ccp4Header.NR*ccp4Header.NC);

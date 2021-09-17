@@ -1,8 +1,12 @@
 
 all: CXXFLAGS= -DNDEBUG -O3 -pthread -std=c++2a  -Iinclude -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include  -Isrc -Icpp_modules/json/include -Icpp_modules/urlcpp -Icpp_modules/doctest -Icpp_modules/openssl/openssl/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 all: LDFLAGS= -shared  -fuse-ld=gold -L../lemon-main/dist/lib -L$(JAVA_HOME)/lib -L$(LUA_HOME)/install/lib -L$(JAVA_HOME)/lib/server -Lcpp_modules/urlcpp -L../antlr4/runtime/Cpp/run/usr/local/lib -Lcpp_modules/zlib/dist/lib -Lcpp_modules/openssl/openssl/lib -ljvm -llua -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -lcrypto
-all: build/src/parsing/CIF2Lexer.o build/src/parsing/CIF2Parser.o build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o build/src/parsing/DICLexer.o build/src/parsing/DICParser.o build/src/constitution/graph.o build/src/constitution/Populator.o build/src/density/Populator.o build/src/standards/AminoStandards.o build/src/standards/ComponentStandards.o build/src/symmetry/LatticeSites.o build/src/lattice/Populator.o build/src/reading/tcp/TCPReader.o build/src/publishing/st/Publisher.o build/src/publishing/st/CIFPublisher.o build/src/publishing/st/OBJPublisher.o build/src/publishing/st/SVGPublisher.o build/src/publishing/st/MOL2Publisher.o build/src/publishing/jgf/JGFPublisher.o build/src/publishing/gz/CIFCompressor.o build/src/utils/JVMSingleton.o /home/roger/sylvanmats/lua-5.4.3/install/lib/liblua.a
+all: build/src/PeriodicTable.o build/src/parsing/CIF2Lexer.o build/src/parsing/CIF2Parser.o build/src/parsing/CIFLexer.o build/src/parsing/CIFParser.o build/src/parsing/DICLexer.o build/src/parsing/DICParser.o build/src/parsing/MOL2Lexer.o build/src/parsing/MOL2Parser.o build/src/constitution/graph.o build/src/constitution/Comparator.o build/src/constitution/Populator.o build/src/constitution/MOL2Populator.o build/src/density/Populator.o build/src/standards/AminoStandards.o build/src/standards/ComponentStandards.o build/src/symmetry/LatticeSites.o build/src/lattice/Populator.o build/src/reading/tcp/TCPReader.o build/src/publishing/st/Publisher.o build/src/publishing/st/CIFPublisher.o build/src/publishing/st/OBJPublisher.o build/src/publishing/st/SVGPublisher.o build/src/publishing/st/MOL2Publisher.o build/src/publishing/jgf/JGFPublisher.o build/src/publishing/gz/CIFCompressor.o build/src/utils/JVMSingleton.o build/src/guile/guile-cifio.o /home/roger/sylvanmats/lua-5.4.3/install/lib/liblua.a
 	$(CXX) $(LDFLAGS) -o libcifio.so $(wildcard build/src/*.o) $(wildcard build/src/parsing/*.o) $(wildcard build/src/standards/*.o) $(wildcard build/src/constitution/*.o) $(wildcard build/src/density/*.o) $(wildcard build/src/lattice/*.o) $(wildcard build/src/symmetry/*.o) $(wildcard build/src/reading/tcp/*.o) $(wildcard build/src/publishing/jgf/*.o) $(wildcard build/src/publishing/gz/*.o) $(wildcard build/src/publishing/st/*.o) $(wildcard build/src/utils/*.o) 
+
+build/src/PeriodicTable.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -Icpp_modules/json/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -MMD
+build/src/PeriodicTable.o: src/PeriodicTable.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/PeriodicTable.o src/PeriodicTable.cpp
 
 build/src/standards/AminoStandards.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/json/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 build/src/standards/AminoStandards.o: src/standards/AminoStandards.cpp 
@@ -15,6 +19,10 @@ build/src/standards/ComponentStandards.o: src/standards/ComponentStandards.cpp
 build/src/constitution/Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a  -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/json/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 build/src/constitution/Populator.o: src/constitution/Populator.cpp 
 	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/Populator.o src/constitution/Populator.cpp
+ 
+build/src/constitution/MOL2Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a  -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/json/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/constitution/MOL2Populator.o: src/constitution/MOL2Populator.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/MOL2Populator.o src/constitution/MOL2Populator.cpp
  
 build/src/density/Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a -Iinclude -Isrc -I../lemon-main/dist/include -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 build/src/density/Populator.o: src/density/Populator.cpp 
@@ -68,6 +76,10 @@ build/src/constitution/graph.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a
 build/src/constitution/graph.o: src/constitution/graph.cpp 
 	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/graph.o src/constitution/graph.cpp
 
+build/src/constitution/Comparator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++2a  -Iinclude -I../lemon-main/dist/include -MMD
+build/src/constitution/Comparator.o: src/constitution/Comparator.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/Comparator.o src/constitution/Comparator.cpp
+
 build/src/parsing/CIFLexer.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 build/src/parsing/CIFLexer.o: src/parsing/CIFLexer.cpp 
 	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/CIFLexer.o src/parsing/CIFLexer.cpp
@@ -91,6 +103,21 @@ build/src/parsing/DICLexer.o: src/parsing/DICLexer.cpp
 build/src/parsing/DICParser.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 build/src/parsing/DICParser.o: src/parsing/DICParser.cpp 
 	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/DICParser.o src/parsing/DICParser.cpp
+
+build/src/parsing/MOL2Lexer.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/parsing/MOL2Lexer.o: src/parsing/MOL2Lexer.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/MOL2Lexer.o src/parsing/MOL2Lexer.cpp
+
+build/src/parsing/MOL2Parser.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -std=c++17 -Iinclude -Isrc -Icpp_modules/doctest -Icpp_modules/zlib/dist/include -I../antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/parsing/MOL2Parser.o: src/parsing/MOL2Parser.cpp 
+	$(CXX) $(CXXFLAGS) -c -o build/src/parsing/MOL2Parser.o src/parsing/MOL2Parser.cpp
+
+build/src/guile/guile-cifio.o: LDFLAGS= -L. -lcifio
+build/src/guile/guile-cifio.o: CXXFLAGS= `pkg-config --cflags guile-3.0` -DNDEBUG -O3 -fPIC  -std=c++2a -Iinclude -I../lemon-main/dist/include
+build/src/guile/guile-cifio.o: src/guile/guile-cifio.c
+	mkdir -p build/src/guile
+	$(CXX) $(CXXFLAGS) -c  -o build/src/guile/guile-cifio.o src/guile/guile-cifio.c  -MMD
+	$(CXX) $(LDFLAGS) -shared -o libguile-cifio.so build/src/guile/guile-cifio.o
 
 clean:
 	cd cpp_modules/zlib && $(MAKE) clean

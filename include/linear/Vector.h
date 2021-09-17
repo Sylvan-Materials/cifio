@@ -106,7 +106,7 @@ namespace sylvanmats::linear{
             return v2;
         };
 
-        Vector<T, R> operator - (const Vector<T, R>::value_type& s){
+        Vector<T, R> operator - (const typename Vector<T, R>::value_type& s){
             Vector<T, R> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=(s-operator[](i));
@@ -134,7 +134,7 @@ namespace sylvanmats::linear{
             return v2;
         };
 
-        Vector<T, R> operator / (const Vector<T, R>::value_type& s){
+        Vector<T, R> operator / (const typename Vector<T, R>::value_type& s){
             Vector<T, R> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=operator[](i)/s;

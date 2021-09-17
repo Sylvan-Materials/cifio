@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+Periodic-Table-JSON@Bowserinator/Periodic-Table-JSON:
+  version "0.0.0"
+  resolved "https://codeload.github.com/Bowserinator/Periodic-Table-JSON/tar.gz/c3fef870286463cfb0d9e2737c5fc98dad4e7a94"
+
 brigand@edouarda/brigand:
   version "0.0.0"
   resolved "https://codeload.github.com/edouarda/brigand/tar.gz/1c398e4f1e817ab195e4cd6fbb03c18cb386eea3"

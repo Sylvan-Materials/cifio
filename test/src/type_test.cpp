@@ -23,34 +23,34 @@ TEST_SUITE("type"){
 TEST_CASE("test atom site struct"){
 
     sylvanmats::constitution::_atom_site<double> atomSite;
-    std::cout << std::boolalpha;
+//    std::cout << std::boolalpha;
     const std::type_info  &ti = typeid(atomSite);
     int     status;
     char   *realname = abi::__cxa_demangle(ti.name(), 0, 0, &status);
-    std::cout <<"name: "<< ti.name()<<" "<< realname<<" "<<status<< '\n';
+//    std::cout <<"name: "<< ti.name()<<" "<< realname<<" "<<status<< '\n';
     CHECK(std::is_class<sylvanmats::constitution::_atom_site<double>>::value);
-    std::cout<<"label_atom_id: " << offsetof(sylvanmats::constitution::_atom_site<double>, label_atom_id)<<std::endl;
-    std::cout << ti.name()<<" " << '\n';
+//    std::cout<<"label_atom_id: " << offsetof(sylvanmats::constitution::_atom_site<double>, label_atom_id)<<std::endl;
+//    std::cout << ti.name()<<" " << '\n';
 
-    std::unordered_map<std::string, size_t> tagMap = { {"asym_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, asym_id)},
-                                                       {"entity_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, entity_id)},
-                                                       {"seq_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, seq_id)},
-                                                       {"mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, mon_id)},
-                                                       {"ndb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, ndb_seq_num)},
-                                                       {"pdb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_seq_num)},
-                                                       {"auth_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_seq_num)},
-                                                       {"pdb_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_mon_id)},
-                                                       {"auth_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_mon_id)},
-                                                       {"pdb_strand_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_strand_id)},
-                                                       {"pdb_ins_code", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, pdb_ins_code)},
-                                                       {"hetero", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, hetero)}
+    std::unordered_map<std::string, size_t> tagMap = { {"asym_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, asym_id)},
+                                                       {"entity_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, entity_id)},
+                                                       {"seq_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, seq_id)},
+                                                       {"mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, mon_id)},
+                                                       {"ndb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, ndb_seq_num)},
+                                                       {"pdb_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_seq_num)},
+                                                       {"auth_seq_num", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, auth_seq_num)},
+                                                       {"pdb_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_mon_id)},
+                                                       {"auth_mon_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, auth_mon_id)},
+                                                       {"pdb_strand_id", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_strand_id)},
+                                                       {"pdb_ins_code", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_ins_code)},
+                                                       {"hetero", offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, hetero)}
                                                     };
     switch(tagMap["auth_seq_num"]){
-        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, asym_id):
-            std::cout<<"in case "<<offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, asym_id)<<std::endl;
+        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, asym_id):
+//            std::cout<<"in case "<<offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, asym_id)<<std::endl;
         break;
-        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_seq_num):
-            std::cout<<"in case "<<offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme, auth_seq_num)<<std::endl;
+        case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, auth_seq_num):
+//            std::cout<<"in case "<<offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, auth_seq_num)<<std::endl;
         break;
     }
 
@@ -71,12 +71,12 @@ TEST_CASE("test atom site struct"){
                                                                 {"vector[2]", (sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, vector))},
                                                                 {"vector[3]", (2*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, vector))}
                                                              };
-    std::cout<<"\"id\" "<<tagOperationsMap["id"]<<std::endl;
-    std::cout<<"\"vector[1]\" "<<tagOperationsMap["vector[1]"]<<std::endl;
-    std::cout<<"\"vector[2]\" "<<tagOperationsMap["vector[2]"]<<std::endl;
-    std::cout<<"\"vector[3]\" "<<tagOperationsMap["vector[3]"]<<std::endl;
-    std::cout<<"\"matrix[1][1]\" "<<tagOperationsMap["matrix[1][1]"]<<std::endl;
-    std::cout<<"\"matrix[3][3]\" "<<tagOperationsMap["matrix[3][3]"]<<std::endl;
+//    std::cout<<"\"id\" "<<tagOperationsMap["id"]<<std::endl;
+//    std::cout<<"\"vector[1]\" "<<tagOperationsMap["vector[1]"]<<std::endl;
+//    std::cout<<"\"vector[2]\" "<<tagOperationsMap["vector[2]"]<<std::endl;
+//    std::cout<<"\"vector[3]\" "<<tagOperationsMap["vector[3]"]<<std::endl;
+//    std::cout<<"\"matrix[1][1]\" "<<tagOperationsMap["matrix[1][1]"]<<std::endl;
+//    std::cout<<"\"matrix[3][3]\" "<<tagOperationsMap["matrix[3][3]"]<<std::endl;
 }
 
 }

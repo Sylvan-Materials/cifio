@@ -132,7 +132,7 @@ namespace sylvanmats::linear{
             return v2;
         };
 
-        Array<T, R, C> operator - (const Array<T, R, C>::value_type& s){
+        Array<T, R, C> operator - (const typename Array<T, R, C>::value_type& s){
             Array<T, R> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=(s-operator[](i));
@@ -160,7 +160,7 @@ namespace sylvanmats::linear{
             return v2;
         };
 
-        Array<T, R, C> operator / (const Array<T, R, C>::value_type& s){
+        Array<T, R, C> operator / (const typename Array<T, R, C>::value_type& s){
             Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=operator[](i)/s;

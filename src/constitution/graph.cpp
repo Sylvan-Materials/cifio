@@ -1,6 +1,7 @@
 //#include <format>
 
 #include "constitution/Graph.h"
+#include "linear/Vector.h"
 
 #include <lemon/suurballe.h>
 
@@ -9,6 +10,25 @@ namespace sylvanmats::constitution {
     bool operator==(symmetry_labels& a, symmetry_labels& b){
         return (a.type_symbol.compare(b.type_symbol)==0);
     };
+
+    void Graph::visibilityOn(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph){
+        for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(subGraph); nSiteA!=lemon::INVALID; ++nSiteA){
+            atomSites[nSiteA].visibility=true;
+        }
+    }
+
+    void  Graph::visibilityOff(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph){
+        for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(subGraph); nSiteA!=lemon::INVALID; ++nSiteA){
+            atomSites[nSiteA].visibility=false;
+        }
+
+    }
+
+    void Graph::flipVisibility(){
+        for(lemon::ListGraph::NodeIt nSiteA(*this); nSiteA!=lemon::INVALID; ++nSiteA){
+            atomSites[nSiteA].visibility=!atomSites[nSiteA].visibility;
+        }
+    }
 
     void Graph::identifyFusedSystems(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph)> apply){
             lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<int> compMap(selectionGraph);
@@ -97,4 +117,58 @@ namespace sylvanmats::constitution {
         
     };
 
+    std::string Graph::getComponentXPath(lemon::ListGraph::Node& n){
+        return "/"+componentProperties[n].asym_id+"/"+componentProperties[n].pdb_mon_id+"/"+std::to_string(componentProperties[n].auth_seq_num)+"/"+((componentProperties[n].pdb_ins_code.compare("?")!=0 && componentProperties[n].pdb_ins_code.compare(".")!=0) ? componentProperties[n].pdb_ins_code: "")+"/";
+    }
+    
+    unsigned int Graph::getNumberOfComponentAtoms(lemon::ListGraph::Node& n){
+        unsigned int count=0;
+        for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemIt(componentNavigation, n); itemIt!=lemon::INVALID; ++itemIt){
+            count++;
+        }
+        return count;
+    };
+
+    unsigned int Graph::getNumberOfComponentNeutronicAtoms(lemon::ListGraph::Node& n, bool alts){
+        unsigned int count=0;
+        std::string firstAlternateId="";
+        for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemIt(componentNavigation, n); itemIt!=lemon::INVALID; ++itemIt){
+            bool singleAlt=(atomSites[itemIt].label_alt_id.empty() || atomSites[itemIt].label_alt_id.compare(".")==0 || atomSites[itemIt].label_alt_id.compare("?")==0);
+            if(firstAlternateId.empty() && !singleAlt)firstAlternateId=atomSites[itemIt].label_alt_id;
+            if(atomSites[itemIt].type_symbol.compare("H")!=0 && (!alts || singleAlt || atomSites[itemIt].label_alt_id.compare(firstAlternateId)==0))count++;
+        }
+        return count;
+    };
+
+    bool Graph::componentHasAlternateIds(lemon::ListGraph::Node& n){
+        for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemItA(componentNavigation, n); itemItA!=lemon::INVALID; ++itemItA){
+            if(!atomSites[itemItA].label_alt_id.empty() && atomSites[itemItA].label_alt_id.compare(".")!=0 && atomSites[itemItA].label_alt_id.compare("?")!=0)return true;
+        }
+        return false;
+    }
+    
+    std::vector<std::string> Graph::getComponentAlternateIds(lemon::ListGraph::Node& n){
+        std::vector<std::string> alternateIds;
+        for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemItA(componentNavigation, n); itemItA!=lemon::INVALID; ++itemItA){
+            if(!atomSites[itemItA].label_alt_id.empty() && atomSites[itemItA].label_alt_id.compare(".")!=0 && atomSites[itemItA].label_alt_id.compare("?")!=0 && std::find(alternateIds.begin(), alternateIds.end(), atomSites[itemItA].label_alt_id) == alternateIds.end())alternateIds.push_back(atomSites[itemItA].label_alt_id);
+        }
+        return alternateIds;
+    }
+    
+    double Graph::getComponentMaximumDiameter(lemon::ListGraph::Node& n){
+        double dia=componentProperties[n].maximum_diameter;
+        if(dia!=0.0) return dia;
+        for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemItA(componentNavigation, n); itemItA!=lemon::INVALID; ++itemItA){
+            bool rightTriangle=false;
+            for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemItB(componentNavigation, n); itemItB!=lemon::INVALID; ++itemItB){
+                if(rightTriangle){
+                    double norm=(sylvanmats::linear::Vector3d(atomSites[itemItA].Cartn_x, atomSites[itemItA].Cartn_y, atomSites[itemItA].Cartn_z)-sylvanmats::linear::Vector3d(atomSites[itemItB].Cartn_x, atomSites[itemItB].Cartn_y, atomSites[itemItB].Cartn_z)).norm();
+                    if(dia<norm)dia=norm;
+                }
+                if(itemItA==itemItB)rightTriangle=true;
+            }
+        }
+        componentProperties[n].maximum_diameter=dia;
+        return dia;
+    };
 }
