@@ -1,5 +1,5 @@
 
-all: LDFLAGS= -fuse-ld=gold -L../ -L../../lemon-main/dist/lib -L$(JAVA_HOME)/lib -L$(JAVA_HOME)/lib/server -L$(LUA_HOME)/install/lib -L../cpp_modules/urlcpp -L../../antlr4/runtime/Cpp/run/usr/local/lib -L../cpp_modules/zlib/dist/lib -L../cpp_modules/openssl/openssl/lib -L../../libpng/dist/lib -llua -lcifio -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -lcrypto -lpng -Wl,--allow-multiple-definition
+all: LDFLAGS= -fuse-ld=gold -L../ -L../../lemon-main/dist/lib -L$(JAVA_HOME)/lib -L$(JAVA_HOME)/lib/server -L$(LUA_HOME)/install/lib -L../cpp_modules/urlcpp -L../../antlr4/runtime/Cpp/run/usr/local/lib -L../cpp_modules/zlib/dist/lib -L../cpp_modules/openssl/openssl/lib64 -L../../libpng/dist/lib -llua -lcifio -lantlr4-runtime -lemon -lurlcpp -lz -ldl -pthread -lssl -lcrypto -lpng -Wl,--allow-multiple-definition
 all: build/src/matching_test.o build/src/symmetry_test.o build/src/dictionary_test.o build/src/write_test.o build/src/type_test.o build/src/bipartite_test.o build/src/standard_protons_test.o build/src/accessible_test.o build/src/matrix_test.o build/src/lattice_test.o test
 	$(CXX) $(LDFLAGS) -o test $(wildcard build/src/*.o) $(LUA_HOME)/install/lib/liblua.a 
 

@@ -32,7 +32,7 @@ namespace sylvanmats{
         element_set_by_symbol::iterator it=symbolIndex.find(symbol);
         if(it==symbolIndex.end()){
 //std::cout << typeid(jin["elements"]).name() << '\n';
-            for(auto it : jin["elements"]){ // | std::views::filter([&symbol](std::map& e){ std::this_thread::yield();return e["symbol"].compare(symbol)==0; })
+            for(auto it : jin["elements"]){ // | std::views:: ([&symbol](std::map& e){ std::this_thread::yield();return e["symbol"].compare(symbol)==0; })
                 //std::cout << typeid((it)).name() << '\n';
                 //std::cout<<" "<<(it)["number"].get<int>()<<" "<<(it)["name"].get<std::string>()<<" "<<(it)["symbol"].get<std::string>()<<" "<<(it)["atomic_mass"].get<double>()<<std::endl;
                 if((it)["symbol"].get<std::string>().compare(symbol)==0){

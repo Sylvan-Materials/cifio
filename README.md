@@ -5,7 +5,9 @@ Crystallographic Information Framework input/output to chemical constitutional g
 
 ## To build and test
 
-Build [antlr4](https://github.com/antlr/antlr4) as sibling project antlr4.  The c++ runtime too.
+Note: currently working on a new package manager to use on this package.  Other managers should still 
+work(as far as they do) as https://github.com/DataDriven-CAM/cnpm.git is based on the package.json npm format.
+
 
 Build [lemon](http://lemon.cs.elte.hu/hg/lemon-main) as sibling where the install is lemon-main/dist
 
@@ -21,7 +23,7 @@ Set compiler(>=10), antlr and zlib paths
 
 ```
 export PATH=~/node-v14.9.0-linux-x64/bin:~/Software/gcc-dev/dist/bin:$PATH
-export LD_LIBRARY_PATH=`pwd`/../antlr4/runtime/Cpp/run/usr/local/lib:`pwd`/cpp_modules/zlib/dist/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=`pwd`/cpp_modules/antlr4/runtime/Cpp/run/usr/local/lib:`pwd`/cpp_modules/zlib/dist/lib:$LD_LIBRARY_PATH
 ```
 
 Generate the c++ lexer/parser code once from the grammar:
@@ -33,9 +35,28 @@ java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -o ../src/parsing 
 cd ..
 ```
 
+### cnpm building
+
+```
+cnpm  install
+
+cnpm urlcpp
+cnpm zlib
+cnpm ssl
+cnpm antlr4
+cnpm javatuples
+cnpm stringtemplate4
+
+cnpm lib
+
+#building and running unit tests
+cnpm test
 
 ```
 
+### Or yarn building if you prefer
+
+```
 yarn config set PATH $PATH
 yarn config set LD_LIBRARY_PATH $LD_LIBRARY_PATH
 yarn config set CIFIO_DB_LOCATION `pwd`/db
