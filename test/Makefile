@@ -8,7 +8,7 @@ build/src/matching_test.o: CXXFLAGS= -DNDEBUG -O3 -pthread -std=c++2a -I../inclu
 build/src/matching_test.o: src/matching_test.cpp
 	$(CXX) $(CXXFLAGS) -c -o build/src/matching_test.o src/matching_test.cpp
 
-build/src/symmetry_test.o: CXXFLAGS= -DNDEBUG -O3 -pthread -fcoroutines -std=c++2a -fext-numeric-literals -I../include -I./../cpp_modules/lemon/dist/include -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include  -I../src -I../cpp_modules/json/include -I../cpp_modules/urlcpp -I../cpp_modules/doctest -I../cpp_modules/openssl/openssl/include -I../cpp_modules/mio/include -I../cpp_modules/zlib/dist/include -I../cpp_modules/antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
+build/src/symmetry_test.o: CXXFLAGS= -DNDEBUG -O3 -pthread -fcoroutines -std=c++2a -fext-numeric-literals -I../include -I./../cpp_modules/lemon/dist/include -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include  -I../src -I../cpp_modules/json/include -I../cpp_modules/urlcpp -I../cpp_modules/doctest -I../cpp_modules/openssl/openssl/include -I../cpp_modules/mio/include -I../cpp_modules/zlib/dist/include -I../cpp_modules/fmt/dist/include -I../cpp_modules/antlr4/runtime/Cpp/run/usr/local/include/antlr4-runtime -MMD
 build/src/symmetry_test.o: src/symmetry_test.cpp
 	$(CXX) $(CXXFLAGS) -c -o build/src/symmetry_test.o src/symmetry_test.cpp
 

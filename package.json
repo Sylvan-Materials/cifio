@@ -5,6 +5,7 @@
     "lemon": "hg+https://lemon.cs.elte.hu/hg/lemon-main",
     "brigand": "edouarda/brigand",
     "json": "nlohmann/json",
+    "xml-thresher":"DataDriven-CAM/xml-thresher",
     "mio": "mandreyel/mio",
     "multi_index": "Alexhuszagh/multi_index",
     "openssl": "openssl/openssl#OpenSSL_1_1_1w",

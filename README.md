@@ -9,8 +9,6 @@ Note: currently working on a new package manager to use on this package.  Other 
 work(as far as they do) as https://github.com/DataDriven-CAM/cnpm.git is based on the package.json npm format.
 
 
-Build [lemon](http://lemon.cs.elte.hu/hg/lemon-main) as sibling where the install is lemon-main/dist
-
 Build [lua](http://www.lua.org/) and export LUA_HOME=&lt;where you installed it>
 
 ftp://ftp.wwpdb.org/pub/pdb/data/monomers/aa-variants-v1.cif.gz & ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz in your cifio/db folder. Untar
@@ -29,7 +27,7 @@ export LD_LIBRARY_PATH=`pwd`/cpp_modules/antlr4/runtime/Cpp/run/usr/local/lib:`p
 Generate the c++ lexer/parser code once from the grammar:
 
 ```
-export CLASSPATH=`pwd`/../antlr4/tool/target/antlr4-4.8-2-SNAPSHOT-complete.jar
+export CLASSPATH=`pwd`/../antlr4/tool/target/antlr4-4.9.4-SNAPSHOT-complete.jar
 cd grammars
 java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -o ../src/parsing -lib ../grammars -package sylvanmats CIFLexer.g4 CIFParser.g4
 cd ..
@@ -44,8 +42,8 @@ cnpm urlcpp
 cnpm zlib
 cnpm ssl
 cnpm antlr4
-cnpm javatuples
-cnpm stringtemplate4
+cnpm lemon
+cnpm fmt
 
 cnpm lib
 
