@@ -35,7 +35,7 @@ TEST_CASE("test writing to ligand to mol2"){
 
 }
 
-TEST_CASE("test writing mol2 from 1ebc's hem") {
+TEST_CASE("test writing mol2 from 1ebcs hem") {
     std::filesystem::path filePath="./examples/1ebc.cif.gz";
    
     sylvanmats::constitution::Graph graph;
@@ -67,10 +67,10 @@ TEST_CASE("test writing mol2 from 1ebc's hem") {
             filePath.replace_extension(".mol2");
             std::filesystem::path path="../../cifio/templates/mol2";
             sylvanmats::publishing::st::MOL2Publisher mol2Publisher(path);   
-            mol2Publisher.add("entry_id", "1ebc");
-            mol2Publisher.add("num_atoms", static_cast<unsigned long long>(lemon::countNodes(subSelectionGraph)));
-            mol2Publisher.add("num_bonds", static_cast<unsigned long long>(lemon::countEdges(subSelectionGraph)));
-            mol2Publisher.add("num_subst", static_cast<unsigned long long>(1));
+            mol2Publisher.setEntryID("1ebc");
+            mol2Publisher.setNumberOfAtoms(static_cast<size_t>(lemon::countNodes(subSelectionGraph)));
+            mol2Publisher.setNumberOfBonds(static_cast<size_t>(lemon::countEdges(subSelectionGraph)));
+//            mol2Publisher.add("num_subst", static_cast<unsigned long long>(1));
             unsigned long long ordinal=lemon::countNodes(subSelectionGraph);
             std::string subst_name="";
             std::string chain="";
@@ -80,19 +80,21 @@ TEST_CASE("test writing mol2 from 1ebc's hem") {
                 ordinalMap[nSiteA]=ordinal;
                 subst_name=graph.atomSites[nSiteA].auth_comp_id;
                 chain=graph.atomSites[nSiteA].auth_asym_id;
-                atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(ordinal--, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].type_symbol, 1, graph.atomSites[nSiteA].auth_comp_id, 0.0));
+                mol2Publisher.insertAtomSites(std::make_tuple(ordinal--, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].type_symbol, 1, graph.atomSites[nSiteA].auth_comp_id, 0.0));
+//                atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(ordinal--, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].type_symbol, 1, graph.atomSites[nSiteA].auth_comp_id, 0.0));
             }
-            mol2Publisher.add("atom_sites", atomSitesLoop);
+//            mol2Publisher.add("atom_sites", atomSitesLoop);
             ordinal=lemon::countEdges(subSelectionGraph);
-            std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, std::string>> atomBondsLoop;
+//            std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, std::string>> atomBondsLoop;
             for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeIt e(subSelectionGraph); e!=lemon::INVALID; ++e){
-                atomBondsLoop.insert(atomBondsLoop.begin(), std::make_tuple(ordinal--,  ordinalMap[subSelectionGraph.u(e)], ordinalMap[subSelectionGraph.v(e)], std::to_string(graph.compBond[e].value_order)));
+                mol2Publisher.insertAtomBonds(std::make_tuple(ordinal--,  ordinalMap[subSelectionGraph.u(e)], ordinalMap[subSelectionGraph.v(e)], std::to_string(graph.compBond[e].value_order)));
+//                atomBondsLoop.insert(atomBondsLoop.begin(), std::make_tuple(ordinal--,  ordinalMap[subSelectionGraph.u(e)], ordinalMap[subSelectionGraph.v(e)], std::to_string(graph.compBond[e].value_order)));
             }
-            mol2Publisher.add("atom_bonds", atomBondsLoop);
+//            mol2Publisher.add("atom_bonds", atomBondsLoop);
             ordinal=1;
-            std::vector<std::tuple<unsigned long long, std::string, unsigned long long, std::string, unsigned long long, std::string, std::string, unsigned long long, std::string>> substructureLoop;
-                substructureLoop.insert(substructureLoop.begin(), std::make_tuple(ordinal--, subst_name, 1l, "RESIDUE", 1l, chain, subst_name, 0l, "ROOT"));
-            mol2Publisher.add("substructures", substructureLoop);
+//            std::vector<std::tuple<unsigned long long, std::string, unsigned long long, std::string, unsigned long long, std::string, std::string, unsigned long long, std::string>> substructureLoop;
+//                substructureLoop.insert(substructureLoop.begin(), std::make_tuple(ordinal--, subst_name, 1l, "RESIDUE", 1l, chain, subst_name, 0l, "ROOT"));
+            mol2Publisher.insertSubstructures(std::make_tuple(ordinal--, subst_name, 1l, "RESIDUE", 1l, chain, subst_name, 0l, "ROOT"));
             std::string&& content = mol2Publisher.render();
             std::ofstream ofs(filePath);
             ofs<<content<<std::endl;

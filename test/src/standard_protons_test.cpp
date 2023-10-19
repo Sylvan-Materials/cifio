@@ -268,10 +268,10 @@ TEST_CASE("test putting standard protons on"){
             connectionIndex+=24;
             faceIndex++;
         }
-        objPublisher.add("vertices", vertexLoop);
-        objPublisher.add("texture_vertices", vertexLoop);
-        objPublisher.add("normals", normalLoop);
-        objPublisher.add("indices", indexLoop);
+//        objPublisher.add("vertices", vertexLoop);
+//        objPublisher.add("texture_vertices", vertexLoop);
+//        objPublisher.add("normals", normalLoop);
+//        objPublisher.add("indices", indexLoop);
         std::string&& content2 = objPublisher.render();
         std::ofstream ofs2("../../server/public/molecule.obj");
         ofs2<<content2<<std::endl;

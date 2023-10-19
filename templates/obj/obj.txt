@@ -1,0 +1,15 @@
+
+#	                Vertices: {vertex_count}
+#	                  Points: 0
+#	                   Lines: 0
+#	                   Faces: {face_count}
+#	               Materials: {material_count}
+
+o 1
+
+# Vertex list
+
+{vertices:9.2f}
+
+usemtl Default
+{indices:}

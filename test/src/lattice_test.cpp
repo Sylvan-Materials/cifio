@@ -108,7 +108,7 @@ TEST_CASE("test rotor"){
 }
 
 TEST_CASE("test copper unit cell"){
-    std::string url = "http://www.crystallography.net/cod/result*?text=copper&format=urls&el1=Cu&formula=Cu";
+    std::string url = "https://www.crystallography.net/cod/result*?text=copper&format=urls&el1=Cu&formula=Cu";
     sylvanmats::reading::TCPReader tcpReader;
     CHECK(tcpReader(url, [&](std::istream& is){
         std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
@@ -156,27 +156,24 @@ TEST_CASE("test copper unit cell"){
                 //std::cout<<" "<<ssLua<<std::endl;
                 std::filesystem::path path="../../cifio/templates/obj";
                 sylvanmats::publishing::st::OBJPublisher objPublisher(path);
-                std::string vertexCount=std::to_string(4*functionNames.size());
-                objPublisher.add("vertex_count", vertexCount);
-                std::string faceCount=std::to_string(6*functionNames.size());
-                objPublisher.add("face_count", faceCount);
-                objPublisher.add("material_count", "1");
-                std::vector<std::tuple<double, double, double, double, double, double>> vertexLoop;
+                objPublisher.setVertexCount(4*functionNames.size());
+                objPublisher.setFaceCount(6*functionNames.size());
+                objPublisher.setMaterialCount(1);
                 std::vector<std::tuple<double, double, double>> normalLoop;
                 std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long>> indexLoop;
                 sylvanmats::linear::Vector3d c(0.722, 0.451, 0.2);
                 unsigned int faceIndex=1;
                 sylvanmats::symmetry::LatticeSites latticeSites(functionNames, ssLua, opMatrix, opVector);
-                latticeSites(x, [&faceIndex, &p1, &p2, &p3, &p4, &c, &vertexLoop, &normalLoop, &indexLoop](sylvanmats::linear::Vector3d& xPrime){
+                latticeSites(x, [&faceIndex, &p1, &p2, &p3, &p4, &c, &objPublisher, &normalLoop, &indexLoop](sylvanmats::linear::Vector3d& xPrime){
                     //std::cout<<"xPrime "<<xPrime<<std::endl;
                     sylvanmats::linear::Vector3d v=p1/3.0+xPrime;
-                    vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v[0], v[1], v[2], c[0], c[1], c[2]));
+                    objPublisher.append(v);
                     v=p2/3.0+xPrime;
-                    vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v[0], v[1], v[2], c[0], c[1], c[2]));
+                    objPublisher.append(v);
                     v=p3/3.0+xPrime;
-                    vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v[0], v[1], v[2], c[0], c[1], c[2]));
+                    objPublisher.append(v);
                     v=p4/3.0+xPrime;
-                    vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v[0], v[1], v[2], c[0], c[1], c[2]));
+                    objPublisher.append(v);
                     sylvanmats::linear::Vector3d vn=(-(p2+p3+p4)/3.0).normalized();
                     normalLoop.insert(normalLoop.begin(), std::make_tuple(vn[0], vn[1], vn[2]));
                     vn=(-(p1+p3+p4)/3.0).normalized();
@@ -190,10 +187,9 @@ TEST_CASE("test copper unit cell"){
                     faceIndex+=4;
                 });
 
-                objPublisher.add("vertices", vertexLoop);
-                objPublisher.add("texture_vertices", vertexLoop);
-                objPublisher.add("normals", normalLoop);
-                objPublisher.add("indices", indexLoop);
+//                objPublisher.add("texture_vertices", vertexLoop);
+//                objPublisher.add("normals", normalLoop);
+//                objPublisher.add("indices", indexLoop);
                 std::string&& content2 = objPublisher.render();
                 std::ofstream ofs2("../../server/public/molecule.obj");
                 ofs2<<content2<<std::endl;
@@ -219,7 +215,7 @@ TEST_CASE("test copper unit cell"){
 }
 
 TEST_CASE("test graphite unit cell"){
-    std::string url = "http://www.crystallography.net/cod/result*?text=graphite&format=urls&el1=C";
+    std::string url = "https://www.crystallography.net/cod/result*?text=graphite&format=urls&el1=C";
     sylvanmats::reading::TCPReader tcpReader;
     CHECK(tcpReader(url, [&](std::istream& is){
         std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
@@ -231,7 +227,7 @@ TEST_CASE("test graphite unit cell"){
                 urls.push_back(std::string(token));
                 token = strtok(nullptr, delim.c_str());
         }
-        CHECK_EQ(urls.size(), 39);
+        CHECK_EQ(urls.size(), 42);
         url=urls[0];
 //        std::cout<<"url "<<url<<std::endl;
         CHECK(tcpReader(url, [&](std::istream& isr){
@@ -284,7 +280,7 @@ TEST_CASE("test graphite unit cell"){
 }
 
 TEST_CASE("test gypsum unit cell"){
-    std::string url = "http://www.crystallography.net/cod/result*?text=gypsum&format=urls";
+    std::string url = "https://www.crystallography.net/cod/result*?text=gypsum&format=urls";
     sylvanmats::reading::TCPReader tcpReader;
     CHECK(tcpReader(url, [&](std::istream& is){
         std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
@@ -296,7 +292,7 @@ TEST_CASE("test gypsum unit cell"){
                 urls.push_back(std::string(token));
                 token = strtok(nullptr, delim.c_str());
         }
-        CHECK_EQ(urls.size(), 21);
+        CHECK_EQ(urls.size(), 28);
         url=urls[0];
 //        std::cout<<"url "<<url<<std::endl;
         CHECK(tcpReader(url, [&](std::istream& isr){
@@ -511,7 +507,7 @@ TEST_CASE("test symmetry operations on 1q8h"){
         objPublisher.add("material_count", "1");
         std::vector<std::tuple<double, double, double, double, double, double>> vertexLoop;
         std::vector<std::tuple<double, double, double>> normalLoop;
-        std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long>> indexLoop;
+//        std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long>> indexLoop;
         unsigned int faceIndex=1;
         unsigned int connectionIndex=0;
         lua_State *L = luaL_newstate();
@@ -621,21 +617,23 @@ TEST_CASE("test symmetry operations on 1q8h"){
                 normalLoop.insert(normalLoop.begin(), std::make_tuple(vn[0], vn[1], vn[2]));
             }
             for(unsigned long long index=1+connectionIndex;index<=12-1+connectionIndex;index++){//[ a, c, b, c, b, d ]
-                indexLoop.insert(indexLoop.begin(), std::make_tuple(index, faceIndex, index+1, faceIndex, index+12, faceIndex, index+12+1, faceIndex));
+                objPublisher.appendIndices(std::make_tuple(index, faceIndex, index+1, faceIndex, index+12, faceIndex, index+12+1, faceIndex));
+//                indexLoop.insert(indexLoop.begin(), std::make_tuple(index, faceIndex, index+1, faceIndex, index+12, faceIndex, index+12+1, faceIndex));
                 //indexLoop.insert(indexLoop.begin(), std::make_tuple(index+12, 2*index, index, 2*index, index+12+1, 2*index));
                 faceIndex++;
             }
             unsigned long long index=1+connectionIndex;
-            indexLoop.insert(indexLoop.begin(), std::make_tuple(index-1+12, faceIndex, index, faceIndex, index-1+2*12, faceIndex, index+12, faceIndex));
+            objPublisher.appendIndices(std::make_tuple(index-1+12, faceIndex, index, faceIndex, index-1+2*12, faceIndex, index+12, faceIndex));
+            //indexLoop.insert(indexLoop.begin(), std::make_tuple(index-1+12, faceIndex, index, faceIndex, index-1+2*12, faceIndex, index+12, faceIndex));
             //indexLoop.insert(indexLoop.begin(), std::make_tuple(2*12, 2*index, 12, 2*index, 12+1, 2*index));
             connectionIndex+=24;
             faceIndex++;
             }
         }
-        objPublisher.add("vertices", vertexLoop);
-        objPublisher.add("texture_vertices", vertexLoop);
-        objPublisher.add("normals", normalLoop);
-        objPublisher.add("indices", indexLoop);
+//        objPublisher.add("vertices", vertexLoop);
+//        objPublisher.add("texture_vertices", vertexLoop);
+//        objPublisher.add("normals", normalLoop);
+//        objPublisher.add("indices", indexLoop);
         std::string&& content2 = objPublisher.render();
         std::ofstream ofs2("../../server/public/molecule2.obj");
         ofs2<<content2<<std::endl;

@@ -41,9 +41,11 @@ TEST_CASE("test accessible two spheres"){
         graph.atomSites[atomSiteA].Cartn_z=0.0;
         graph.atomSites[atomSiteA].type_symbol="N";
 
+        std::cout<<"accessible "<<std::endl;
         sylvanmats::surface::Accessible accessible(graph);
         accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){
             std::filesystem::path path="../../cifio/templates/svg";
+        std::cout<<"to svg "<<std::endl;
             sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
             std::vector<std::tuple<double, double, double, std::string>> circleLoop;
             double maxRadius=0.0;
@@ -51,11 +53,11 @@ TEST_CASE("test accessible two spheres"){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(c.center[0], c.center[1], c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0);
             }
-            svgPublisher.add("height", 4*maxRadius);
-            svgPublisher.add("width", 4*maxRadius);
-            svgPublisher.add("offset_x", 2*maxRadius);
-            svgPublisher.add("offset_y", 2*maxRadius);
-            svgPublisher.add("circles", circleLoop);
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("y_z.svg");
             ofs2<<content<<std::endl;
@@ -84,11 +86,11 @@ TEST_CASE("test accessible two spheres"){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(c.center[0], c.center[1], c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0);
             }
-            svgPublisher.add("height", 4*maxRadius);
-            svgPublisher.add("width", 4*maxRadius);
-            svgPublisher.add("offset_x", 2*maxRadius);
-            svgPublisher.add("offset_y", 2*maxRadius);
-            svgPublisher.add("circles", circleLoop);
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("x_z.svg");
             ofs2<<content<<std::endl;
@@ -117,11 +119,11 @@ TEST_CASE("test accessible two spheres"){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(c.center[0], c.center[1], c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0);
             }
-            svgPublisher.add("height", 4*maxRadius);
-            svgPublisher.add("width", 4*maxRadius);
-            svgPublisher.add("offset_x", 2*maxRadius);
-            svgPublisher.add("offset_y", 2*maxRadius);
-            svgPublisher.add("circles", circleLoop);
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("x_y.svg");
             ofs2<<content<<std::endl;
@@ -208,11 +210,11 @@ TEST_CASE("test accessible three spheres"){
             maxRadius=std::max(maxRadius, c.r0);
                 maxRadius=std::max(maxRadius, c.r0);
         }
-        svgPublisher.add("height", 4*maxRadius);
-        svgPublisher.add("width", 4*maxRadius);
-        svgPublisher.add("offset_x", 2*maxRadius);
-        svgPublisher.add("offset_y", 2*maxRadius);
-        svgPublisher.add("circles", circleLoop);
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
         std::string&& content = svgPublisher.render();
         std::ofstream ofs2("three"+name);
         ofs2<<content<<std::endl;
@@ -313,11 +315,11 @@ TEST_CASE("test accessible eight spheres"){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(scale*c.center[0], scale*c.center[1], scale*c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0+c.center.norm());
             }
-            svgPublisher.add("height", 2*2*maxRadius);
-            svgPublisher.add("width", 2*2*maxRadius);
-            svgPublisher.add("offset_x", 1*2*maxRadius);
-            svgPublisher.add("offset_y", 1*2*maxRadius);
-            svgPublisher.add("circles", circleLoop);
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
             svgPublisher.rawSetAttribute("has_arcs", true); 
             std::vector<std::tuple<double, double, double, double, double, int, std::string>> arcLoop;
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
@@ -349,11 +351,11 @@ TEST_CASE("test accessible eight spheres"){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(c.center[0], c.center[1], c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0+c.center.norm());
             }
-            svgPublisher.add("height", 4*maxRadius);
-            svgPublisher.add("width", 4*maxRadius);
-            svgPublisher.add("offset_x", 2*maxRadius);
-            svgPublisher.add("offset_y", 2*maxRadius);
-            svgPublisher.add("circles", circleLoop);
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("eight"+name);
             ofs2<<content<<std::endl;
@@ -399,11 +401,11 @@ TEST_CASE("test accessible 3sgs.cif.gz"){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(c.t0, c.s0, c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0);
             }
-            svgPublisher.add("height", 4*maxRadius);
-            svgPublisher.add("width", 4*maxRadius);
-            svgPublisher.add("offset_x", 2*maxRadius);
-            svgPublisher.add("offset_y", 2*maxRadius);
-            svgPublisher.add("circles", circleLoop);
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2(name);
             ofs2<<content<<std::endl;*/

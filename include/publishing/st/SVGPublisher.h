@@ -6,24 +6,29 @@
 #include "publishing/st/Publisher.h"
 
 
+#define FMT_HEADER_ONLY
+#include "fmt/format.h"
+#include "fmt/ranges.h"
+
 namespace sylvanmats::publishing::st{
     class SVGPublisher : public Publisher {
-    protected:
-        using Publisher::jniEnv;
-        using Publisher::jcls;
-        using Publisher::jshortcls;
-        using Publisher::jintcls;
-        using Publisher::jlongcls;
-        using Publisher::jdoublecls;
-        using Publisher::stObject;
     public:
-        using Publisher::add;
+        using Publisher::render;
+    protected:
+        std::string svgTemplate{};
+        
+        size_t height=0;
+        size_t width=0;
+        //offset_x, offset_y, circles, has_arcs, arcs, has_text, text_list
 
     public:
         SVGPublisher(std::filesystem::path& stPath);
         SVGPublisher(const SVGPublisher& orig) = delete;
         virtual ~SVGPublisher() =  default;
 
+        std::string render() override;
+        void setHeight(size_t height){this->height=height;};
+        void setWidth(size_t width){this->width=width;};
         void addWedges(std::string name, std::vector<std::tuple<double, double, double, double, double, int, std::string>>& wedges);
         void addLabelToWedges(std::string name, std::vector<std::tuple<double, double, double, double, double, int, std::string, double>>& wedgeText);
 

@@ -260,8 +260,10 @@ namespace sylvanmats::constitution {
 
             Graph() : atomSites(*this), compBond(*this), componentProperties(componentGraph), structConnType(componentGraph), componentNavigation(*this) {
             };
+            Graph(const Graph& orig) = delete;
+            virtual ~Graph()=default;
 
-            lemon::ListGraph::Node addComponentNode(){lemon::ListGraph::Node n=componentGraph.addNode();return n;};
+            lemon::ListGraph::Node addComponentNode(){lemon::ListGraph::Node n=componentGraph.addNode();return std::move(n);};
             unsigned long getNumberOfAtomSites(){return lemon::countNodes(*this);};
             unsigned long getNumberOfNeutronicAtomSites(){
                 unsigned long count=0;
@@ -270,6 +272,7 @@ namespace sylvanmats::constitution {
                 }
                 return count;
             };
+            unsigned long getNumberOfConnections(){return lemon::countEdges(*this);};
             void visibilityOn(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);
             void visibilityOff(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);
             void flipVisibility();

@@ -12,104 +12,113 @@ namespace sylvanmats::publishing::st{
 
     Publisher::Publisher(std::filesystem::path& stPath) : stPath (stPath){
 
-        sylvanmats::utils::JVMSingleton* jvmSingleton=sylvanmats::utils::JVMSingleton::getInstance();
-        jniEnv=jvmSingleton->getEnv();
-       jcls = jniEnv->FindClass("org/stringtemplate/v4/ST");
-       if (jcls == NULL) {
-          jniEnv->ExceptionDescribe();
-          return;
-       }
-       if (jcls != NULL) {
-        jclass jdcls = jniEnv->FindClass("org/stringtemplate/v4/STGroupDir");
-        if (jdcls == NULL) {
-           jniEnv->ExceptionDescribe();
-           return;
-        }
-          jmethodID constructorId = jniEnv->GetMethodID(jdcls, "<init>", "(Ljava/lang/String;)V");
-          if (constructorId != NULL) {
-            if(stPath.string().rfind("~/", 0)==0){
-                const char* home = getenv("HOME");
-                if (home) {
-                    stPath=home+stPath.string().substr(1);
-                }
-            }
-            if(std::filesystem::exists(stPath)){
-                    //std::ifstream file(stPath.c_str());
-                    //std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-                    //file.close();
-                jstring str = jniEnv->NewStringUTF(stPath.c_str());
-                stGroupDirObject = jniEnv->NewObject(jdcls, constructorId, str);
-                if (jniEnv->ExceptionCheck()) {
-                   jniEnv->ExceptionDescribe();
-                   jniEnv->ExceptionClear();
-                }
-                jclass jncls = jniEnv->FindClass("java/lang/Number");
-                jclass jscls = jniEnv->FindClass("java/lang/String");
-                jclass jnrcls = jniEnv->FindClass("org/stringtemplate/v4/NumberRenderer");
-                jmethodID constructorNRId = jniEnv->GetMethodID(jnrcls, "<init>", "()V");
-                jobject stNRObject = jniEnv->NewObject(jnrcls, constructorNRId);
-
-                jclass jsrcls = jniEnv->FindClass("org/stringtemplate/v4/StringRenderer");
-                jmethodID constructorSRId = jniEnv->GetMethodID(jsrcls, "<init>", "()V");
-                jobject stSRObject = jniEnv->NewObject(jsrcls, constructorSRId);
-
-                jmethodID methodId = jniEnv->GetMethodID(jdcls, "registerRenderer", "(Ljava/lang/Class;Lorg/stringtemplate/v4/AttributeRenderer;)V");
-                jniEnv->CallVoidMethod(stGroupDirObject, methodId, jncls, stNRObject);
-                jniEnv->CallVoidMethod(stGroupDirObject, methodId, jscls, stSRObject);
-            }
-          }
-          else std::cout<<"no constructor "<<std::endl;
-          jmethodID methodId = jniEnv->GetMethodID(jdcls, "getInstanceOf", "(Ljava/lang/String;)Lorg/stringtemplate/v4/ST;");
-          if (methodId != NULL) {
-            if(stPath.string().rfind("~/", 0)==0){
-                const char* home = getenv("HOME");
-                if (home) {
-                    stPath=home+stPath.string().substr(1);
-                }
-            }
-            if(std::filesystem::exists(stPath)){
-                for(auto& p: std::filesystem::directory_iterator(stPath)){
-                    jstring str = jniEnv->NewStringUTF(p.path().stem().c_str());
-                    stObject = jniEnv->CallObjectMethod(stGroupDirObject, methodId, str);
-                    if (jniEnv->ExceptionCheck()) {
-                       jniEnv->ExceptionDescribe();
-                       jniEnv->ExceptionClear();
-                    }
-                }
-            }
-          }
-       }
-       jshortcls = jniEnv->FindClass("java/lang/Short");
-       if (jshortcls == NULL) {
-          jniEnv->ExceptionDescribe();
-          return;
-       }
-       constructorShortId = jniEnv->GetMethodID(jshortcls, "<init>", "(S)V");
-       jboolcls = jniEnv->FindClass("java/lang/Boolean");
-       if (jboolcls == NULL) {
-          jniEnv->ExceptionDescribe();
-          return;
-       }
-       constructorBoolId = jniEnv->GetMethodID(jboolcls, "<init>", "(Z)V");
-       jintcls = jniEnv->FindClass("java/lang/Integer");
-       if (jintcls == NULL) {
-          jniEnv->ExceptionDescribe();
-          return;
-       }
-       constructorIntId = jniEnv->GetMethodID(jintcls, "<init>", "(I)V");
-       jlongcls = jniEnv->FindClass("java/lang/Long");
-       if (jlongcls == NULL) {
-          jniEnv->ExceptionDescribe();
-          return;
-       }
-       constructorLongId = jniEnv->GetMethodID(jlongcls, "<init>", "(J)V");
-       jdoublecls = jniEnv->FindClass("java/lang/Double");
-       if (jdoublecls == NULL) {
-          jniEnv->ExceptionDescribe();
-          return;
-       }
+//        sylvanmats::utils::JVMSingleton* jvmSingleton=sylvanmats::utils::JVMSingleton::getInstance();
+//        std::cout<<"got jvm "<<std::endl;
+//        jniEnv=jvmSingleton->getEnv();
+//       std::cout<<"got jvm env"<<std::endl;
+//       jcls = jniEnv->FindClass("org/stringtemplate/v4/ST");
+//      std::cout<<"got ST "<<std::endl;
+//       if (jcls == NULL) {
+//          jniEnv->ExceptionDescribe();
+//          return;
+//       }
+//       if (jcls != NULL) {
+//        jclass jdcls = jniEnv->FindClass("org/stringtemplate/v4/STGroupDir");
+//        if (jdcls == NULL) {
+//           jniEnv->ExceptionDescribe();
+//           return;
+//        }
+//          jmethodID constructorId = jniEnv->GetMethodID(jdcls, "<init>", "(Ljava/lang/String;)V");
+//          if (constructorId != NULL) {
+//            if(stPath.string().rfind("~/", 0)==0){
+//                const char* home = getenv("HOME");
+//                if (home) {
+//                    stPath=home+stPath.string().substr(1);
+//                }
+//            }
+//      std::cout<<"exist ST "<<std::filesystem::exists(stPath)<<std::endl;
+//            if(false && std::filesystem::exists(stPath)){
+//                    //std::ifstream file(stPath.c_str());
+//                    //std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+//                    //file.close();
+//                jstring str = jniEnv->NewStringUTF(stPath.c_str());
+//                stGroupDirObject = jniEnv->NewObject(jdcls, constructorId, str);
+//                if (jniEnv->ExceptionCheck()) {
+//                   jniEnv->ExceptionDescribe();
+//                   jniEnv->ExceptionClear();
+//                }
+//                jclass jncls = jniEnv->FindClass("java/lang/Number");
+//                jclass jscls = jniEnv->FindClass("java/lang/String");
+//                jclass jnrcls = jniEnv->FindClass("org/stringtemplate/v4/NumberRenderer");
+//                jmethodID constructorNRId = jniEnv->GetMethodID(jnrcls, "<init>", "()V");
+//                jobject stNRObject = jniEnv->NewObject(jnrcls, constructorNRId);
+//
+//                jclass jsrcls = jniEnv->FindClass("org/stringtemplate/v4/StringRenderer");
+//                jmethodID constructorSRId = jniEnv->GetMethodID(jsrcls, "<init>", "()V");
+//                jobject stSRObject = jniEnv->NewObject(jsrcls, constructorSRId);
+//
+//                jmethodID methodId = jniEnv->GetMethodID(jdcls, "registerRenderer", "(Ljava/lang/Class;Lorg/stringtemplate/v4/AttributeRenderer;)V");
+//                jniEnv->CallVoidMethod(stGroupDirObject, methodId, jncls, stNRObject);
+//                jniEnv->CallVoidMethod(stGroupDirObject, methodId, jscls, stSRObject);
+//            }
+//          }
+//          else std::cout<<"no constructor "<<std::endl;
+//          jmethodID methodId = jniEnv->GetMethodID(jdcls, "getInstanceOf", "(Ljava/lang/String;)Lorg/stringtemplate/v4/ST;");
+//     std::cout<<"exist v4 st "<<std::endl;
+//          if (false && methodId != NULL) {
+//            if(stPath.string().rfind("~/", 0)==0){
+//                const char* home = getenv("CNPM_HOME");
+//                if (home) {
+//                    stPath=home+stPath.string().substr(1);
+//                }
+//            }
+//            if(std::filesystem::exists(stPath)){
+//                for(auto& p: std::filesystem::directory_iterator(stPath)){
+//                    jstring str = jniEnv->NewStringUTF(p.path().stem().c_str());
+//                    stObject = jniEnv->CallObjectMethod(stGroupDirObject, methodId, str);
+//                    if (jniEnv->ExceptionCheck()) {
+//                       jniEnv->ExceptionDescribe();
+//                       jniEnv->ExceptionClear();
+//                    }
+//                }
+//            }
+//          }
+//     std::cout<<"exist v4 st "<<std::endl;
+//       }
+//       jshortcls = jniEnv->FindClass("java/lang/Short");
+//       if (jshortcls == NULL) {
+//          jniEnv->ExceptionDescribe();
+//          return;
+//       }
+//      std::cout<<"exist short "<<std::endl;
+//       constructorShortId = jniEnv->GetMethodID(jshortcls, "<init>", "(S)V");
+//       jboolcls = jniEnv->FindClass("java/lang/Boolean");
+//       if (jboolcls == NULL) {
+//          jniEnv->ExceptionDescribe();
+//          return;
+//       }
+//       constructorBoolId = jniEnv->GetMethodID(jboolcls, "<init>", "(Z)V");
+//       jintcls = jniEnv->FindClass("java/lang/Integer");
+//       if (jintcls == NULL) {
+//          jniEnv->ExceptionDescribe();
+//          return;
+//       }
+//     std::cout<<"exist int "<<std::endl;
+//       constructorIntId = jniEnv->GetMethodID(jintcls, "<init>", "(I)V");
+//       jlongcls = jniEnv->FindClass("java/lang/Long");
+//       if (jlongcls == NULL) {
+//          jniEnv->ExceptionDescribe();
+//          return;
+//       }
+//     std::cout<<"exist long "<<std::endl;
+//       constructorLongId = jniEnv->GetMethodID(jlongcls, "<init>", "(J)V");
+//       jdoublecls = jniEnv->FindClass("java/lang/Double");
+//       if (jdoublecls == NULL) {
+//          jniEnv->ExceptionDescribe();
+//          return;
+//       }
 //          std::cout << "jdoublecls. ...\n";
-       constructorDoubleId = jniEnv->GetMethodID(jdoublecls, "<init>", "(D)V");
+//       constructorDoubleId = jniEnv->GetMethodID(jdoublecls, "<init>", "(D)V");
     };
 
     void Publisher::add(std::string name, const char* value){
@@ -202,24 +211,6 @@ namespace sylvanmats::publishing::st{
              }
           }
        }
-    };
-
-    std::string Publisher::render(){
-         std::string content;
-       if (jcls != NULL) {
-          jmethodID methodId = jniEnv->GetMethodID(jcls, "render", "()Ljava/lang/String;");
-          if (methodId != NULL) {
-             jstring jcontent = (jstring)jniEnv->CallObjectMethod(stObject, methodId);
-             if (jniEnv->ExceptionCheck()) {
-                jniEnv->ExceptionDescribe();
-                jniEnv->ExceptionClear();
-             }
-            const char *cstr = jniEnv->GetStringUTFChars(jcontent, NULL);
-            content = std::string(cstr);
-            jniEnv->ReleaseStringUTFChars(jcontent, cstr);             
-          }
-       }
-       return content;
     };
 
 }

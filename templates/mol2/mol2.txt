@@ -1,0 +1,13 @@
+@<TRIPOS>MOLECULE
+{entry_id}
+{num_atoms} {num_bonds} {num_subst} 0 0
+SMALL
+NO_CHARGES
+
+
+@<TRIPOS>ATOM
+{atom_sites:}
+@<TRIPOS>BOND
+{atom_bonds:}
+@<TRIPOS>SUBSTRUCTURE
+{substructures:}

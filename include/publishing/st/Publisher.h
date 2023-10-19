@@ -46,7 +46,7 @@ namespace sylvanmats::publishing::st{
         virtual void add(std::string name, double value);
         virtual void rawSetAttribute(std::string name, bool value);
 
-        virtual std::string render();
+        virtual std::string render() = 0;
 
         template< class... Types >
         void add(std::string name, std::vector<std::tuple<Types...>>& value){
