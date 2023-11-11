@@ -11,7 +11,6 @@
 
 #include "zlib.h"
 #include "mio/mmap.hpp"
-#include "nlohmann/json.hpp"
 
 #include "antlr4-runtime.h"
 #include "reading/gz/GZReader.h"

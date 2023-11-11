@@ -15,11 +15,15 @@ namespace sylvanmats::standards{
                 }
                 return true;
             }*/
-            nlohmann::json::json_pointer startKey("/"+comp_ids[index]+"/start");
-            nlohmann::json::json_pointer endKey("/"+comp_ids[index]+"/end");
+            sylvanmats::io::json::Path jpStart(comp_ids[index].c_str());
+            jpStart["start"];
+            sylvanmats::io::json::Path jpEnd(comp_ids[index].c_str());
+            jpEnd["end"];
             try{
-            unsigned int start=jin[startKey];
-            unsigned int end=jin[endKey];
+        jsonBinder(jpStart, [&](std::any& v){
+            unsigned int start=std::any_cast<unsigned int>(v);
+        jsonBinder(jpEnd, [&](std::any& v){
+            unsigned int end=std::any_cast<unsigned int>(v);
 //std::cout<<"start "<<start<<" end"<<end<<" "<<(end-start)<<std::endl;
             if((end-start)<=0)return false;
             mio::mmap_source mmap2nd(path.string(), start, end-start+1);
@@ -134,6 +138,9 @@ namespace sylvanmats::standards{
                     }
                 }
             }
+        });
+        });
+            
             return ret;
             }
             catch(std::exception& ex){

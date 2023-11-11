@@ -11,7 +11,7 @@
 
 #include "zlib.h"
 #include "mio/mmap.hpp"
-#include "nlohmann/json.hpp"
+#include "io/json/Binder.h"
 
 #include "antlr4-runtime.h"
 #include "parsing/DICLexer.h"

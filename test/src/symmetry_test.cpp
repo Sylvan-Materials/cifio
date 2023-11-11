@@ -14,7 +14,6 @@
 #define protected public
 #include "zlib.h"
 #include "mio/mmap.hpp"
-#include "nlohmann/json.hpp"
 
 #include "antlr4-runtime.h"
 #include "reading/gz/GZReader.h"
@@ -35,6 +34,8 @@
 #include "algebra/geometric/Motor.h"
 #include "publishing/jgf/JGFPublisher.h"
 #include "publishing/st/MOL2Publisher.h"
+
+#include "io/json/Binder.h"
 
 // row-major
 template<std::floating_point T>

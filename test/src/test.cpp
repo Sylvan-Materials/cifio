@@ -16,7 +16,6 @@
 
 #include "zlib.h"
 #include "mio/mmap.hpp"
-#include "nlohmann/json.hpp"
 
 #include "antlr4-runtime.h"
 #include "reading/gz/GZReader.h"
@@ -34,6 +33,9 @@
 #include "publishing/jgf/JGFPublisher.h"
 #include "publishing/st/CIFPublisher.h"
 #include "publishing/gz/CIFCompressor.h"
+#include "PeriodicTable.h"
+
+#include "io/json/Binder.h"
 
 #include "lemon/vf2.h"
 
@@ -66,6 +68,21 @@ TEST_CASE("test jvm singleton") {
     CHECK(!content.empty());
 }
 
+TEST_CASE("test periodic table") {
+        sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
+
+        std::string h{"H"};
+        sylvanmats::element ele=periodicTable->index(h);
+        CHECK_EQ(ele.atomic_number, 1);
+        CHECK_EQ(ele.name, "Hydrogen");
+        CHECK_EQ(ele.symbol, h);
+        std::string c{"C"};
+        sylvanmats::element eleC=periodicTable->index(c);
+        CHECK_EQ(eleC.atomic_number, 6);
+        CHECK_EQ(eleC.name, "Carbon");
+        CHECK_EQ(eleC.symbol, c);
+}
+
 TEST_CASE("test component db") {
     std::filesystem::path path="../db/components.cif";
     CHECK(std::filesystem::exists(path));
@@ -75,7 +92,8 @@ TEST_CASE("test component db") {
         mmap.unmap();
         std::regex r(R"(\n?data_(\S*))");
 
-        nlohmann::json j;
+        sylvanmats::io::json::Binder jsonBinder;
+        sylvanmats::io::json::Path jp;
         std::string previousDataId="";
         for(std::sregex_iterator it=std::sregex_iterator(content.begin(), content.end(), r);it!=std::sregex_iterator();++it)
         {
@@ -83,14 +101,19 @@ TEST_CASE("test component db") {
             if((*it).size()>1){
                 std::string s = (*it)[0];
                 unsigned long p=(s.starts_with('\n')) ? (*it).position()+1 : (*it).position();
-                j[(*it)[1]]["start"]=p;
-                if(!previousDataId.empty())j[previousDataId]["end"]=p-1;
+                jsonBinder(jp, std::string_view((*it)[1].str()), sylvanmats::io::json::object());
+                sylvanmats::io::json::Path jpStart((*it)[1].str().c_str());
+                jsonBinder(jpStart, "start",p);
+                if(!previousDataId.empty()){
+                    sylvanmats::io::json::Path jpEnd(previousDataId.c_str());
+                    jsonBinder(jpEnd, "end",p-1);
+                }
                 previousDataId=(*it)[1];
             }
         }
         path.replace_extension(".json");
         std::ofstream ostrm(path, std::ios::trunc);
-        ostrm<<j<<std::endl;
+        ostrm<<jsonBinder<<std::endl;
         ostrm.close();
 
         std::vector<std::string> comp_ids;

@@ -15,24 +15,20 @@
 #include <multi_index/identity.hpp>
 #include <multi_index/member.hpp>
 
-#include "nlohmann/json.hpp"
+#include "io/json/Binder.h"
 
 namespace sylvanmats{
 
     struct element{
         int id;
-        unsigned int atomic_number;
-        std::string name;
-        std::string symbol;
-        double mass;
+        mutable unsigned int atomic_number;
+        mutable std::string name;
+        mutable std::string symbol;
+        mutable double mass;
+        element() = default;
+        element(int id) :  id (id) {};
         element(int id, unsigned int atomic_number, std::string name, std::string symbol, double mass): id (id), atomic_number (atomic_number), name (name), symbol (symbol), mass (mass) {};
-        element(const element& orig){
-            id=orig.id;
-            atomic_number=orig.atomic_number;
-            name=orig.name;
-            symbol=orig.symbol;
-            mass=orig.mass;
-        };
+        element(const element& orig) = default;
         virtual ~element() = default;
         bool operator<(const element& e)const{return id<e.id;}
     };
@@ -61,9 +57,9 @@ namespace sylvanmats{
         static PeriodicTable* periodicTable;
         PeriodicTable();
         PeriodicTable(const PeriodicTable& orig) = delete;
-        virtual ~PeriodicTable();
+        virtual ~PeriodicTable() = default;
         protected:
-        nlohmann::json jin;
+        sylvanmats::io::json::Binder jsonBinder;
         element_set elementSet;
         element_set_by_symbol& symbolIndex;
         public:

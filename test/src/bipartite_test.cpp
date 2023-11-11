@@ -25,7 +25,7 @@
 #include "surface/Accessible.h"
 #include "surface/BipartiteSurface.h"
 
-#include "nlohmann/json.hpp"
+#include "io/json/Binder.h"
 
 TEST_SUITE("bipartite"){
 

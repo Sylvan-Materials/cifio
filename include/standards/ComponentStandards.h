@@ -27,7 +27,7 @@
 #include <multi_index/member.hpp>
 
 #include "mio/mmap.hpp"
-#include "nlohmann/json.hpp"
+#include "io/json/Binder.h"
 
 #include "standards/AminoStandards.h"
 
@@ -39,7 +39,7 @@ namespace sylvanmats::standards{
     class ComponentStandards{
     protected:
         std::filesystem::path path="../db/components.cif";
-        nlohmann::json jin;
+        sylvanmats::io::json::Binder jsonBinder;
         standard_set componentStandardSet;
         standard_set_by_name& nameIndex;
     public:
@@ -49,7 +49,7 @@ namespace sylvanmats::standards{
             path.replace_extension(".json");
             std::ifstream file(path);
             std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-            jin=nlohmann::json::parse(jsonContent);
+            jsonBinder(jsonContent);
             file.close();
             path.replace_extension(".cif");
         };

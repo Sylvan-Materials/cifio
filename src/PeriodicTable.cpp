@@ -5,23 +5,19 @@
 #include <typeinfo>
 #include "PeriodicTable.h"
 
-#include "nlohmann/json.hpp"
-
 namespace sylvanmats{
 
     PeriodicTable* PeriodicTable::periodicTable=nullptr;
     //PeriodicTable* PeriodicTable::jin=nullptr;
     PeriodicTable::PeriodicTable() : symbolIndex(elementSet.get<symbol>()) {
         std::filesystem::path path="../cpp_modules/Periodic-Table-JSON/PeriodicTableJSON.json";
-        std::ifstream file(path);
-        std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        jin=nlohmann::json::parse(jsonContent);
-        file.close();
+        std::ifstream is(path);
+        std::string jsonContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+        jsonBinder(jsonContent);
+//        jsonBinder.display();
+        is.close();
     }
     
-    PeriodicTable::~PeriodicTable(){
-    };
-
     PeriodicTable* PeriodicTable::PeriodicTable::getInstance(){
         if(periodicTable==nullptr)
             periodicTable=new PeriodicTable();
@@ -31,16 +27,30 @@ namespace sylvanmats{
     element PeriodicTable::index(std::string& symbol) {
         element_set_by_symbol::iterator it=symbolIndex.find(symbol);
         if(it==symbolIndex.end()){
-//std::cout << typeid(jin["elements"]).name() << '\n';
-            for(auto it : jin["elements"]){ // | std::views:: ([&symbol](std::map& e){ std::this_thread::yield();return e["symbol"].compare(symbol)==0; })
-                //std::cout << typeid((it)).name() << '\n';
-                //std::cout<<" "<<(it)["number"].get<int>()<<" "<<(it)["name"].get<std::string>()<<" "<<(it)["symbol"].get<std::string>()<<" "<<(it)["atomic_mass"].get<double>()<<std::endl;
-                if((it)["symbol"].get<std::string>().compare(symbol)==0){
-                    elementSet.insert(element(elementSet.size(), (it)["number"].get<unsigned int>(), (it)["name"].get<std::string>(), (it)["symbol"].get<std::string>(), (it)["atomic_mass"].get<double>()));
-                    break;
+            sylvanmats::io::json::Path jpName;
+            jpName["elements"]["*"]["symbol"]==symbol;
+            size_t currentSetSize=elementSet.size();
+            jsonBinder(jpName, [&](std::string_view& key, std::any& v){
+//                std::cout<<"key "<<key<<std::endl;
+                if(key.compare("name")==0){
+                    if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
+                    elementSet.begin()->name=std::any_cast<std::string_view>(v);
                 }
-            }
-            it=symbolIndex.find(symbol);
+                else if(key.compare("number")==0){
+                    if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
+                    elementSet.begin()->atomic_number=std::any_cast<long>(v);
+                }
+                else if(key.compare("symbol")==0){
+                    if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
+                    elementSet.begin()->symbol=std::any_cast<std::string_view>(v);
+                }
+                else if(key.compare("atomic_mass")==0){
+                    if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
+                    elementSet.begin()->mass=std::any_cast<double>(v);
+                }
+            });
+
+                it=symbolIndex.find(symbol);
         }
         return static_cast<element>(*it);
     }

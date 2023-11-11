@@ -4,7 +4,7 @@
   "dependencies": {
     "lemon": "hg+https://lemon.cs.elte.hu/hg/lemon-main",
     "brigand": "edouarda/brigand",
-    "json": "nlohmann/json",
+    "json-thresher": "DataDriven-CAM/json-thresher",
     "xml-thresher":"DataDriven-CAM/xml-thresher",
     "mio": "mandreyel/mio",
     "multi_index": "Alexhuszagh/multi_index",
@@ -28,9 +28,10 @@
     "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
     "urlcpp": "cd cpp_modules/urlcpp && mkdir -p test && cnpm install && pwd && make -f Makefile all",
     "fmt": "cd cpp_modules/fmt && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../dist .. && make install",
+    "json": "cd cpp_modules/json-thresher && pwd && make -f Makefile all",
     "build": "cd test && pwd && which make && make -j 3 -f Makefile all",
-    "test": "cnpm build && cd test && pwd && ./test --test-case='test writing mol2 from 1ebcs hem' ",
-    "lib": "mkdir -p build/src/parsing && mkdir -p build/src/standards && mkdir -p build/src/constitution && mkdir -p build/src/density && mkdir -p build/src/lattice && mkdir -p build/src/symmetry && mkdir -p build/src/reading/tcp && mkdir -p build/src/publishing/jgf && mkdir -p build/src/publishing/gz && mkdir -p build/src/publishing/st && mkdir -p build/src/utils && which make && make -j 3 -f Makefile all"
+    "test": "cnpm build && cd test && pwd && ./test --test-case='test component db' ",
+    "lib": "which make && make -j 3 -f Makefile all"
   },
   "author": "rimmartin",
   "license": "MIT"

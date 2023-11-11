@@ -11,7 +11,6 @@
 
 #include "zlib.h"
 #include "mio/mmap.hpp"
-#include "nlohmann/json.hpp"
 
 #include "antlr4-runtime.h"
 #include "parsing/CIFLexer.h"
@@ -31,6 +30,8 @@
 #include "lattice/Populator.h"
 #include "density/ccp4/MapInput.h"
 #include "publishing/jgf/JGFPublisher.h"
+
+#include "io/json/Binder.h"
 
 #include "lemon/vf2.h"
 
