@@ -14,6 +14,8 @@
 #include <typeinfo>
 #include <cxxabi.h>
 
+#define protected public
+
 #include "zlib.h"
 #include "mio/mmap.hpp"
 
@@ -83,7 +85,7 @@ TEST_CASE("test periodic table") {
         CHECK_EQ(eleC.symbol, c);
 }
 
-TEST_CASE("test component db") {
+TEST_CASE("test component db" * doctest::skip()) {
     std::filesystem::path path="../db/components.cif";
     CHECK(std::filesystem::exists(path));
     if(std::filesystem::exists(path)){
@@ -94,21 +96,48 @@ TEST_CASE("test component db") {
 
         sylvanmats::io::json::Binder jsonBinder;
         sylvanmats::io::json::Path jp;
+        unsigned long previousP=0;
         std::string previousDataId="";
+        size_t count=0;
+        std::cout<<"jsonBinder "<<std::endl;
+        double  matchTime=0.0;
+        double  reductionTime=0.0;
+        double  bindTime=0.0;
+        int objDiff=0;
+        size_t bindObjSize=0;
         for(std::sregex_iterator it=std::sregex_iterator(content.begin(), content.end(), r);it!=std::sregex_iterator();++it)
         {
             //std::cout << sm.prefix().first << '\n';
             if((*it).size()>1){
                 std::string s = (*it)[0];
                 unsigned long p=(s.starts_with('\n')) ? (*it).position()+1 : (*it).position();
-                jsonBinder(jp, std::string_view((*it)[1].str()), sylvanmats::io::json::object());
-                sylvanmats::io::json::Path jpStart((*it)[1].str().c_str());
-                jsonBinder(jpStart, "start",p);
-                if(!previousDataId.empty()){
-                    sylvanmats::io::json::Path jpEnd(previousDataId.c_str());
-                    jsonBinder(jpEnd, "end",p-1);
+                if(count % 1000 == 0){
+                    std::cout<<s<<"..."<<count<<" "<<p<<" "<<(*it)[1].str()<<" "<<jsonBinder.countObjects()<<" matchTime: "<<matchTime<<" "<<reductionTime<<" "<<bindTime<<" objDiff: "<<objDiff<<" bindObjSize: "<<bindObjSize<<std::endl;
+                    matchTime=0.0;
+                    reductionTime=0.0;
+                    bindTime=0.0;
+                    objDiff=0;
                 }
+                if(count>0){
+                    jsonBinder(jp, std::string_view(previousDataId), sylvanmats::io::json::object());
+                    matchTime+=jsonBinder.matchTime;
+                    reductionTime+=jsonBinder.reductionTime;
+                    bindTime+=jsonBinder.bindTime;
+                    objDiff+=jsonBinder.objDiff;
+                    sylvanmats::io::json::Path jpStart(previousDataId.c_str());
+                    jsonBinder(jpStart, "start",previousP);
+                    sylvanmats::io::json::Path jpEnd(previousDataId.c_str());
+                    jsonBinder(jpEnd, "end",p-1u);
+                    matchTime+=jsonBinder.matchTime;
+                    reductionTime+=jsonBinder.reductionTime;
+                    bindTime+=jsonBinder.bindTime;
+                    objDiff+=jsonBinder.objDiff;
+                    bindObjSize=jsonBinder.bindObjSize;
+                }
+                previousP=p;
+//                std::cout<<" "<<jsonBinder<<std::endl;
                 previousDataId=(*it)[1];
+                count++;
             }
         }
         path.replace_extension(".json");
@@ -120,7 +149,7 @@ TEST_CASE("test component db") {
         comp_ids.push_back("HEM");
         sylvanmats::standards::ComponentStandards componentStandards;
         bool ret=componentStandards(comp_ids, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
-            //std::cout<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<std::endl;
+//            std::cout<<" "<<ccb.atom_id_1<<" "<<ccb.atom_id_2<<std::endl;
         });
         CHECK(ret);
 

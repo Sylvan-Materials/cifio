@@ -51,6 +51,7 @@ test: src/test.cpp
 	$(CXX) $(CXXFLAGS) -c -o build/src/test.o src/test.cpp 
 
 clean:
-	cd cpp_modules/zlib && $(MAKE) clean
-	cd cpp_modules/openssl && $(MAKE) clean
+	rm ./build/*
+	#cd cpp_modules/zlib && $(MAKE) clean
+	#cd cpp_modules/openssl && $(MAKE) clean
 

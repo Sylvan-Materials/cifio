@@ -6,7 +6,7 @@ namespace sylvanmats::standards{
             unsigned int index=0;
             do{
                      standard_set_by_name::iterator it=nameIndex.find(comp_ids[index]);
-                   //std::cout<<comp_id<<" (it!=nameIndex.end())."<<(it!=nameIndex.end())<<std::endl;
+//                   std::cout<<comp_ids.back()<<" (it!=nameIndex.end())."<<(it!=nameIndex.end())<<std::endl;
             /*if(it!=nameIndex.end()){
                 for(std::vector<chem_comp_bond>::iterator itStd=(*it).chemCombonds.begin();itStd!=(*it).chemCombonds.end();itStd++){
                     std::vector<chem_comp_atom<double>>::iterator cca1=std::find_if((*it).chemCompAtoms.begin(), (*it).chemCompAtoms.end(), [&](chem_comp_atom<double>& cca){return (*itStd).atom_id_1.compare(cca.atom_id)==0;});
@@ -19,11 +19,12 @@ namespace sylvanmats::standards{
             jpStart["start"];
             sylvanmats::io::json::Path jpEnd(comp_ids[index].c_str());
             jpEnd["end"];
+//            std::cout<<"jpStart "<<jpStart<<" jpEnd "<<jpEnd<<" "<<jsonBinder.countObjects()<<std::endl;
             try{
         jsonBinder(jpStart, [&](std::any& v){
-            unsigned int start=std::any_cast<unsigned int>(v);
+            unsigned int start=std::any_cast<long>(v);
         jsonBinder(jpEnd, [&](std::any& v){
-            unsigned int end=std::any_cast<unsigned int>(v);
+            unsigned int end=std::any_cast<long>(v);
 //std::cout<<"start "<<start<<" end"<<end<<" "<<(end-start)<<std::endl;
             if((end-start)<=0)return false;
             mio::mmap_source mmap2nd(path.string(), start, end-start+1);
@@ -144,6 +145,7 @@ namespace sylvanmats::standards{
             return ret;
             }
             catch(std::exception& ex){
+                std::cout<<"huh? ex: "<<ex.what()<<std::endl;
             }
             index++;
             }while(index<comp_ids.size());
