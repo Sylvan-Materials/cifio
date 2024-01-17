@@ -17,6 +17,13 @@
 #include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
+#include "constitution/Selection.h"
+#include "constitution/MOL2Populator.h"
+#include "PeriodicTable.h"
+#include "forcefield/OpenFF.h"
+
+#include "io/xml/Path.h"
+#include "io/xml/Binder.h"
 
 TEST_SUITE("type"){
 
@@ -77,6 +84,57 @@ TEST_CASE("test atom site struct"){
 //    std::cout<<"\"vector[3]\" "<<tagOperationsMap["vector[3]"]<<std::endl;
 //    std::cout<<"\"matrix[1][1]\" "<<tagOperationsMap["matrix[1][1]"]<<std::endl;
 //    std::cout<<"\"matrix[3][3]\" "<<tagOperationsMap["matrix[3][3]"]<<std::endl;
+}
+
+TEST_CASE("test reading SMIRNOFF offxml"){
+    sylvanmats::forcefield::OpenFF openFF;
+}
+
+TEST_CASE("test QD0 direct typing from mol2") {
+    sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
+    std::filesystem::path filePath="../../CASF-2016/coreset/4bkt/4bkt_ligand.mol2";
+std::cout<<"filePath "<<filePath<<std::endl;   
+    sylvanmats::constitution::Graph graph;
+    
+    sylvanmats::constitution::MOL2Populator populator;
+    populator(filePath, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+std::cout<<"graph.getNumberOfAtomSites() "<<graph.getNumberOfAtomSites()<<std::endl;   
+   CHECK_EQ(graph.getNumberOfAtomSites(), 36);
+   
+   });
+   CHECK_EQ(graph.getNumberOfAtomSites(), 36);
+   CHECK_EQ(lemon::countEdges(graph), 37);
+   CHECK_EQ(lemon::countNodes(graph.componentGraph), 1);  
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 0);
+    std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="QD0", .label_asym_id="*", .pdbx_PDB_ins_code="*", .auth_seq_id=1}};
+    sylvanmats::constitution::Selection selection(graph);
+    selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
+        graph.identifyFusedSystems(selectionGraph, [&periodicTable, &graph, &filePath](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph){
+            CHECK_EQ(lemon::countNodes(subSelectionGraph), 5);
+            CHECK_EQ(lemon::countEdges(subSelectionGraph), 5);
+            graph.identifyRings(subSelectionGraph);
+            for (lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeIt eSiteA(subSelectionGraph); eSiteA!=lemon::INVALID; ++eSiteA){
+                lemon::ListGraph::Node nSiteA=graph.u(eSiteA);
+                lemon::ListGraph::Node nSiteB=graph.v(eSiteA);
+                sylvanmats::element eleA=periodicTable->index(graph.atomSites[nSiteA].type_symbol);
+                std::cout<<"[#"<<eleA.atomic_number<<"X"<<lemon::countIncEdges(graph, nSiteA)<<":1]";
+                if(graph.compBond[eSiteA].value_order==3)std::cout<<"#";
+                else if(graph.compBond[eSiteA].value_order==2)std::cout<<"=";
+                else std::cout<<"-";
+                sylvanmats::element eleB=periodicTable->index(graph.atomSites[nSiteB].type_symbol);
+                std::cout<<"[#"<<eleB.atomic_number<<"X"<<lemon::countIncEdges(graph, nSiteB)<<":2]";
+                std::cout<<std::endl;
+            }       
+        });
+        selection.compliment(selectionGraph, [](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& complimentGraph){
+            CHECK_EQ(lemon::countNodes(complimentGraph), 0);
+            CHECK_EQ(lemon::countEdges(complimentGraph), 0);
+        });
+    });
+    CHECK_EQ(graph.getNumberOfRings(), 2);
+    CHECK_EQ(graph.countFlexibles(), 31);
+    sylvanmats::forcefield::OpenFF openFF;
+    openFF(graph);
 }
 
 }

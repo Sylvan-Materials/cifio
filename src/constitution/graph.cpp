@@ -106,7 +106,7 @@ namespace sylvanmats::constitution {
                     for(unsigned int j=0;j<suurballe.path(i).length();j++){
                         compBond[suurballe.path(i).nth(j)].ring=currRing;
                         //std::cout<<atomSites[subGraph.source(suurballe.path(i).nth(j))].label_atom_id<<" ";
-                        if(j==suurballe.path(i).length()-1)std::cout<<atomSites[subGraph.target(suurballe.path(i).nth(j))].label_atom_id<<std::endl;
+//                        if(j==suurballe.path(i).length()-1)std::cout<<atomSites[subGraph.target(suurballe.path(i).nth(j))].label_atom_id<<std::endl;
                     }
                     //std::cout<<std::endl;
                  }

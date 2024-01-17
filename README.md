@@ -17,19 +17,21 @@ to generate a lookup json.
 (Note: this will change as this project setup becomes more automated)
 
 
-Set compiler(>=10), antlr and zlib paths
+Set compiler(>=10)
 
 ```
-export PATH=~/node-v14.9.0-linux-x64/bin:~/Software/gcc-dev/dist/bin:$PATH
-export LD_LIBRARY_PATH=`pwd`/cpp_modules/antlr4/runtime/Cpp/run/usr/local/lib:`pwd`/cpp_modules/zlib/dist/lib:$LD_LIBRARY_PATH
+export PATH=~~/Software/gcc-dev/dist/bin:$PATH
+export LD_LIBRARY_PATH=`pwd`/../cnpm/cpp_modules/urlcpp:`pwd`/../cnpm/cpp_modules/libgit2/dist/lib:`pwd`:`pwd`/cpp_modules/json-thresher:`pwd`/cpp_modules/xml-thresher:$JAVA_HOME/lib:$JAVA_HOME/lib/server:~/Software/gcc-dev/dist/lib64::`pwd`/cpp_modules/antlr4/runtime/Cpp/run/lib:`pwd`/cpp_modules/urlcpp:`pwd`/cpp_modules/openssl/openssl/lib64:`pwd`/cpp_modules/zlib/dist/lib:$LD_LIBRARY_PATH
 ```
 
-Generate the c++ lexer/parser code once from the grammar:
+Generate the c++ lexer/parser code once from the grammars:
 
 ```
-export CLASSPATH=`pwd`/../antlr4/tool/target/antlr4-4.9.4-SNAPSHOT-complete.jar
+export CLASSPATH=`pwd`/src:`pwd`/build/src:`pwd`/cpp_modules/antlr4/tool/target/antlr4-4.13.2-SNAPSHOT-complete.jar
 cd grammars
-java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -o ../src/parsing -lib ../grammars -package sylvanmats CIFLexer.g4 CIFParser.g4
+java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -encoding utf-8 -o ../src/parsing -lib ../grammars -package sylvanmats CIFLexer.g4 CIFParser.g4
+java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -encoding utf-8 -o ../src/parsing -lib ../grammars -package sylvanmats MOL2Lexer.g4 MOL2Parser.g4
+java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -encoding utf-8 -o ../src/parsing -lib ../grammars -package sylvanmats SMIRKSLexer.g4 SMIRKSParser.g4
 cd ..
 ```
 
@@ -48,6 +50,7 @@ cnpm fmt
 cnpm lib
 
 #building and running unit tests
+export CIFIO_DB_LOCATION=`pwd`/db
 cnpm test
 
 ```

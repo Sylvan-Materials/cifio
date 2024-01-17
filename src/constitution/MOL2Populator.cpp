@@ -63,7 +63,7 @@ namespace sylvanmats::constitution {
                     graph.atomSites[n].Cartn_y=std::strtod(r->y(atomIndex)->getText().c_str(), nullptr);
                     graph.atomSites[n].Cartn_z=std::strtod(r->z(atomIndex)->getText().c_str(), nullptr);
                     std::string::size_type index=r->atom_type(atomIndex)->getText().find_first_of('.');
-                    graph.atomSites[n].type_symbol = (index==std::string::npos) ? r->atom_type(atomIndex)->getText() : r->atom_type(atomIndex)->getText().substr(index);
+                    graph.atomSites[n].type_symbol = (index==std::string::npos) ? r->atom_type(atomIndex)->getText() : r->atom_type(atomIndex)->getText().substr(0, index);
                     graph.atomSites[n].auth_seq_id=1;
                     graph.atomSites[n].label_comp_id.assign(r->atom_subst_name(atomIndex)->getText());
                     atomMap[atomIndex+1]=n;
