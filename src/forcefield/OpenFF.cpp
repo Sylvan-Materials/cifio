@@ -23,11 +23,12 @@ namespace sylvanmats::forcefield {
             smirksPatterns(eleA.atomic_number, lemon::countIncEdges(graph, nSiteA), type, lemon::countIncEdges(graph, nSiteB), eleB.atomic_number, [&](double length, double k, smirks_pattern& smirksPattern){
                 double norm=(sylvanmats::linear::Vector3d(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z)-sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z)).norm();
                 double eb=(k/2.0)*std::pow(norm-length, 2);
-                double deb=eb/norm;
+                double deb=k*(norm-length);
                 Ebond+=eb;
                 std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.compBond[eSiteA].value_order<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<norm<<" "<<length<<" "<<k<<" "<<eb<<" "<<deb<<std::endl;
 
             });
+            
         }
         std::cout<<std::endl;
         for (lemon::ListGraph::NodeIt nSiteB(graph); nSiteB!=lemon::INVALID; ++nSiteB){
@@ -55,7 +56,7 @@ namespace sylvanmats::forcefield {
                     smirksPatterns(eleA.atomic_number, lemon::countIncEdges(graph, nSiteA), typeA, lemon::countIncEdges(graph, nSiteB), eleB.atomic_number, typeB, lemon::countIncEdges(graph, nSiteC), eleC.atomic_number, [&](double angle, double k, smirks_pattern& smirksPattern){
                         double norm=findAngleBetween(sylvanmats::linear::Vector3d(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z)-sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z), sylvanmats::linear::Vector3d(graph.atomSites[nSiteC].Cartn_x, graph.atomSites[nSiteC].Cartn_y, graph.atomSites[nSiteC].Cartn_z)-sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z));
                         double eb=(k/2.0)*std::pow(norm-angle, 2);
-                        double deb=eb/norm;
+                        double deb=k*(norm-angle);
                         Eangle+=eb;
                         std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.compBond[eSiteA].value_order<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<graph.compBond[eSiteB].value_order<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<norm<<" "<<angle<<" "<<k<<" "<<eb<<" "<<deb<<std::endl;
 

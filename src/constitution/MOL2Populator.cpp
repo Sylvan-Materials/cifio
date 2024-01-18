@@ -81,6 +81,7 @@ namespace sylvanmats::constitution {
                     lemon::ListGraph::Node nSiteB=atomMap[std::strtol(r->target_atom_id(bondIndex)->getText().c_str(), nullptr, 10)];
                     lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
                     if(r->bond_type(bondIndex)->getText().compare("am")==0 || r->bond_type(bondIndex)->getText().compare("ar")==0){
+                        graph.compBond[e].value_order=2;
                     }
                     else{
                         graph.compBond[e].value_order=std::strtol(r->bond_type(bondIndex)->getText().c_str(), nullptr, 10);
