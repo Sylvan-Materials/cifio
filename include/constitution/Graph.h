@@ -9,6 +9,8 @@
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
 
+#include "forcefield/bond_type.h"
+
 namespace sylvanmats::constitution {
     
     struct symmetry_labels{
@@ -40,7 +42,9 @@ namespace sylvanmats::constitution {
         std::string auth_asym_id;
         std::string auth_atom_id;
         int pdbx_PDB_model_num;
-        unsigned short proton_count=0;
+        char8_t connectivity=0;
+        char8_t sssr_ring=0;
+        char8_t proton_count=0;
         bool visibility=true;
         //std::optiona<> accessibleArea;
 
@@ -67,12 +71,13 @@ namespace sylvanmats::constitution {
         std::string comp_id;
         std::string atom_id_1;
         std::string atom_id_2;
-        short value_order=1;
+        char8_t value_order=1;
         bool pdbx_aromatic_flag=false;
         bool pdbx_stereo_config=false;
         unsigned int pdbx_ordinal;
         bool flexible=false;
-        int ring=0;
+        forcefield::BOND_TYPE type=forcefield::BOND_ANY;
+        char8_t ring=0;
     };
 
     enum TERMINATION{

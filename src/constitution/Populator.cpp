@@ -407,6 +407,12 @@ namespace sylvanmats::constitution {
                                      if((graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_1)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_2)==0) || (graph.atomSites[nSiteA].label_atom_id.compare(ccb.atom_id_2)==0 && graph.atomSites[nSiteB].label_atom_id.compare(ccb.atom_id_1)==0)){
                                         lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
                                         graph.compBond[e].value_order=ccb.value_order;
+                                        if(graph.compBond[e].value_order==3)
+                                            graph.compBond[e].type=forcefield::BOND_TRIPLE;
+                                        else if(graph.compBond[e].value_order==2)
+                                            graph.compBond[e].type=forcefield::BOND_DOUBLE;
+                                        else if(graph.compBond[e].value_order==1)
+                                            graph.compBond[e].type=forcefield::BOND_SINGLE;
                                         matched=true;
                                      }
                                     if(graph.atomSites[nSiteA].label_atom_id.compare("N")==0)nNode=nSiteA;
@@ -460,6 +466,12 @@ namespace sylvanmats::constitution {
                                         //if(current_comp_id.compare("SO4")==0)std::cout<<"\t"<<entityCount<<" "<<graph.atomSites[nSiteA].auth_seq_id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<graph.atomSites[nSiteB].auth_seq_id<<std::endl;
                                         lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
                                         graph.compBond[e].value_order=ccb.value_order;
+                                        if(graph.compBond[e].value_order==3)
+                                            graph.compBond[e].type=forcefield::BOND_TRIPLE;
+                                        else if(graph.compBond[e].value_order==2)
+                                            graph.compBond[e].type=forcefield::BOND_DOUBLE;
+                                        else if(graph.compBond[e].value_order==1)
+                                            graph.compBond[e].type=forcefield::BOND_SINGLE;
                                         matched=true;
                                      }
                                     //if(graph.atomSites[nSiteA].label_atom_id.compare("N")==0)nNode=nSiteA;
@@ -729,6 +741,7 @@ namespace sylvanmats::constitution {
                            break;
                             case offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_value_order):
                                 graph.structureConnections.back().pdbx_value_order.assign(values[valueIndex]->getText());
+                                
                             break;
                         }
                         columnCount++;

@@ -83,8 +83,6 @@ namespace sylvanmats::forcefield {
                             lemon::ListGraph::Edge eB=lemon::INVALID;
                             lemon::ListGraph::Node nC=lemon::INVALID;
                             for(size_t baaIndex=0;baaIndex<r->bonds_and_atoms().size();baaIndex++){
-//                            for(std::vector<sylvanmats::SMIRKSParser::Bonds_and_atomsContext *>::iterator itB=r->bonds_and_atoms().begin();itB!=r->bonds_and_atoms().end();++itB){
-//                                sylvanmats::SMIRKSParser::AtomsContext* ac=(*itB)->atoms();
 //                    std::cout<<"got next atom "<<std::endl;
                                 if(baaIndex==0){
                                     nB=processAtoms(r->bonds_and_atoms(baaIndex)->atoms(), smirksPattern);
@@ -128,8 +126,12 @@ namespace sylvanmats::forcefield {
             for(size_t index=0;index<std::min(1ul, atoms->atomic_primitives().size());index++){
                 lemon::ListGraph::Node n=smirksPattern.smirksGraph.addNode();
                 if(atoms->atomic_primitives(index)->atomic_number()!=nullptr)smirksPattern.atomicPrimitives[n].atomic_number=std::strtoul(atoms->atomic_primitives(index)->atomic_number()->getText().c_str(), nullptr, 10);
+                if(atoms->atomic_primitives(index)->Star()!=nullptr)smirksPattern.atomicPrimitives[n].wildcard=true;
                 if(!atoms->atomic_primitives(index)->connectivity().empty())smirksPattern.atomicPrimitives[n].connectivity=std::strtoul(atoms->atomic_primitives(index)->connectivity(0)->getText().c_str(), nullptr, 10);
-                else smirksPattern.atomicPrimitives[n].connectivity=1;
+                else if(smirksPattern.atomicPrimitives[n].atomic_number==1)smirksPattern.atomicPrimitives[n].connectivity=1;
+                if(!atoms->atomic_primitives(index)->ring_connectivity().empty())smirksPattern.atomicPrimitives[n].ring_connectivity=std::strtoul(atoms->atomic_primitives(index)->ring_connectivity(0)->getText().c_str(), nullptr, 10);
+                if(!atoms->atomic_primitives(index)->ring_size().empty())smirksPattern.atomicPrimitives[n].ring_size=std::strtoul(atoms->atomic_primitives(index)->Ring_size(0)->getText().c_str(), nullptr, 10);
+                if(!atoms->atomic_primitives(index)->proton_count().empty())smirksPattern.atomicPrimitives[n].total_H_count=std::strtoul(atoms->atomic_primitives(index)->proton_count(0)->getText().c_str(), nullptr, 10);
                 if(!atoms->atomic_primitives(index)->formal_charge().empty())smirksPattern.atomicPrimitives[n].formal_charge=std::strtoul(atoms->atomic_primitives(index)->formal_charge(0)->getText().c_str(), nullptr, 10);
                 smirksPattern.atomicPrimitives[n].map_class=mapClass;
                 nPrev=n;
@@ -157,10 +159,14 @@ namespace sylvanmats::forcefield {
         else if(!bc->Pound().empty()){
             smirksPattern.bondPrimitives[e].type=BOND_TRIPLE;
         }
+        else if(!bc->Colon().empty()){
+            smirksPattern.bondPrimitives[e].type=BOND_AROMATIC;
+        }
         else if(!bc->Any().empty()){
             smirksPattern.bondPrimitives[e].type=BOND_ANY;
         }
-        if(!bc->At().empty()){
+        else if(!bc->At().empty()){
+            smirksPattern.bondPrimitives[e].type=BOND_ANY_RING;
             smirksPattern.bondPrimitives[e].any_ring=true;
         }
         if(!bc->Not().empty()){
@@ -169,22 +175,40 @@ namespace sylvanmats::forcefield {
         
     }
     
-    void SMIRKSPatterns::operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<void(double length, double k, smirks_pattern& smirksPattern)> apply){
+    void SMIRKSPatterns::operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<bool(double length, double k, smirks_pattern& smirksPattern)> apply){
+        bool ret=false;
         bond_set::index<bond_connectvity>::type::iterator it = bondSet.get<bond_connectvity>().find(std::make_tuple(atomic_numberA, connectivityA, type, connectivityB, atomic_numberB));
-        if (it != bondSet.get<bond_connectvity>().end()) {
-            apply((*it).length, (*it).k, (*it).smirksPattern);
+        for (;!ret && it != bondSet.get<bond_connectvity>().end();it++) {
+            ret=apply((*it).length, (*it).k, (*it).smirksPattern);
+        }
+        if(!ret){
+            if(atomic_numberA==1)connectivityA=1;
+            else connectivityA=0;
+            if(atomic_numberB==1)connectivityB=1;
+            else connectivityB=0;
+            it = bondSet.get<bond_connectvity>().find(std::make_tuple(atomic_numberA, connectivityA, type, connectivityB, atomic_numberB));
+            for (;!ret && it != bondSet.get<bond_connectvity>().end();it++) {
+                ret=apply((*it).length, (*it).k, (*it).smirksPattern);
+            }
+        }
+        if(!ret){
+            bond_set::index<wildcard_bond_connectvity>::type::iterator wit = bondSet.get<wildcard_bond_connectvity>().find(std::make_tuple(atomic_numberA, type, atomic_numberB));
+            for (;!ret && wit != bondSet.get<wildcard_bond_connectvity>().end();wit++) {
+                ret=apply((*wit).length, (*wit).k, (*wit).smirksPattern);
+            }
         }
     }
     
-    void SMIRKSPatterns::operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<void(double angle, double k, smirks_pattern& smirksPattern)> apply){
+    void SMIRKSPatterns::operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<bool(double angle, double k, smirks_pattern& smirksPattern)> apply){
         angle_set::index<angle_connectvity>::type::iterator it = angleSet.get<angle_connectvity>().find(std::make_tuple(atomic_numberA, connectivityA, typeA, connectivityB, atomic_numberB, typeB, connectivityC, atomic_numberC));
+        bool ret=false;
         if (it != angleSet.get<angle_connectvity>().end()) {
-            apply((*it).angle_length, (*it).k, (*it).smirksPattern);
+            ret=apply((*it).angle_length, (*it).k, (*it).smirksPattern);
         }
         else{
             angle_set::index<wildcard_angle_connectvity>::type::iterator wit = angleSet.get<wildcard_angle_connectvity>().find(std::make_tuple(typeA, connectivityB, atomic_numberB, typeB));
             if (wit != angleSet.get<wildcard_angle_connectvity>().end()) {
-                apply((*wit).angle_length, (*wit).k, (*it).smirksPattern);
+                ret=apply((*wit).angle_length, (*wit).k, (*wit).smirksPattern);
             }
         }
     }

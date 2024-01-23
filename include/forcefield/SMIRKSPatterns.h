@@ -16,6 +16,8 @@
 #include "parsing/SMIRKSLexer.h"
 #include "parsing/SMIRKSParser.h"
 
+#include "forcefield/bond_type.h"
+
 namespace sylvanmats::forcefield {
     
     enum CHIRALITY_TYPE{
@@ -41,20 +43,6 @@ namespace sylvanmats::forcefield {
         short total_H_count=0;
         short implicit_H_count=0;
         short map_class=0;
-    };
-    
-    enum BOND_TYPE{
-        BOND_SINGLE,
-        BOND_DOUBLE,
-        BOND_TRIPLE,
-        BOND_UP,
-        BOND_DOWN,
-        BOND_UP_OR_UNSPECIFIED,
-        BOND_DOWN_OR_UNSPECIFIED,
-        BOND_AROMATIC,
-        BOND_ANY,
-        BOND_ANY_RING
-        
     };
     
     struct bond_primitive{
@@ -139,12 +127,14 @@ namespace sylvanmats::forcefield {
         angle(int id) :  id (id) {};
         angle(int id, smirks_pattern smirksPattern, char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, double angle_length, double k): id (id), smirksPattern (smirksPattern), atomic_numberA (atomic_numberA), connectivityA (connectivityA), typeA (typeA), connectivityB (connectivityB), atomic_numberB (atomic_numberB), typeB (typeB), connectivityC (connectivityC), atomic_numberC (atomic_numberC), angle_length (angle_length), k (k) {};
         angle(const angle& orig) = default;
+        angle(angle&& orig) = default;
         virtual ~angle() = default;
         bool operator<(const angle& e)const{return id<e.id;}
     };
 
     struct smirk{};
     struct bond_connectvity{};
+    struct wildcard_bond_connectvity{};
     struct angle_connectvity{};
     struct wildcard_angle_connectvity{};
     struct proper_connectvity{};
@@ -166,6 +156,14 @@ namespace sylvanmats::forcefield {
                     multi_index::member<bond,char8_t,&bond::connectivityA>,
                     multi_index::member<bond,BOND_TYPE,&bond::type>,
                     multi_index::member<bond,char8_t,&bond::connectivityB>,
+                    multi_index::member<bond,char8_t,&bond::atomic_numberB>
+                >
+            >,
+        multi_index::hashed_non_unique<
+            multi_index::tag<wildcard_bond_connectvity>,
+            multi_index::composite_key<bond,
+                    multi_index::member<bond,char8_t,&bond::atomic_numberA>,
+                    multi_index::member<bond,BOND_TYPE,&bond::type>,
                     multi_index::member<bond,char8_t,&bond::atomic_numberB>
                 >
             >
@@ -217,8 +215,8 @@ namespace sylvanmats::forcefield {
         SMIRKSPatterns(const SMIRKSPatterns& orig) = delete;
         virtual ~SMIRKSPatterns() =  default;
         
-        void operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<void(double length, double k, smirks_pattern& smirksPattern)> apply);
-        void operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<void(double angle, double k, smirks_pattern& smirksPattern)> apply);
+        void operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<bool(double length, double k, smirks_pattern& smirksPattern)> apply);
+        void operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<bool(double angle, double k, smirks_pattern& smirksPattern)> apply);
         
     private:
         lemon::ListGraph::Node processAtoms(sylvanmats::SMIRKSParser::AtomsContext* atoms, sylvanmats::forcefield::smirks_pattern& smirksPattern);

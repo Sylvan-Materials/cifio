@@ -21,7 +21,7 @@ namespace sylvanmats::standards {
             for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
                 if(graph.atomSites[nSiteA].proton_count>0){
                     int incA=lemon::countIncEdges(graph, nSiteA);
-                    if(graph.atomSites[nSiteA].auth_seq_id==1 && graph.atomSites[nSiteA].type_symbol.compare("N")==0)std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<incA<<" "<<graph.atomSites[nSiteA].proton_count<<std::endl;
+                    if(graph.atomSites[nSiteA].auth_seq_id==1 && graph.atomSites[nSiteA].type_symbol.compare("N")==0)std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<incA<<" "<<static_cast<int>(graph.atomSites[nSiteA].proton_count)<<std::endl;
                     if(graph.atomSites[nSiteA].proton_count==1 && incA==2){
                         sylvanmats::linear::Vector3d aveHeavy=sylvanmats::linear::Vector3d::Zero();
                         for(lemon::ListGraph::IncEdgeIt eSiteA(graph, nSiteA); eSiteA!=lemon::INVALID; ++eSiteA){
@@ -71,7 +71,7 @@ namespace sylvanmats::standards {
                                 else sumOfProtons++;
                             }
                         }
-                    if(graph.atomSites[nSiteA].auth_seq_id==1 && graph.atomSites[nSiteA].type_symbol.compare("N")==0)std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<incA<<" "<<sumOfHeavies<<" "<<graph.atomSites[nSiteA].proton_count<<std::endl;
+                    if(graph.atomSites[nSiteA].auth_seq_id==1 && graph.atomSites[nSiteA].type_symbol.compare("N")==0)std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<incA<<" "<<sumOfHeavies<<" "<<static_cast<int>(graph.atomSites[nSiteA].proton_count)<<std::endl;
                          if(nSiteC!=lemon::INVALID){
                             if(graph.atomSites[nSiteA].proton_count==1 && sumOfHeavies>1){
                                 //aveHeavy+=sylvanmats::linear::Vector3d(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y,graph.atomSites[nSiteA].Cartn_z);

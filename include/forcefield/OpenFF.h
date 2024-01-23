@@ -8,6 +8,9 @@
 #include "lemon/connectivity.h"
 
 namespace sylvanmats::forcefield {
+
+    bool operator==(const atom_primitive& ltp, const sylvanmats::constitution::_atom_site<double>& rtp);
+        
     
     class OpenFF{
     protected:

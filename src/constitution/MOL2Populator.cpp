@@ -80,11 +80,21 @@ namespace sylvanmats::constitution {
                     lemon::ListGraph::Node nSiteA=atomMap[std::strtol(r->origin_atom_id(bondIndex)->getText().c_str(), nullptr, 10)];
                     lemon::ListGraph::Node nSiteB=atomMap[std::strtol(r->target_atom_id(bondIndex)->getText().c_str(), nullptr, 10)];
                     lemon::ListGraph::Edge e=graph.addEdge(nSiteA, nSiteB);
-                    if(r->bond_type(bondIndex)->getText().compare("am")==0 || r->bond_type(bondIndex)->getText().compare("ar")==0){
-                        graph.compBond[e].value_order=2;
+                    if(r->bond_type(bondIndex)->getText().compare("am")==0){
+                        graph.compBond[e].type=forcefield::BOND_SINGLE;
+                    }
+                    else if(r->bond_type(bondIndex)->getText().compare("ar")==0){
+//                        graph.compBond[e].value_order=2;
+                        graph.compBond[e].type=forcefield::BOND_AROMATIC;
                     }
                     else{
                         graph.compBond[e].value_order=std::strtol(r->bond_type(bondIndex)->getText().c_str(), nullptr, 10);
+                        if(graph.compBond[e].value_order==3)
+                            graph.compBond[e].type=forcefield::BOND_TRIPLE;
+                        else if(graph.compBond[e].value_order==2)
+                            graph.compBond[e].type=forcefield::BOND_DOUBLE;
+                        else if(graph.compBond[e].value_order==1)
+                            graph.compBond[e].type=forcefield::BOND_SINGLE;
                     }
                     
                 }
