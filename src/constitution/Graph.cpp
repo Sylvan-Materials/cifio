@@ -102,11 +102,11 @@ namespace sylvanmats::constitution {
                     if(suurballe.path(i).length()<2 || suurballe.path(i).length()>8)continue;
                     currRing++;
                     compBond[eSiteA].ring=currRing;
-                    atomSites[startNode].sssr_ring=suurballe.path(i).length()+1;
+                    if(atomSites[startNode].sssr_ring==0 || atomSites[startNode].sssr_ring>suurballe.path(i).length()+1)atomSites[startNode].sssr_ring=suurballe.path(i).length()+1;
                     //std::cout<<i<<" ";
                     for(unsigned int j=0;j<suurballe.path(i).length();j++){
                         compBond[suurballe.path(i).nth(j)].ring=currRing;
-                        atomSites[subGraph.target(suurballe.path(i).nth(j))].sssr_ring=suurballe.path(i).length()+1;
+                        if(atomSites[subGraph.target(suurballe.path(i).nth(j))].sssr_ring==0 || atomSites[subGraph.target(suurballe.path(i).nth(j))].sssr_ring>suurballe.path(i).length()+1)atomSites[subGraph.target(suurballe.path(i).nth(j))].sssr_ring=suurballe.path(i).length()+1;
                         //std::cout<<atomSites[subGraph.source(suurballe.path(i).nth(j))].label_atom_id<<" ";
 //                        if(j==suurballe.path(i).length()-1)std::cout<<atomSites[subGraph.target(suurballe.path(i).nth(j))].label_atom_id<<std::endl;
                     }

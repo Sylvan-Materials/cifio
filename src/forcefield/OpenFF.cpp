@@ -21,6 +21,7 @@ namespace sylvanmats::forcefield {
         double Eangle=0.0;
         size_t nodeCount=0;
         size_t edgeCount=0;
+        size_t incidentCount=0;
         lemon::ListGraph::NodeMap<bool> patternNodes(graph, false);
         lemon::ListGraph::EdgeMap<bool> patternEdges(graph, false);
         lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>> patternGraph(graph, patternNodes, patternEdges);
@@ -63,6 +64,7 @@ namespace sylvanmats::forcefield {
         std::cout<<std::endl;
         for (lemon::ListGraph::NodeIt nSiteB(graph); nSiteB!=lemon::INVALID; ++nSiteB){
             patternGraph.enable(nSiteB);
+            incidentCount+=lemon::countIncEdges(graph, nSiteB)*(lemon::countIncEdges(graph, nSiteB)-1)/2;
             for (lemon::ListGraph::IncEdgeIt eSiteA(graph, nSiteB); eSiteA!=lemon::INVALID; ++eSiteA){
                 lemon::ListGraph::Node nSiteA=graph.runningNode(eSiteA);
                 patternGraph.enable(nSiteA);
@@ -88,9 +90,10 @@ namespace sylvanmats::forcefield {
 //                    else if(graph.compBond[eSiteB].value_order==2)typeB=sylvanmats::forcefield::BOND_DOUBLE;
 //                    else typeB=sylvanmats::forcefield::BOND_SINGLE;
                     sylvanmats::element eleC=periodicTable->index(graph.atomSites[nSiteC].type_symbol);
-                    graph.atomSites[nSiteA].connectivity=lemon::countIncEdges(graph, nSiteA);
-                    graph.atomSites[nSiteB].connectivity=lemon::countIncEdges(graph, nSiteB);
-                    graph.atomSites[nSiteC].connectivity=lemon::countIncEdges(graph, nSiteC);
+//                    graph.atomSites[nSiteA].connectivity=lemon::countIncEdges(graph, nSiteA);
+//                    graph.atomSites[nSiteB].connectivity=lemon::countIncEdges(graph, nSiteB);
+//                    graph.atomSites[nSiteC].connectivity=lemon::countIncEdges(graph, nSiteC);
+                    bool hit=false;
                     smirksPatterns(eleA.atomic_number, graph.atomSites[nSiteA].connectivity, graph.compBond[eSiteA].type, graph.atomSites[nSiteB].connectivity, eleB.atomic_number, graph.compBond[eSiteB].type, graph.atomSites[nSiteC].connectivity, eleC.atomic_number, [&](double angle, double k, smirks_pattern& smirksPattern)->bool{
                         lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<lemon::ListGraph::Node> bijectionMap(patternGraph);
                         bool ret = lemon::vf2(smirksPattern.smirksGraph, patternGraph).induced().mapping(bijectionMap).nodeLabels<lemon::ListGraph::NodeMap<atom_primitive>, lemon::ListGraph::NodeMap<sylvanmats::constitution::_atom_site<double>>>(smirksPattern.atomicPrimitives, graph.atomSites).run();
@@ -101,9 +104,11 @@ namespace sylvanmats::forcefield {
                         Eangle+=eb;
                         std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteB].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<norm<<" "<<angle<<" "<<k<<" "<<eb<<" "<<deb<<std::endl;
                         nodeCount++;
+                        hit=true;
                         }
                         return ret;
                     });
+                    if(!hit)std::cout<<"missed \t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteB].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<static_cast<int>(graph.atomSites[nSiteA].sssr_ring)<<" "<<static_cast<int>(graph.atomSites[nSiteB].sssr_ring)<<" "<<static_cast<int>(graph.atomSites[nSiteC].sssr_ring)<<std::endl;
                         patternGraph.disable(nSiteC);
                         patternGraph.disable(eSiteB);
                         
@@ -116,7 +121,7 @@ namespace sylvanmats::forcefield {
             patternGraph.disable(nSiteB);
             
         }
-        std::cout<<"Found nodes: "<<nodeCount<<" of "<<lemon::countNodes(graph)<<std::endl;
+        std::cout<<"Found nodes: "<<nodeCount<<" of "<<incidentCount<<"("<<lemon::countNodes(graph)<<")"<<std::endl;
         std::cout<<"Found edges: "<<edgeCount<<" of "<<lemon::countEdges(graph)<<std::endl;
         std::cout<<"Ebond "<<Ebond<<" kcal/mol"<<std::endl;
         std::cout<<"Eangle "<<Eangle<<" kcal/mol"<<std::endl;
