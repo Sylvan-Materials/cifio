@@ -7,7 +7,7 @@
 
 namespace sylvanmats::forcefield {
 
-    SMIRKSPatterns::SMIRKSPatterns() : smirksIndex(bondSet.get<smirk>()){
+    SMIRKSPatterns::SMIRKSPatterns() {
         
         sylvanmats::io::xml::Binder xmlReaper("/home/roger/Documents/Optimization/openff-2.1.0.offxml", "");
         xmlReaper([&](std::u16string& utf16, std::vector<std::pair<sylvanmats::io::xml::tag_indexer, std::vector<sylvanmats::io::xml::tag_indexer>>>& dag){
@@ -30,7 +30,8 @@ namespace sylvanmats::forcefield {
                     const std::string patternsPath="/patterns";
                     antlr4::tree::xpath::XPath xpatternsPath(&parser,patternsPath);
                     std::vector<antlr4::tree::ParseTree*> pattern=xpatternsPath.evaluate(tree);
-                    sylvanmats::forcefield::smirks_pattern smirksPattern;
+                    std::string smirksBytes=cv.to_bytes(smirksValue);
+                    sylvanmats::forcefield::smirks_pattern smirksPattern(smirksBytes, std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr), std::strtod(cv.to_bytes(kValue).c_str(), nullptr));
                     for(std::vector<antlr4::tree::ParseTree*>::iterator it=pattern.begin();it!=pattern.end();it++){
                         if (sylvanmats::SMIRKSParser::PatternsContext* r=dynamic_cast<sylvanmats::SMIRKSParser::PatternsContext*>((*it))) {
                             lemon::ListGraph::Node nA=processAtoms(r->atoms(), smirksPattern);
@@ -49,9 +50,8 @@ namespace sylvanmats::forcefield {
                             }
                             if(nA!=lemon::INVALID && e!=lemon::INVALID && nB!=lemon::INVALID){
                                 std::cout<<" nodes: "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].atomic_number)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].connectivity)<<" "<<smirksPattern.bondPrimitives[e].type<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].connectivity)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].atomic_number)<<std::endl;
-                                bondSet.insert(bond(bondSet.size(), smirksPattern, smirksPattern.atomicPrimitives[nA].atomic_number, smirksPattern.atomicPrimitives[nA].connectivity, smirksPattern.bondPrimitives[e].type, smirksPattern.atomicPrimitives[nB].connectivity, smirksPattern.atomicPrimitives[nB].atomic_number, std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr), std::strtod(cv.to_bytes(kValue).c_str(), nullptr)));
-                                if(smirksPattern.atomicPrimitives[nA].atomic_number!=smirksPattern.atomicPrimitives[nB].atomic_number)
-                                    bondSet.insert(bond(bondSet.size(), smirksPattern, smirksPattern.atomicPrimitives[nB].atomic_number, smirksPattern.atomicPrimitives[nB].connectivity, smirksPattern.bondPrimitives[e].type, smirksPattern.atomicPrimitives[nA].connectivity, smirksPattern.atomicPrimitives[nA].atomic_number, std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr), std::strtod(cv.to_bytes(kValue).c_str(), nullptr)));
+                                bondSet.insert(bondSet.begin(), smirksPattern);
+//                                bondSet.push_back(smirksPattern);
                             }
                         }
                     }
@@ -74,7 +74,8 @@ namespace sylvanmats::forcefield {
                     const std::string patternsPath="/patterns";
                     antlr4::tree::xpath::XPath xpatternsPath(&parser,patternsPath);
                     std::vector<antlr4::tree::ParseTree*> pattern=xpatternsPath.evaluate(tree);
-                    sylvanmats::forcefield::smirks_pattern smirksPattern;
+                    std::string smirksBytes=cv.to_bytes(smirksValue);
+                    sylvanmats::forcefield::smirks_pattern smirksPattern(smirksBytes, std::numbers::pi*std::strtod(cv.to_bytes(angleValue).c_str(), nullptr)/180.0, std::strtod(cv.to_bytes(kValue).c_str(), nullptr));
                     for(std::vector<antlr4::tree::ParseTree*>::iterator it=pattern.begin();it!=pattern.end();it++){
                         if (sylvanmats::SMIRKSParser::PatternsContext* r=dynamic_cast<sylvanmats::SMIRKSParser::PatternsContext*>((*it))) {
                             lemon::ListGraph::Node nA=processAtoms(r->atoms(), smirksPattern);
@@ -103,9 +104,8 @@ namespace sylvanmats::forcefield {
                             }
                             if(nA!=lemon::INVALID && eA!=lemon::INVALID && nB!=lemon::INVALID && eB!=lemon::INVALID && nC!=lemon::INVALID){
                                 std::cout<<"a nodes: "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].atomic_number)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].connectivity)<<" "<<smirksPattern.bondPrimitives[eA].type<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].connectivity)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].atomic_number)<<" "<<" rs: "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].ring_size)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].ring_size)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nC].ring_size)<<std::endl;
-                                angleSet.insert(angle(angleSet.size(), smirksPattern, smirksPattern.atomicPrimitives[nA].atomic_number, smirksPattern.atomicPrimitives[nA].connectivity, smirksPattern.bondPrimitives[eA].type, smirksPattern.atomicPrimitives[nB].connectivity, smirksPattern.atomicPrimitives[nB].atomic_number, smirksPattern.bondPrimitives[eB].type, smirksPattern.atomicPrimitives[nC].connectivity, smirksPattern.atomicPrimitives[nC].atomic_number, std::numbers::pi*std::strtod(cv.to_bytes(angleValue).c_str(), nullptr)/180.0, std::strtod(cv.to_bytes(kValue).c_str(), nullptr)));
-                                if(smirksPattern.atomicPrimitives[nA].atomic_number!=smirksPattern.atomicPrimitives[nC].atomic_number || smirksPattern.bondPrimitives[eA].type!=smirksPattern.bondPrimitives[eB].type)
-                                    angleSet.insert(angle(angleSet.size(), smirksPattern, smirksPattern.atomicPrimitives[nC].atomic_number, smirksPattern.atomicPrimitives[nC].connectivity, smirksPattern.bondPrimitives[eB].type, smirksPattern.atomicPrimitives[nB].connectivity, smirksPattern.atomicPrimitives[nB].atomic_number, smirksPattern.bondPrimitives[eA].type, smirksPattern.atomicPrimitives[nA].connectivity, smirksPattern.atomicPrimitives[nA].atomic_number, std::numbers::pi*std::strtod(cv.to_bytes(angleValue).c_str(), nullptr)/180.0, std::strtod(cv.to_bytes(kValue).c_str(), nullptr)));
+                                angleSet.insert(angleSet.begin(), smirksPattern);
+//                                angleSet.push_back(smirksPattern);
                             }
                         }
                     }
@@ -177,64 +177,24 @@ namespace sylvanmats::forcefield {
     
     void SMIRKSPatterns::operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<bool(double length, double k, smirks_pattern& smirksPattern)> apply){
         bool ret=false;
-        bond_set::index<bond_connectvity>::type::iterator it = bondSet.get<bond_connectvity>().find(std::make_tuple(atomic_numberA, connectivityA, type, connectivityB, atomic_numberB));
-        for (;!ret && it != bondSet.get<bond_connectvity>().end();it++) {
-            ret=apply((*it).length, (*it).k, (*it).smirksPattern);
-        }
-        if(!ret){
-            char8_t wildConnectivityA=connectivityA;
-            char8_t wildConnectivityB=connectivityB;
-            if(atomic_numberA==1)wildConnectivityA=1;
-            else wildConnectivityA=0;
-            if(atomic_numberB==1)wildConnectivityB=1;
-            else wildConnectivityB=0;
-            it = bondSet.get<bond_connectvity>().find(std::make_tuple(atomic_numberA, wildConnectivityA, type, wildConnectivityB, atomic_numberB));
-            for (;!ret && it != bondSet.get<bond_connectvity>().end();it++) {
-                ret=apply((*it).length, (*it).k, (*it).smirksPattern);
-            }
-        }
-        if(!ret){
-            bond_set::index<wildcard_bond_connectvity>::type::iterator wit = bondSet.get<wildcard_bond_connectvity>().find(std::make_tuple(atomic_numberA, type, atomic_numberB));
-            for (;!ret && wit != bondSet.get<wildcard_bond_connectvity>().end();wit++) {
-                ret=apply((*wit).length, (*wit).k, (*wit).smirksPattern);
-            }
+        for (std::vector<smirks_pattern>::iterator it=bondSet.begin();!ret && it != bondSet.end();it++) {
+            lemon::ListGraph::EdgeIt eSiteA((*it).smirksGraph);
+            lemon::ListGraph::Node nSiteA=(*it).smirksGraph.u(eSiteA);
+            lemon::ListGraph::Node nSiteB=(*it).smirksGraph.v(eSiteA);
+            if (eSiteA!=lemon::INVALID && ((*it).bondPrimitives[eSiteA].type==BOND_ANY || (*it).bondPrimitives[eSiteA].type==type) && ((((*it).atomicPrimitives[nSiteA].wildcard || (*it).atomicPrimitives[nSiteA].atomic_number==atomic_numberA) && ((*it).atomicPrimitives[nSiteB].wildcard || (*it).atomicPrimitives[nSiteB].atomic_number==atomic_numberB)) || (((*it).atomicPrimitives[nSiteA].wildcard || (*it).atomicPrimitives[nSiteA].atomic_number==atomic_numberB) && ((*it).atomicPrimitives[nSiteB].wildcard || (*it).atomicPrimitives[nSiteB].atomic_number==atomic_numberA))))
+                ret=apply((*it).length, (*it).k, (*it));
         }
     }
     
     void SMIRKSPatterns::operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<bool(double angle, double k, smirks_pattern& smirksPattern)> apply){
-        angle_set::index<angle_connectvity>::type::iterator it = angleSet.get<angle_connectvity>().find(std::make_tuple(atomic_numberA, connectivityA, typeA, connectivityB, atomic_numberB, typeB, connectivityC, atomic_numberC));
         bool ret=false;
-        for (;!ret && it != angleSet.get<angle_connectvity>().end();it++) {
-            ret=apply((*it).angle_length, (*it).k, (*it).smirksPattern);
+        for (std::vector<smirks_pattern>::iterator it=angleSet.begin();!ret && it != angleSet.end();it++) {
+            lemon::ListGraph::EdgeIt eSiteA((*it).smirksGraph);
+            lemon::ListGraph::EdgeIt eSiteB=eSiteA;
+            ++eSiteB;
+            if (eSiteA!=lemon::INVALID && eSiteB!=lemon::INVALID && (((*it).bondPrimitives[eSiteA].type==BOND_ANY || (*it).bondPrimitives[eSiteA].type==typeA) && ((*it).bondPrimitives[eSiteB].type==BOND_ANY || (*it).bondPrimitives[eSiteB].type==typeB)) || (((*it).bondPrimitives[eSiteA].type==BOND_ANY || (*it).bondPrimitives[eSiteA].type==typeB) && ((*it).bondPrimitives[eSiteB].type==BOND_ANY || (*it).bondPrimitives[eSiteB].type==typeA)))
+             ret=apply((*it).length, (*it).k, (*it));
         }
-        if(!ret){
-            char8_t wildConnectivityA=connectivityA;
-            char8_t wildConnectivityB=connectivityB;
-            char8_t wildConnectivityC=connectivityC;
-            if(atomic_numberA==1)wildConnectivityA=0;
-            else wildConnectivityA=0;
-//            if(atomic_numberB==1)wildConnectivityB=1;
-//            else wildConnectivityB=0;
-            if(atomic_numberC==1)wildConnectivityC=0;
-            else wildConnectivityC=0;
-            it = angleSet.get<angle_connectvity>().find(std::make_tuple(atomic_numberA, wildConnectivityA, typeA, wildConnectivityB, atomic_numberB, typeB, wildConnectivityC, atomic_numberC));
-            for (;!ret && it != angleSet.get<angle_connectvity>().end();it++) {
-                ret=apply((*it).angle_length, (*it).k, (*it).smirksPattern);
-            }
-        }
-        if(!ret){
-            angle_set::index<wildcard_angle_connectvity>::type::iterator wit = angleSet.get<wildcard_angle_connectvity>().find(std::make_tuple(typeA, connectivityB, atomic_numberB, typeB));
-            for (;!ret && wit != angleSet.get<wildcard_angle_connectvity>().end();wit++) {
-                ret=apply((*wit).angle_length, (*wit).k, (*wit).smirksPattern);
-            }
-        }
-        if(!ret){
-            char8_t wildConnectivityB=0;
-            angle_set::index<wildcard_angle_connectvity>::type::iterator wit = angleSet.get<wildcard_angle_connectvity>().find(std::make_tuple(typeA, wildConnectivityB, atomic_numberB, typeB));
-            for (;!ret && wit != angleSet.get<wildcard_angle_connectvity>().end();wit++) {
-                ret=apply((*wit).angle_length, (*wit).k, (*wit).smirksPattern);
-            }
-        }
-    }
+   }
     
 }

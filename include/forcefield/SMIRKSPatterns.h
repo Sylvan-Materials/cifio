@@ -1,13 +1,13 @@
 #pragma once
 
 #include <functional>
-#include <multi_index_container.hpp>
-#include <multi_index/sequenced_index.hpp>
-#include <multi_index/ordered_index.hpp>
-#include <multi_index/identity.hpp>
-#include <multi_index/member.hpp>
-#include "multi_index/composite_key.hpp"
-#include <multi_index/hashed_index.hpp>
+//#include <multi_index_container.hpp>
+//#include <multi_index/sequenced_index.hpp>
+//#include <multi_index/ordered_index.hpp>
+//#include <multi_index/identity.hpp>
+//#include <multi_index/member.hpp>
+//#include "multi_index/composite_key.hpp"
+//#include <multi_index/hashed_index.hpp>
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
@@ -53,13 +53,19 @@ namespace sylvanmats::forcefield {
     
     struct smirks_pattern{
     public:
+        std::string smirks;
+        mutable double length;
+        mutable double k;
         lemon::ListGraph smirksGraph;
         lemon::ListGraph::NodeMap<atom_primitive> atomicPrimitives;
         lemon::ListGraph::EdgeMap<bond_primitive> bondPrimitives;
-        smirks_pattern(): smirksGraph (lemon::ListGraph()), atomicPrimitives(smirksGraph), bondPrimitives(smirksGraph) {
+        smirks_pattern(): smirks (""), length (0.0), k (0.0), smirksGraph (lemon::ListGraph()), atomicPrimitives(smirksGraph), bondPrimitives(smirksGraph) {
         
         };
-        smirks_pattern(const smirks_pattern& orig): smirksGraph (lemon::ListGraph()), atomicPrimitives (smirksGraph), bondPrimitives (smirksGraph) {
+        smirks_pattern(std::string& smirks, double length, double k): smirks (smirks), length (length), k (k), smirksGraph (lemon::ListGraph()), atomicPrimitives(smirksGraph), bondPrimitives(smirksGraph) {
+        
+        };
+        smirks_pattern(const smirks_pattern& orig): smirks (orig.smirks), length (orig.length), k (orig.k), smirksGraph (lemon::ListGraph()), atomicPrimitives (smirksGraph), bondPrimitives (smirksGraph) {
             if(lemon::countNodes(orig.smirksGraph)>0){
                 lemon::ListGraph::NodeMap<lemon::ListGraph::Node> nr(orig.smirksGraph);
                 lemon::ListGraph::EdgeMap<lemon::ListGraph::Edge> ecr(orig.smirksGraph);
@@ -88,128 +94,54 @@ namespace sylvanmats::forcefield {
                 }
             }
         };
+        smirks_pattern(smirks_pattern&& orig) = default;
         virtual ~smirks_pattern() = default;
-        bool operator<(const smirks_pattern& e)const{return lemon::countNodes(smirksGraph)<lemon::countNodes(e.smirksGraph);}
+        smirks_pattern& operator=(const smirks_pattern& other) // copy assignment
+    {
+        return *this = smirks_pattern(other);
+    }
+        smirks_pattern& operator=(smirks_pattern&& other) noexcept // move assignment
+    {
+        std::swap(smirks, other.smirks);
+        std::swap(length, other.length);
+        std::swap(k, other.k);
+            if(lemon::countNodes(other.smirksGraph)>0){
+                lemon::ListGraph::NodeMap<lemon::ListGraph::Node> nr(other.smirksGraph);
+                lemon::ListGraph::EdgeMap<lemon::ListGraph::Edge> ecr(other.smirksGraph);
+                lemon::graphCopy<lemon::ListGraph, lemon::ListGraph>(other.smirksGraph, smirksGraph).nodeRef(nr).edgeRef(ecr).run();
+                for(lemon::ListGraph::NodeIt n(other.smirksGraph);n!=lemon::INVALID; ++n){
+                    atomicPrimitives[nr[n]].wildcard=other.atomicPrimitives[n].wildcard;
+                    atomicPrimitives[nr[n]].atomic_number=other.atomicPrimitives[n].atomic_number;
+                    atomicPrimitives[nr[n]].connectivity=other.atomicPrimitives[n].connectivity;
+                    atomicPrimitives[nr[n]].aromatic=other.atomicPrimitives[n].aromatic;
+                    atomicPrimitives[nr[n]].aliphatic=other.atomicPrimitives[n].aliphatic;
+                    atomicPrimitives[nr[n]].ring_connectivity=other.atomicPrimitives[n].ring_connectivity;
+                    atomicPrimitives[nr[n]].ring_membership=other.atomicPrimitives[n].ring_membership;
+                    atomicPrimitives[nr[n]].ring_size=other.atomicPrimitives[n].ring_size;
+                    atomicPrimitives[nr[n]].valence=other.atomicPrimitives[n].valence;
+                    atomicPrimitives[nr[n]].formal_charge=other.atomicPrimitives[n].formal_charge;
+                    atomicPrimitives[nr[n]].chirality=other.atomicPrimitives[n].chirality;
+                    atomicPrimitives[nr[n]].degree=other.atomicPrimitives[n].degree;
+                    atomicPrimitives[nr[n]].total_H_count=other.atomicPrimitives[n].total_H_count;
+                    atomicPrimitives[nr[n]].implicit_H_count=other.atomicPrimitives[n].implicit_H_count;
+                    atomicPrimitives[nr[n]].map_class=other.atomicPrimitives[n].map_class;
+                }
+                for(lemon::ListGraph::EdgeIt e(other.smirksGraph);e!=lemon::INVALID; ++e){
+                    bondPrimitives[ecr[e]].type=other.bondPrimitives[e].type;
+                    bondPrimitives[ecr[e]].exclude=other.bondPrimitives[e].exclude;
+                    bondPrimitives[ecr[e]].any_ring=other.bondPrimitives[e].any_ring;
+                }
+            }
+        return *this;
+    }
+//        bool operator<(const smirks_pattern& e)const{return lemon::countNodes(smirksGraph)<lemon::countNodes(e.smirksGraph);}
     };
-    
-    struct bond{
-        int id;
-        mutable smirks_pattern smirksPattern;
-        char8_t atomic_numberA;
-        char8_t connectivityA;
-        BOND_TYPE type=BOND_ANY;
-        char8_t connectivityB;
-        char8_t atomic_numberB;
-        mutable double length;
-        mutable double k;
-        bond() = default;
-        bond(int id) :  id (id) {};
-        bond(int id, smirks_pattern smirksPattern, char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, double length, double k): id (id), smirksPattern (smirksPattern), atomic_numberA (atomic_numberA), connectivityA (connectivityA), type (type), connectivityB (connectivityB), atomic_numberB (atomic_numberB), length (length), k (k) {};
-        bond(const bond& orig) = default;
-        virtual ~bond() = default;
-        bool operator<(const bond& e)const{return id<e.id;}
-    };
-
-    struct angle{
-        int id;
-        mutable smirks_pattern smirksPattern;
-        char8_t atomic_numberA;
-        char8_t connectivityA;
-        BOND_TYPE typeA=BOND_ANY;
-        char8_t connectivityB;
-        char8_t atomic_numberB;
-        BOND_TYPE typeB=BOND_ANY;
-        char8_t connectivityC;
-        char8_t atomic_numberC;
-        mutable double angle_length;
-        mutable double k;
-        angle() = default;
-        angle(int id) :  id (id) {};
-        angle(int id, smirks_pattern smirksPattern, char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, double angle_length, double k): id (id), smirksPattern (smirksPattern), atomic_numberA (atomic_numberA), connectivityA (connectivityA), typeA (typeA), connectivityB (connectivityB), atomic_numberB (atomic_numberB), typeB (typeB), connectivityC (connectivityC), atomic_numberC (atomic_numberC), angle_length (angle_length), k (k) {};
-        angle(const angle& orig) = default;
-        angle(angle&& orig) = default;
-        virtual ~angle() = default;
-        bool operator<(const angle& e)const{return id<e.id;}
-    };
-
-    struct smirk{};
-    struct bond_connectvity{};
-    struct wildcard_bond_connectvity{};
-    struct angle_connectvity{};
-    struct wildcard_angle_connectvity{};
-    struct proper_connectvity{};
-    struct improper_connectvity{};
-    struct vdw_connectvity{};
-
-    using bond_set = multi_index::multi_index_container<
-      bond,
-      multi_index::indexed_by<
-        // sort by element
-        multi_index::ordered_unique<multi_index::identity<bond> >,
-
-        //multi_index::ordered_non_unique<multi_index::tag<name>,multi_index::member<bond,std::string,&bond::name> >,
-        multi_index::ordered_non_unique<multi_index::tag<smirk>,multi_index::member<bond,smirks_pattern,&bond::smirksPattern> >,
-        multi_index::hashed_non_unique<
-            multi_index::tag<bond_connectvity>,
-            multi_index::composite_key<bond,
-                    multi_index::member<bond,char8_t,&bond::atomic_numberA>,
-                    multi_index::member<bond,char8_t,&bond::connectivityA>,
-                    multi_index::member<bond,BOND_TYPE,&bond::type>,
-                    multi_index::member<bond,char8_t,&bond::connectivityB>,
-                    multi_index::member<bond,char8_t,&bond::atomic_numberB>
-                >
-            >,
-        multi_index::hashed_non_unique<
-            multi_index::tag<wildcard_bond_connectvity>,
-            multi_index::composite_key<bond,
-                    multi_index::member<bond,char8_t,&bond::atomic_numberA>,
-                    multi_index::member<bond,BOND_TYPE,&bond::type>,
-                    multi_index::member<bond,char8_t,&bond::atomic_numberB>
-                >
-            >
-      >
-    >;
-    using bond_set_by_smirks = multi_index::index<bond_set,smirk>::type;
-    
-    using angle_set = multi_index::multi_index_container<
-      angle,
-      multi_index::indexed_by<
-        // sort by element
-        multi_index::ordered_unique<multi_index::identity<angle> >,
-
-        //multi_index::ordered_non_unique<multi_index::tag<name>,multi_index::member<angle,std::string,&angle::name> >,
-        multi_index::ordered_non_unique<multi_index::tag<smirk>,multi_index::member<angle,smirks_pattern,&angle::smirksPattern> >,
-        multi_index::hashed_non_unique<
-            multi_index::tag<angle_connectvity>,
-            multi_index::composite_key<angle,
-                    multi_index::member<angle,char8_t,&angle::atomic_numberA>,
-                    multi_index::member<angle,char8_t,&angle::connectivityA>,
-                    multi_index::member<angle,BOND_TYPE,&angle::typeA>,
-                    multi_index::member<angle,char8_t,&angle::connectivityB>,
-                    multi_index::member<angle,char8_t,&angle::atomic_numberB>,
-                    multi_index::member<angle,BOND_TYPE,&angle::typeB>,
-                    multi_index::member<angle,char8_t,&angle::connectivityC>,
-                    multi_index::member<angle,char8_t,&angle::atomic_numberC>
-                >
-            >,
-        multi_index::hashed_non_unique<
-            multi_index::tag<wildcard_angle_connectvity>,
-            multi_index::composite_key<angle,
-                    multi_index::member<angle,BOND_TYPE,&angle::typeA>,
-                    multi_index::member<angle,char8_t,&angle::connectivityB>,
-                    multi_index::member<angle,char8_t,&angle::atomic_numberB>,
-                    multi_index::member<angle,BOND_TYPE,&angle::typeB>
-                >
-            >
-      >
-    >;
-    using angle_set_by_smirks = multi_index::index<angle_set,smirk>::type;
     
     class SMIRKSPatterns{
     protected:
-        bond_set bondSet;
-        bond_set_by_smirks& smirksIndex;
-        angle_set angleSet;
+        std::vector<smirks_pattern> bondSet;
+//        bond_set_by_smirks& smirksIndex;
+        std::vector<smirks_pattern> angleSet;
     public:
         SMIRKSPatterns();
         SMIRKSPatterns(const SMIRKSPatterns& orig) = delete;

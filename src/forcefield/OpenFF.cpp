@@ -49,7 +49,7 @@ namespace sylvanmats::forcefield {
                 double eb=(k/2.0)*std::pow(norm-length, 2);
                 double deb=k*(norm-length);
                 Ebond+=eb;
-                std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<norm<<" "<<length<<" "<<k<<" "<<eb<<" "<<deb<<std::endl;
+                std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<norm<<" "<<length<<" "<<k<<" "<<eb<<" "<<deb<<" "<<smirksPattern.smirks<<std::endl;
                 edgeCount++;
                 hit=true;
                 }
