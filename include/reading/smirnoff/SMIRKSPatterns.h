@@ -1,13 +1,6 @@
 #pragma once
 
 #include <functional>
-//#include <multi_index_container.hpp>
-//#include <multi_index/sequenced_index.hpp>
-//#include <multi_index/ordered_index.hpp>
-//#include <multi_index/identity.hpp>
-//#include <multi_index/member.hpp>
-//#include "multi_index/composite_key.hpp"
-//#include <multi_index/hashed_index.hpp>
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
@@ -18,7 +11,7 @@
 
 #include "forcefield/bond_type.h"
 
-namespace sylvanmats::forcefield {
+namespace sylvanmats::reading {
     
     enum CHIRALITY_TYPE{
         UNSPECIFIED,
@@ -46,7 +39,7 @@ namespace sylvanmats::forcefield {
     };
     
     struct bond_primitive{
-        BOND_TYPE type=BOND_ANY;
+        sylvanmats::forcefield::BOND_TYPE type=sylvanmats::forcefield::BOND_ANY;
         bool exclude=false;
         bool any_ring=false;
     };
@@ -57,7 +50,7 @@ namespace sylvanmats::forcefield {
         mutable double length;
         mutable double k;
         lemon::ListGraph smirksGraph;
-        lemon::ListGraph::NodeMap<atom_primitive> atomicPrimitives;
+        lemon::ListGraph::NodeMap<std::vector<atom_primitive>> atomicPrimitives;
         lemon::ListGraph::EdgeMap<bond_primitive> bondPrimitives;
         smirks_pattern(): smirks (""), length (0.0), k (0.0), smirksGraph (lemon::ListGraph()), atomicPrimitives(smirksGraph), bondPrimitives(smirksGraph) {
         
@@ -71,21 +64,7 @@ namespace sylvanmats::forcefield {
                 lemon::ListGraph::EdgeMap<lemon::ListGraph::Edge> ecr(orig.smirksGraph);
                 lemon::graphCopy<lemon::ListGraph, lemon::ListGraph>(orig.smirksGraph, smirksGraph).nodeRef(nr).edgeRef(ecr).run();
                 for(lemon::ListGraph::NodeIt n(orig.smirksGraph);n!=lemon::INVALID; ++n){
-                    atomicPrimitives[nr[n]].wildcard=orig.atomicPrimitives[n].wildcard;
-                    atomicPrimitives[nr[n]].atomic_number=orig.atomicPrimitives[n].atomic_number;
-                    atomicPrimitives[nr[n]].connectivity=orig.atomicPrimitives[n].connectivity;
-                    atomicPrimitives[nr[n]].aromatic=orig.atomicPrimitives[n].aromatic;
-                    atomicPrimitives[nr[n]].aliphatic=orig.atomicPrimitives[n].aliphatic;
-                    atomicPrimitives[nr[n]].ring_connectivity=orig.atomicPrimitives[n].ring_connectivity;
-                    atomicPrimitives[nr[n]].ring_membership=orig.atomicPrimitives[n].ring_membership;
-                    atomicPrimitives[nr[n]].ring_size=orig.atomicPrimitives[n].ring_size;
-                    atomicPrimitives[nr[n]].valence=orig.atomicPrimitives[n].valence;
-                    atomicPrimitives[nr[n]].formal_charge=orig.atomicPrimitives[n].formal_charge;
-                    atomicPrimitives[nr[n]].chirality=orig.atomicPrimitives[n].chirality;
-                    atomicPrimitives[nr[n]].degree=orig.atomicPrimitives[n].degree;
-                    atomicPrimitives[nr[n]].total_H_count=orig.atomicPrimitives[n].total_H_count;
-                    atomicPrimitives[nr[n]].implicit_H_count=orig.atomicPrimitives[n].implicit_H_count;
-                    atomicPrimitives[nr[n]].map_class=orig.atomicPrimitives[n].map_class;
+                    atomicPrimitives[nr[n]]=std::vector<atom_primitive>(orig.atomicPrimitives[n].begin(), orig.atomicPrimitives[n].end());
                 }
                 for(lemon::ListGraph::EdgeIt e(orig.smirksGraph);e!=lemon::INVALID; ++e){
                     bondPrimitives[ecr[e]].type=orig.bondPrimitives[e].type;
@@ -110,21 +89,7 @@ namespace sylvanmats::forcefield {
                 lemon::ListGraph::EdgeMap<lemon::ListGraph::Edge> ecr(other.smirksGraph);
                 lemon::graphCopy<lemon::ListGraph, lemon::ListGraph>(other.smirksGraph, smirksGraph).nodeRef(nr).edgeRef(ecr).run();
                 for(lemon::ListGraph::NodeIt n(other.smirksGraph);n!=lemon::INVALID; ++n){
-                    atomicPrimitives[nr[n]].wildcard=other.atomicPrimitives[n].wildcard;
-                    atomicPrimitives[nr[n]].atomic_number=other.atomicPrimitives[n].atomic_number;
-                    atomicPrimitives[nr[n]].connectivity=other.atomicPrimitives[n].connectivity;
-                    atomicPrimitives[nr[n]].aromatic=other.atomicPrimitives[n].aromatic;
-                    atomicPrimitives[nr[n]].aliphatic=other.atomicPrimitives[n].aliphatic;
-                    atomicPrimitives[nr[n]].ring_connectivity=other.atomicPrimitives[n].ring_connectivity;
-                    atomicPrimitives[nr[n]].ring_membership=other.atomicPrimitives[n].ring_membership;
-                    atomicPrimitives[nr[n]].ring_size=other.atomicPrimitives[n].ring_size;
-                    atomicPrimitives[nr[n]].valence=other.atomicPrimitives[n].valence;
-                    atomicPrimitives[nr[n]].formal_charge=other.atomicPrimitives[n].formal_charge;
-                    atomicPrimitives[nr[n]].chirality=other.atomicPrimitives[n].chirality;
-                    atomicPrimitives[nr[n]].degree=other.atomicPrimitives[n].degree;
-                    atomicPrimitives[nr[n]].total_H_count=other.atomicPrimitives[n].total_H_count;
-                    atomicPrimitives[nr[n]].implicit_H_count=other.atomicPrimitives[n].implicit_H_count;
-                    atomicPrimitives[nr[n]].map_class=other.atomicPrimitives[n].map_class;
+                    atomicPrimitives[nr[n]]=std::vector<atom_primitive>(other.atomicPrimitives[n].begin(), other.atomicPrimitives[n].end());
                 }
                 for(lemon::ListGraph::EdgeIt e(other.smirksGraph);e!=lemon::INVALID; ++e){
                     bondPrimitives[ecr[e]].type=other.bondPrimitives[e].type;
@@ -137,21 +102,37 @@ namespace sylvanmats::forcefield {
 //        bool operator<(const smirks_pattern& e)const{return lemon::countNodes(smirksGraph)<lemon::countNodes(e.smirksGraph);}
     };
     
+    struct smirks_torsions_pattern : public smirks_pattern {
+    public:
+        using smirks_pattern::smirks;
+        using smirks_pattern::smirksGraph;
+        
+        smirks_torsions_pattern(): smirks_pattern(){};
+        smirks_torsions_pattern(std::string& smirks, double length, double k) : smirks_pattern(smirks, 0.0, 0.0){};
+        virtual ~smirks_torsions_pattern() = default;
+        
+    };
+    struct smirks_vdw_pattern : public smirks_pattern {
+        
+    };
     class SMIRKSPatterns{
     protected:
         std::vector<smirks_pattern> bondSet;
 //        bond_set_by_smirks& smirksIndex;
         std::vector<smirks_pattern> angleSet;
+        std::vector<smirks_torsions_pattern> properSet;
+        std::vector<smirks_torsions_pattern> improperSet;
+        std::vector<smirks_vdw_pattern> vdwSet;
     public:
         SMIRKSPatterns();
         SMIRKSPatterns(const SMIRKSPatterns& orig) = delete;
         virtual ~SMIRKSPatterns() =  default;
         
-        void operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<bool(double length, double k, smirks_pattern& smirksPattern)> apply);
-        void operator()(char8_t atomic_numberA, char8_t connectivityA, BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<bool(double angle, double k, smirks_pattern& smirksPattern)> apply);
+        void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<bool(double length, double k, smirks_pattern& smirksPattern)> apply);
+        void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, sylvanmats::forcefield::BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<bool(double angle, double k, smirks_pattern& smirksPattern)> apply);
         
     private:
-        lemon::ListGraph::Node processAtoms(sylvanmats::SMIRKSParser::AtomsContext* atoms, sylvanmats::forcefield::smirks_pattern& smirksPattern);
-        void processBonds(sylvanmats::SMIRKSParser::Bond_primitivesContext* bc, lemon::ListGraph::Edge& e, sylvanmats::forcefield::smirks_pattern& smirksPattern);
+        lemon::ListGraph::Node processAtoms(sylvanmats::SMIRKSParser::AtomsContext* atoms, sylvanmats::reading::smirks_pattern& smirksPattern);
+        void processBonds(sylvanmats::SMIRKSParser::Bond_primitivesContext* bc, lemon::ListGraph::Edge& e, sylvanmats::reading::smirks_pattern& smirksPattern);
     };
 }

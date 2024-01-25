@@ -2,18 +2,31 @@
 #include "PeriodicTable.h"
 #include "linear/Vector.h"
 
+#include "lemon/list_graph.h"
 #include "lemon/vf2.h"
 
-namespace sylvanmats::forcefield {
+namespace sylvanmats{
+    namespace reading {
 
-    bool operator==(const atom_primitive& ltp, const sylvanmats::constitution::_atom_site<double>& rtp){
+    bool operator==(const std::vector<sylvanmats::reading::atom_primitive>& ltp, const sylvanmats::constitution::_atom_site<double>& rtp){
         sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
         sylvanmats::element ele=periodicTable->index((std::string&)rtp.type_symbol);
-        return (ltp.atomic_number==ele.atomic_number||ltp.wildcard) && (ltp.ring_size==0 || ltp.ring_size==rtp.sssr_ring) && (ltp.connectivity==0 || ltp.connectivity==rtp.connectivity);
+        bool an=false;
+        bool rs=false;
+        bool fc=false;
+        bool connectivity=false;
+        for(std::vector<sylvanmats::reading::atom_primitive>::const_iterator it=ltp.begin();(!an || !rs || !connectivity) && it!=ltp.end();it++){
+            if((*it).wildcard || (*it).atomic_number==ele.atomic_number)an=true;
+            if((*it).ring_size==0 || (*it).ring_size==rtp.sssr_ring)rs=true;
+            if((*it).formal_charge==0)fc=true;
+            if((*it).connectivity==0 || (*it).connectivity==rtp.connectivity)connectivity=true;
+        }
+        return an && (rs) && (connectivity) && (fc /*ltp.front().formal_charge==0 || ltp.front().formal_charge==rtp.sssr_ring*/);
     };
-
-    OpenFF::OpenFF() : smirksPatterns(SMIRKSPatterns()){
-    }
+}
+    namespace forcefield{
+        
+    OpenFF::OpenFF() : smirksPatterns(sylvanmats::reading::SMIRKSPatterns()){}
     
     void OpenFF::operator()(sylvanmats::constitution::Graph& graph){
         sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
@@ -41,9 +54,9 @@ namespace sylvanmats::forcefield {
             graph.atomSites[nSiteA].connectivity=lemon::countIncEdges(graph, nSiteA);
             graph.atomSites[nSiteB].connectivity=lemon::countIncEdges(graph, nSiteB);
             bool hit=false;
-            smirksPatterns(eleA.atomic_number, graph.atomSites[nSiteA].connectivity, graph.compBond[eSiteA].type, graph.atomSites[nSiteB].connectivity, eleB.atomic_number, [&](double length, double k, smirks_pattern& smirksPattern)->bool{
+            smirksPatterns(eleA.atomic_number, graph.atomSites[nSiteA].connectivity, graph.compBond[eSiteA].type, graph.atomSites[nSiteB].connectivity, eleB.atomic_number, [&](double length, double k, sylvanmats::reading::smirks_pattern& smirksPattern)->bool{
                 lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<lemon::ListGraph::Node> bijectionMap(patternGraph);
-                bool ret = lemon::vf2(smirksPattern.smirksGraph, patternGraph).induced().mapping(bijectionMap).nodeLabels<lemon::ListGraph::NodeMap<atom_primitive>, lemon::ListGraph::NodeMap<sylvanmats::constitution::_atom_site<double>>>(smirksPattern.atomicPrimitives, graph.atomSites).run();
+                bool ret = lemon::vf2(smirksPattern.smirksGraph, patternGraph).induced().mapping(bijectionMap).nodeLabels<lemon::ListGraph::NodeMap<std::vector<sylvanmats::reading::atom_primitive>>, lemon::ListGraph::NodeMap<sylvanmats::constitution::_atom_site<double>>>(smirksPattern.atomicPrimitives, graph.atomSites).run();
                 if(ret){
                 double norm=(sylvanmats::linear::Vector3d(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z)-sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z)).norm();
                 double eb=(k/2.0)*std::pow(norm-length, 2);
@@ -94,9 +107,9 @@ namespace sylvanmats::forcefield {
 //                    graph.atomSites[nSiteB].connectivity=lemon::countIncEdges(graph, nSiteB);
 //                    graph.atomSites[nSiteC].connectivity=lemon::countIncEdges(graph, nSiteC);
                     bool hit=false;
-                    smirksPatterns(eleA.atomic_number, graph.atomSites[nSiteA].connectivity, graph.compBond[eSiteA].type, graph.atomSites[nSiteB].connectivity, eleB.atomic_number, graph.compBond[eSiteB].type, graph.atomSites[nSiteC].connectivity, eleC.atomic_number, [&](double angle, double k, smirks_pattern& smirksPattern)->bool{
+                    smirksPatterns(eleA.atomic_number, graph.atomSites[nSiteA].connectivity, graph.compBond[eSiteA].type, graph.atomSites[nSiteB].connectivity, eleB.atomic_number, graph.compBond[eSiteB].type, graph.atomSites[nSiteC].connectivity, eleC.atomic_number, [&](double angle, double k, sylvanmats::reading::smirks_pattern& smirksPattern)->bool{
                         lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<lemon::ListGraph::Node> bijectionMap(patternGraph);
-                        bool ret = lemon::vf2(smirksPattern.smirksGraph, patternGraph).induced().mapping(bijectionMap).nodeLabels<lemon::ListGraph::NodeMap<atom_primitive>, lemon::ListGraph::NodeMap<sylvanmats::constitution::_atom_site<double>>>(smirksPattern.atomicPrimitives, graph.atomSites).run();
+                        bool ret = lemon::vf2(smirksPattern.smirksGraph, patternGraph).induced().mapping(bijectionMap).nodeLabels<lemon::ListGraph::NodeMap<std::vector<sylvanmats::reading::atom_primitive>>, lemon::ListGraph::NodeMap<sylvanmats::constitution::_atom_site<double>>>(smirksPattern.atomicPrimitives, graph.atomSites).run();
                         if(ret){
                         double norm=findAngleBetween(sylvanmats::linear::Vector3d(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z)-sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z), sylvanmats::linear::Vector3d(graph.atomSites[nSiteC].Cartn_x, graph.atomSites[nSiteC].Cartn_y, graph.atomSites[nSiteC].Cartn_z)-sylvanmats::linear::Vector3d(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z));
                         double eb=(k/2.0)*std::pow(norm-angle, 2);
@@ -128,4 +141,5 @@ namespace sylvanmats::forcefield {
       
     }
 
+    }
 }

@@ -1,20 +1,21 @@
 #pragma once
 
 #include "constitution/Graph.h"
-#include "forcefield/SMIRKSPatterns.h"
+#include "reading/smirnoff/SMIRKSPatterns.h"
 #include "linear/Vector.h"
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
 
-namespace sylvanmats::forcefield {
+namespace sylvanmats{
+    namespace reading {
 
-    bool operator==(const atom_primitive& ltp, const sylvanmats::constitution::_atom_site<double>& rtp);
-        
-    
+    bool operator==(const std::vector<sylvanmats::reading::atom_primitive>& ltp, const sylvanmats::constitution::_atom_site<double>& rtp);
+}
+    namespace forcefield {
     class OpenFF{
     protected:
-        SMIRKSPatterns smirksPatterns;
+        sylvanmats::reading::SMIRKSPatterns smirksPatterns;
     public:
         OpenFF();
         OpenFF(const OpenFF& orig) = delete;
@@ -28,4 +29,5 @@ namespace sylvanmats::forcefield {
         }
         
     };
+    }
 }
