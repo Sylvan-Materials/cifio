@@ -108,11 +108,34 @@ namespace sylvanmats::reading {
         using smirks_pattern::smirksGraph;
         
         smirks_torsions_pattern(): smirks_pattern(){};
-        smirks_torsions_pattern(std::string& smirks, double length, double k) : smirks_pattern(smirks, 0.0, 0.0){};
+        smirks_torsions_pattern(std::string& smirks) : smirks_pattern(smirks, 0.0, 0.0){};
         virtual ~smirks_torsions_pattern() = default;
         
+        double periodicity1Value=0.0;
+        double periodicity2Value=0.0;
+        double periodicity3Value=0.0;
+        double periodicity4Value=0.0;
+        double k1Value=0.0;
+        double k2Value=0.0;
+        double k3Value=0.0;
+        double k4Value=0.0;
+        double phase1Value=0.0;
+        double phase2Value=0.0;
+        double phase3Value=0.0;
+        double phase4Value=0.0;
+        double idivf1Value=0.0;
+        double idivf2Value=0.0;
+        double idivf3Value=0.0;
+        double idivf4Value=0.0;
     };
     struct smirks_vdw_pattern : public smirks_pattern {
+    public:
+        using smirks_pattern::smirks;
+        using smirks_pattern::smirksGraph;
+        
+        smirks_vdw_pattern(): smirks_pattern(){};
+        smirks_vdw_pattern(std::string& smirks) : smirks_pattern(smirks, 0.0, 0.0){};
+        virtual ~smirks_vdw_pattern() = default;
         
     };
     class SMIRKSPatterns{
@@ -130,6 +153,7 @@ namespace sylvanmats::reading {
         
         void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<bool(double length, double k, smirks_pattern& smirksPattern)> apply);
         void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, sylvanmats::forcefield::BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<bool(double angle, double k, smirks_pattern& smirksPattern)> apply);
+        void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, sylvanmats::forcefield::BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, sylvanmats::forcefield::BOND_TYPE typeC, char8_t connectivityD, char8_t atomic_numberD, std::function<bool(double angle, double k, smirks_torsions_pattern& smirksPattern)> apply);
         
     private:
         lemon::ListGraph::Node processAtoms(sylvanmats::SMIRKSParser::AtomsContext* atoms, sylvanmats::reading::smirks_pattern& smirksPattern);

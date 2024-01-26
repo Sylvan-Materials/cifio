@@ -87,7 +87,7 @@ TEST_CASE("test atom site struct"){
 }
 
 TEST_CASE("test reading SMIRNOFF offxml"){
-    sylvanmats::forcefield::OpenFF openFF;
+//    sylvanmats::forcefield::OpenFF openFF;
 }
 
 TEST_CASE("test QD0 direct typing from mol2") {
@@ -133,8 +133,9 @@ std::cout<<"graph.getNumberOfAtomSites() "<<graph.getNumberOfAtomSites()<<std::e
     });
     CHECK_EQ(graph.getNumberOfRings(), 2);
     CHECK_EQ(graph.countFlexibles(), 31);
-    sylvanmats::forcefield::OpenFF openFF;
-    openFF(graph);
+    sylvanmats::forcefield::OpenFF openFF(graph);
+    openFF();
+    std::cout<<"MM energy: "<<openFF.getEnergy()<<std::endl<<"grads: "<<openFF.getGradients()<<std::endl;
 }
 
 }

@@ -53,8 +53,8 @@ namespace sylvanmats::reading {
                             }
                             if(nA!=lemon::INVALID && e!=lemon::INVALID && nB!=lemon::INVALID){
                                 std::cout<<" nodes: "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().atomic_number)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().connectivity)<<" "<<smirksPattern.bondPrimitives[e].type<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().connectivity)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().atomic_number)<<std::endl;
-                                bondSet.insert(bondSet.begin(), smirksPattern);
-//                                bondSet.push_back(smirksPattern);
+//                                bondSet.insert(bondSet.begin(), smirksPattern);
+                                bondSet.push_back(smirksPattern);
                             }
                         }
                     }
@@ -107,8 +107,8 @@ namespace sylvanmats::reading {
                             }
                             if(nA!=lemon::INVALID && eA!=lemon::INVALID && nB!=lemon::INVALID && eB!=lemon::INVALID && nC!=lemon::INVALID){
                                 std::cout<<"a nodes: "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().atomic_number)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().connectivity)<<" "<<smirksPattern.bondPrimitives[eA].type<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().connectivity)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().atomic_number)<<" "<<" rs: "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().ring_size)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().ring_size)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nC].front().ring_size)<<std::endl;
-                                angleSet.insert(angleSet.begin(), smirksPattern);
-//                                angleSet.push_back(smirksPattern);
+//                                angleSet.insert(angleSet.begin(), smirksPattern);
+                                angleSet.push_back(smirksPattern);
                             }
                         }
                     }
@@ -169,6 +169,33 @@ namespace sylvanmats::reading {
                     ret=apply((*it).length, (*it).k, (*it));
             }
         }
-   }
+    }
+    
+    void SMIRKSPatterns::operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, sylvanmats::forcefield::BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, sylvanmats::forcefield::BOND_TYPE typeC, char8_t connectivityD, char8_t atomic_numberD, std::function<bool(double angle, double k, smirks_torsions_pattern& smirksPattern)> apply){
+        bool ret=false;
+        for (std::vector<smirks_torsions_pattern>::iterator it=properSet.begin();!ret && it != properSet.end();it++) {
+            lemon::ListGraph::EdgeIt eSiteA((*it).smirksGraph);
+            lemon::ListGraph::EdgeIt eSiteB=eSiteA;
+            ++eSiteB;
+            lemon::ListGraph::EdgeIt eSiteC=eSiteA;
+            ++eSiteC;
+            if (eSiteA!=lemon::INVALID && eSiteB!=lemon::INVALID && eSiteC!=lemon::INVALID && (((*it).bondPrimitives[eSiteA].type==sylvanmats::forcefield::BOND_ANY || (*it).bondPrimitives[eSiteA].type==typeA) && ((*it).bondPrimitives[eSiteB].type==sylvanmats::forcefield::BOND_ANY || (*it).bondPrimitives[eSiteB].type==typeB) && ((*it).bondPrimitives[eSiteC].type==sylvanmats::forcefield::BOND_ANY || (*it).bondPrimitives[eSiteC].type==typeC)) || (((*it).bondPrimitives[eSiteA].type==sylvanmats::forcefield::BOND_ANY || (*it).bondPrimitives[eSiteA].type==typeC) && ((*it).bondPrimitives[eSiteB].type==sylvanmats::forcefield::BOND_ANY || (*it).bondPrimitives[eSiteB].type==typeB)) && (((*it).bondPrimitives[eSiteC].type==sylvanmats::forcefield::BOND_ANY || (*it).bondPrimitives[eSiteC].type==typeA))){
+                lemon::ListGraph::Node nSiteA=lemon::INVALID;
+                lemon::ListGraph::Node nSiteB=lemon::INVALID;
+                lemon::ListGraph::Node nSiteC=lemon::INVALID;
+                lemon::ListGraph::Node nSiteD=lemon::INVALID;
+                for (lemon::ListGraph::NodeIt n((*it).smirksGraph); n!=lemon::INVALID; ++n){
+                    if(nSiteA==lemon::INVALID && (*it).atomicPrimitives[n].front().map_class==1)nSiteA=n;
+                    if(nSiteB==lemon::INVALID && (*it).atomicPrimitives[n].front().map_class==2)nSiteB=n;
+                    if(nSiteC==lemon::INVALID && (*it).atomicPrimitives[n].front().map_class==3)nSiteC=n;
+                    if(nSiteD==lemon::INVALID && (*it).atomicPrimitives[n].front().map_class==4)nSiteD=n;
+                }
+                if(nSiteA!=lemon::INVALID && nSiteB!=lemon::INVALID && nSiteC!=lemon::INVALID && nSiteD!=lemon::INVALID)
+                if(((((*it).atomicPrimitives[nSiteA].front().wildcard || (*it).atomicPrimitives[nSiteA].front().atomic_number==atomic_numberA) && ((*it).atomicPrimitives[nSiteB].front().wildcard || (*it).atomicPrimitives[nSiteB].front().atomic_number==atomic_numberB) && ((*it).atomicPrimitives[nSiteC].front().wildcard || (*it).atomicPrimitives[nSiteC].front().atomic_number==atomic_numberC) && ((*it).atomicPrimitives[nSiteD].front().wildcard || (*it).atomicPrimitives[nSiteD].front().atomic_number==atomic_numberD)) || (((*it).atomicPrimitives[nSiteA].front().wildcard || (*it).atomicPrimitives[nSiteA].front().atomic_number==atomic_numberD) && ((*it).atomicPrimitives[nSiteB].front().wildcard || (*it).atomicPrimitives[nSiteB].front().atomic_number==atomic_numberC)) && ((*it).atomicPrimitives[nSiteC].front().wildcard || (*it).atomicPrimitives[nSiteC].front().atomic_number==atomic_numberB) && ((*it).atomicPrimitives[nSiteD].front().wildcard || (*it).atomicPrimitives[nSiteD].front().atomic_number==atomic_numberA)))
+                    ret=apply((*it).length, (*it).k, (*it));
+            }
+        }
+        
+    }
     
 }

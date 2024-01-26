@@ -31,7 +31,7 @@ namespace sylvanmats::reading{
                 std::u16string&& idivf2Value=xmlReaper.findAttribute(u"idivf2", itS.angle_start, itS.angle_end);
                 std::u16string&& idivf3Value=xmlReaper.findAttribute(u"idivf3", itS.angle_start, itS.angle_end);
                 std::u16string&& idivf4Value=xmlReaper.findAttribute(u"idivf4", itS.angle_start, itS.angle_end);
-//                    std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
+                    std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(phase1Value).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(k1Value).c_str(), nullptr)<<std::endl;
                 antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                 sylvanmats::SMIRKSLexer lexer(&input);
                 antlr4::CommonTokenStream tokens(&lexer);
@@ -43,28 +43,64 @@ namespace sylvanmats::reading{
                 antlr4::tree::xpath::XPath xpatternsPath(&parser,patternsPath);
                 std::vector<antlr4::tree::ParseTree*> pattern=xpatternsPath.evaluate(tree);
                 std::string smirksBytes=cv.to_bytes(smirksValue);
-                sylvanmats::reading::smirks_torsions_pattern smirksPattern(smirksBytes, std::strtod(cv.to_bytes(phase1Value).c_str(), nullptr), std::strtod(cv.to_bytes(k1Value).c_str(), nullptr));
+                sylvanmats::reading::smirks_torsions_pattern smirksPattern(smirksBytes);
+                if(!periodicity1Value.empty())smirksPattern.periodicity1Value=std::strtod(cv.to_bytes(k1Value).c_str(), nullptr);
+                if(!periodicity2Value.empty())smirksPattern.periodicity2Value=std::strtod(cv.to_bytes(k2Value).c_str(), nullptr);
+                if(!periodicity3Value.empty())smirksPattern.periodicity3Value=std::strtod(cv.to_bytes(k3Value).c_str(), nullptr);
+                if(!periodicity4Value.empty())smirksPattern.periodicity4Value=std::strtod(cv.to_bytes(k4Value).c_str(), nullptr);
+                if(!k1Value.empty())smirksPattern.k1Value=std::strtod(cv.to_bytes(k1Value).c_str(), nullptr);
+                if(!k2Value.empty())smirksPattern.k2Value=std::strtod(cv.to_bytes(k2Value).c_str(), nullptr);
+                if(!k3Value.empty())smirksPattern.k3Value=std::strtod(cv.to_bytes(k3Value).c_str(), nullptr);
+                if(!k4Value.empty())smirksPattern.k4Value=std::strtod(cv.to_bytes(k4Value).c_str(), nullptr);
+                if(!phase1Value.empty())smirksPattern.phase1Value=std::strtod(cv.to_bytes(phase1Value).c_str(), nullptr);
+                if(!phase2Value.empty())smirksPattern.phase2Value=std::strtod(cv.to_bytes(phase2Value).c_str(), nullptr);
+                if(!phase3Value.empty())smirksPattern.phase3Value=std::strtod(cv.to_bytes(phase3Value).c_str(), nullptr);
+                if(!phase4Value.empty())smirksPattern.phase4Value=std::strtod(cv.to_bytes(phase4Value).c_str(), nullptr);
+                if(!idivf1Value.empty())smirksPattern.idivf1Value=std::strtod(cv.to_bytes(idivf1Value).c_str(), nullptr);
+                if(!idivf2Value.empty())smirksPattern.idivf2Value=std::strtod(cv.to_bytes(idivf2Value).c_str(), nullptr);
+                if(!idivf3Value.empty())smirksPattern.idivf3Value=std::strtod(cv.to_bytes(idivf3Value).c_str(), nullptr);
+                if(!idivf4Value.empty())smirksPattern.idivf4Value=std::strtod(cv.to_bytes(idivf4Value).c_str(), nullptr);
                 for(std::vector<antlr4::tree::ParseTree*>::iterator it=pattern.begin();it!=pattern.end();it++){
                     if (sylvanmats::SMIRKSParser::PatternsContext* r=dynamic_cast<sylvanmats::SMIRKSParser::PatternsContext*>((*it))) {
                         lemon::ListGraph::Node nA=processAtoms(r->atoms(), smirksPattern);
-                        lemon::ListGraph::Edge e=lemon::INVALID;
+                        lemon::ListGraph::Edge eA=lemon::INVALID;
                         lemon::ListGraph::Node nB=lemon::INVALID;
+                        lemon::ListGraph::Edge eB=lemon::INVALID;
+                        lemon::ListGraph::Node nC=lemon::INVALID;
+                        lemon::ListGraph::Edge eC=lemon::INVALID;
+                        lemon::ListGraph::Node nD=lemon::INVALID;
                         for(size_t baaIndex=0;baaIndex<r->bonds_and_atoms().size();baaIndex++){
-//                            for(std::vector<sylvanmats::SMIRKSParser::Bonds_and_atomsContext *>::iterator itB=r->bonds_and_atoms().begin();itB!=r->bonds_and_atoms().end();++itB){
-//                                sylvanmats::SMIRKSParser::AtomsContext* ac=(*itB)->atoms();
 //                    std::cout<<"got next atom "<<std::endl;
-                            nB=processAtoms(r->bonds_and_atoms(baaIndex)->atoms(), smirksPattern);
-                            if(nA!=lemon::INVALID && nB!=lemon::INVALID){
-                                sylvanmats::SMIRKSParser::Bond_primitivesContext* bc=r->bonds_and_atoms(baaIndex)->bond_primitives();
-                                e=smirksPattern.smirksGraph.addEdge(nA, nB);
-                                processBonds(bc, e, smirksPattern);
+                            if(baaIndex==0){
+                                nB=processAtoms(r->bonds_and_atoms(baaIndex)->atoms(), smirksPattern);
+                                if(nA!=lemon::INVALID && nB!=lemon::INVALID){
+                                    sylvanmats::SMIRKSParser::Bond_primitivesContext* bc=r->bonds_and_atoms(baaIndex)->bond_primitives();
+                                    eA=smirksPattern.smirksGraph.addEdge(nA, nB);
+                                    processBonds(bc, eA, smirksPattern);
+                                }
+                            }
+                            else if(baaIndex==1){
+                                nC=processAtoms(r->bonds_and_atoms(baaIndex)->atoms(), smirksPattern);
+                                if(nB!=lemon::INVALID && nC!=lemon::INVALID){
+                                    sylvanmats::SMIRKSParser::Bond_primitivesContext* bc=r->bonds_and_atoms(baaIndex)->bond_primitives();
+                                    eB=smirksPattern.smirksGraph.addEdge(nB, nC);
+                                    processBonds(bc, eB, smirksPattern);
+                                }
+                            }
+                            else if(baaIndex==2){
+                                nD=processAtoms(r->bonds_and_atoms(baaIndex)->atoms(), smirksPattern);
+                                if(nC!=lemon::INVALID && nD!=lemon::INVALID){
+                                    sylvanmats::SMIRKSParser::Bond_primitivesContext* bc=r->bonds_and_atoms(baaIndex)->bond_primitives();
+                                    eC=smirksPattern.smirksGraph.addEdge(nC, nD);
+                                    processBonds(bc, eC, smirksPattern);
+                                }
                             }
                         }
-                        if(nA!=lemon::INVALID && e!=lemon::INVALID && nB!=lemon::INVALID){
-                            std::cout<<"p nodes: "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().atomic_number)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().connectivity)<<" "<<smirksPattern.bondPrimitives[e].type<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().connectivity)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().atomic_number)<<std::endl;
-                            properSet.insert(properSet.begin(), smirksPattern);
-//                                properSet.push_back(smirksPattern);
-                        }
+                        if(nA!=lemon::INVALID && eA!=lemon::INVALID && nB!=lemon::INVALID && eB!=lemon::INVALID && nC!=lemon::INVALID && eC!=lemon::INVALID && nD!=lemon::INVALID){
+                            std::cout<<"p nodes: "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().atomic_number)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().connectivity)<<" "<<smirksPattern.bondPrimitives[eA].type<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().connectivity)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().atomic_number)<<" "<<" rs: "<<static_cast<int>(smirksPattern.atomicPrimitives[nA].front().ring_size)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nB].front().ring_size)<<" "<<static_cast<int>(smirksPattern.atomicPrimitives[nC].front().ring_size)<<std::endl;
+//                            properSet.insert(properSet.begin(), smirksPattern);
+                                properSet.push_back(smirksPattern);
+                    }
                     }
                 }
             }

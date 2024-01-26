@@ -18,4 +18,4 @@ proton_count : UnsignedInteger;
 formal_charge : PlusPlus | MinusMinus| (Minus|Plus) UnsignedInteger;
 map_class : UnsignedInteger;
     
-bond_primitives : (Minus|Double|Pound|Colon|Semicolon|Any|Not|Star|At)+;
+bond_primitives : (Minus|Double|Pound|Colon|Semicolon|(Any UnsignedInteger?)|Not|Star|At|Comma)+;
