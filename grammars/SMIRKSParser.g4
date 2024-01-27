@@ -3,7 +3,7 @@ parser grammar SMIRKSParser;
 
 options { tokenVocab = SMIRKSLexer; }
 
-patterns : atoms (bonds_and_atoms)+;
+patterns : atoms (bonds_and_atoms)*;
 atoms : LSquare (atomic_primitives Comma?)+ (Colon map_class)? RSquare (LParenthese branch RParenthese)*;
 bonds_and_atoms : bond_primitives atoms;
 branch : bond_primitives atoms;

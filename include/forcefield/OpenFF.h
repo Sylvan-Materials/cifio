@@ -41,6 +41,17 @@ namespace sylvanmats{
             return std::acos(dot/(v1.norm()*v2.norm()));
         }
         
+        inline double findDihedralBetween(sylvanmats::linear::Vector3d v1, sylvanmats::linear::Vector3d v2, sylvanmats::linear::Vector3d v3, sylvanmats::linear::Vector3d v4){
+            sylvanmats::linear::Vector3d b1=v2-v1;
+            sylvanmats::linear::Vector3d b2=v3-v2;
+            sylvanmats::linear::Vector3d b3=v4-v3;
+            sylvanmats::linear::Vector3d n1=b1.cross(b2).normalized();
+            sylvanmats::linear::Vector3d n2=b2.cross(b3).normalized();
+            double x=n1.dot(n2);
+            double y=n1.cross(b2.normalized()).dot(n2);
+            return std::atan2(y, x);
+        }
+        
     };
     }
 }

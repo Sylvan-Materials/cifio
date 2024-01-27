@@ -66,7 +66,7 @@ namespace sylvanmats{
                 double eb=(k/2.0)*std::pow(norm-length, 2);
                 double deb=k*(norm-length);
                 g[std::slice(3*graph.id(nSiteB), 3, 1)] += -deb*(pointB-pointC)/norm;
-                g[std::slice(3*graph.id(nSiteC), 3, 1)] += -deb*(pointB-pointC)/norm;
+                g[std::slice(3*graph.id(nSiteC), 3, 1)] += deb*(pointB-pointC)/norm;
                 Ebond+=eb;
                 std::cout<<"\t"<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteB].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<norm<<" "<<length<<" "<<k<<" "<<eb<<" "<<deb<<" "<<smirksPattern.smirks<<std::endl;
                 edgeCount++;
@@ -92,27 +92,28 @@ namespace sylvanmats{
                         graph.atomSites[nSiteA].connectivity=lemon::countIncEdges(graph, nSiteA);
                         graph.atomSites[nSiteD].connectivity=lemon::countIncEdges(graph, nSiteD);
                         bool hit=false;
-                        smirksPatterns(eleA.atomic_number, graph.atomSites[nSiteA].connectivity, graph.compBond[eSiteA].type, graph.atomSites[nSiteB].connectivity, eleB.atomic_number, graph.compBond[eSiteB].type, graph.atomSites[nSiteC].connectivity, eleC.atomic_number, graph.compBond[eSiteC].type, graph.atomSites[nSiteD].connectivity, eleD.atomic_number, [&](double angle, double k, sylvanmats::reading::smirks_torsions_pattern& smirksPattern)->bool{
+                        smirksPatterns(eleA.atomic_number, graph.atomSites[nSiteA].connectivity, graph.compBond[eSiteA].type, graph.atomSites[nSiteB].connectivity, eleB.atomic_number, graph.compBond[eSiteB].type, graph.atomSites[nSiteC].connectivity, eleC.atomic_number, graph.compBond[eSiteC].type, graph.atomSites[nSiteD].connectivity, eleD.atomic_number, [&](sylvanmats::reading::smirks_torsions_pattern& smirksPattern)->bool{
                             lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<lemon::ListGraph::Node> bijectionMap(patternGraph);
-                            std::cout<<smirksPattern.smirks<<" "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<std::endl;
+//                            std::cout<<smirksPattern.smirks<<" "<<lemon::countNodes(smirksPattern.smirksGraph)<<" "<<lemon::countEdges(smirksPattern.smirksGraph)<<std::endl;
                             bool ret = lemon::vf2(smirksPattern.smirksGraph, patternGraph).induced().mapping(bijectionMap).nodeLabels<lemon::ListGraph::NodeMap<std::vector<sylvanmats::reading::atom_primitive>>, lemon::ListGraph::NodeMap<sylvanmats::constitution::_atom_site<double>>>(smirksPattern.atomicPrimitives, graph.atomSites).run();
                             if(ret){
                                 sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
                                 sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
                                 sylvanmats::linear::Vector3d pointC(graph.atomSites[nSiteC].Cartn_x, graph.atomSites[nSiteC].Cartn_y, graph.atomSites[nSiteC].Cartn_z);
                                 sylvanmats::linear::Vector3d pointD(graph.atomSites[nSiteD].Cartn_x, graph.atomSites[nSiteD].Cartn_y, graph.atomSites[nSiteD].Cartn_z);
-//////                            double norm=findAngleBetween(pointA-pointB, pointC-pointB);
-//////                            double eb=(k/2.0)*std::pow(norm-angle, 2);
+                                double dihedral=findDihedralBetween(pointA, pointB, pointC, pointD);
+                                
+                                double et=smirksPattern.k1Value*(1.0+std::cos(smirksPattern.periodicity1Value*dihedral-smirksPattern.phase1Value))+smirksPattern.k2Value*(1.0+std::cos(smirksPattern.periodicity2Value*dihedral-smirksPattern.phase2Value))+smirksPattern.k3Value*(1.0+std::cos(smirksPattern.periodicity3Value*dihedral-smirksPattern.phase3Value))+smirksPattern.k4Value*(1.0+std::cos(smirksPattern.periodicity4Value*dihedral-smirksPattern.phase4Value));
 //////                            double deb=k*(norm-angle);
 //////
-//////                            Eproper+=eb;
+                                Eproper+=et;
 ////                            std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteB].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<norm<<" "<<angle<<" "<<k<<" "<<eb<<" "<<deb<<std::endl;
                             properCount++;
                             hit=true;
                             }
                             return ret;
                         });
-                        if(!hit)std::cout<<"missed \t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteB].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<static_cast<int>(graph.atomSites[nSiteA].sssr_ring)<<" "<<static_cast<int>(graph.atomSites[nSiteB].sssr_ring)<<" "<<static_cast<int>(graph.atomSites[nSiteC].sssr_ring)<<std::endl;
+                        if(!hit)std::cout<<"missed \t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteB].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteC].value_order)<<" "<<graph.atomSites[nSiteD].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<static_cast<int>(graph.atomSites[nSiteA].sssr_ring)<<" "<<static_cast<int>(graph.atomSites[nSiteB].sssr_ring)<<" "<<static_cast<int>(graph.atomSites[nSiteC].sssr_ring)<<std::endl;
                         
                         patternGraph.disable(nSiteD);
                         patternGraph.disable(nSiteA);
@@ -156,10 +157,14 @@ namespace sylvanmats{
                             sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
                             sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
                             sylvanmats::linear::Vector3d pointC(graph.atomSites[nSiteC].Cartn_x, graph.atomSites[nSiteC].Cartn_y, graph.atomSites[nSiteC].Cartn_z);
-                        double norm=findAngleBetween(pointA-pointB, pointC-pointB);
+                            sylvanmats::linear::Vector3d vectorAB=pointA-pointB;
+                            sylvanmats::linear::Vector3d vectorCB=pointC-pointB;
+                        double norm=findAngleBetween(vectorAB, vectorCB);
                         double eb=(k/2.0)*std::pow(norm-angle, 2);
                         double deb=k*(norm-angle);
-                        
+                        g[3*graph.id(nSiteB)] += (vectorAB.cross(vectorAB.cross(vectorCB))).norm()/vectorAB.norm();
+                        g[3*graph.id(nSiteB)+2] += (vectorCB.cross(vectorCB.cross(vectorAB))).norm()/vectorCB.norm();
+                        g[3*graph.id(nSiteB)+1] -= (g[3*graph.id(nSiteB)]+g[3*graph.id(nSiteB)+2])/2.0;
                         Eangle+=eb;
                         std::cout<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteB].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<norm<<" "<<angle<<" "<<k<<" "<<eb<<" "<<deb<<std::endl;
                         nodeCount++;
