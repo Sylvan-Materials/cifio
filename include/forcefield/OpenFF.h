@@ -28,6 +28,7 @@ namespace sylvanmats{
         double Eangle=0.0;
         double Eproper=0.0;
         double Eimproper=0.0;
+        double Eelectrostatics=0.0;
         double Evdw=0.0;
         sylvanmats::linear::ArrayXd g;
     public:
@@ -38,7 +39,7 @@ namespace sylvanmats{
         
         void operator()();
         
-        double getEnergy(){return Ebond+Eangle+Eproper+Eimproper+Evdw;};
+        double getEnergy(){return Ebond+Eangle+Eproper+Eimproper+Eelectrostatics+Evdw;};
         sylvanmats::linear::ArrayXd& getGradients(){return g;};
         
     private:

@@ -38,6 +38,7 @@ namespace sylvanmats{
         Eangle=0.0;
         Eproper=0.0;
         Eimproper=0.0;
+        Eelectrostatics=0.0;
         Evdw=0.0;
         size_t nodeCount=0;
         size_t edgeCount=0;
@@ -422,11 +423,12 @@ namespace sylvanmats{
                         sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
                         double norm=(pointA-pointB).norm();
                         if(norm<=smirksPatterns.getElectrostatics().cutoff){
-                        double εij=std::sqrt(vdwMap[nSiteA].epsilon*vdwMap[nSiteB].epsilon);
-                        double Rmin=(vdwMap[nSiteA].rmin_half+vdwMap[nSiteB].rmin_half)/2.0;
-//                        std::cout<<"vdw "<<graph.atomSites[nSiteA].label_atom_id<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<norm<<" "<<εij<<" "<<Rmin<<std::endl;
-                        Evdw+=εij*(std::pow(Rmin/norm, 12)-2.0*std::pow(Rmin/norm, 6));
-                        vdwCount++;
+                            double D=1.0;
+                            Eelectrostatics+=(graph.atomSites[nSiteA].partial_charge*graph.atomSites[nSiteB].partial_charge)/(4.0*std::numbers::pi*D*norm);
+                            double εij=std::sqrt(vdwMap[nSiteA].epsilon*vdwMap[nSiteB].epsilon);
+                            double Rmin=(vdwMap[nSiteA].rmin_half+vdwMap[nSiteB].rmin_half)/2.0;
+                            Evdw+=εij*(std::pow(Rmin/norm, 12)-2.0*std::pow(Rmin/norm, 6));
+                            vdwCount++;
                         }
                     }
                 }
@@ -443,6 +445,7 @@ namespace sylvanmats{
         std::cout<<"Eangle "<<Eangle<<" kcal/mol"<<std::endl;
         std::cout<<"Eproper "<<Eproper<<" kcal/mol"<<std::endl;
         std::cout<<"Eimproper "<<Eimproper<<" kcal/mol"<<std::endl;
+        std::cout<<"Eelectrostatics "<<Eelectrostatics<<" kcal/mol"<<std::endl;
         std::cout<<"Evdw "<<Evdw<<" kcal/mol"<<std::endl;
       
     }

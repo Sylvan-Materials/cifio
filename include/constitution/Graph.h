@@ -47,6 +47,7 @@ namespace sylvanmats::constitution {
         char8_t proton_count=0;
         bool visibility=true;
         short map_class=0;
+        T partial_charge=0.0;
         //std::optional<> accessibleArea;
 
     };

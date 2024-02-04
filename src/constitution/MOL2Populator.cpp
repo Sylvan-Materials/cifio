@@ -68,6 +68,7 @@ namespace sylvanmats::constitution {
                     graph.atomSites[n].label_comp_id.assign(r->atom_subst_name(atomIndex)->getText());
                     atomMap[atomIndex+1]=n;
                     graph.atomSites[n].pdbx_formal_charge=0;
+                    graph.atomSites[n].partial_charge=(!r->charge().empty())? std::strtod(r->charge(atomIndex)->getText().c_str(), nullptr): 0.0;
                 }
             }
         }

@@ -115,8 +115,8 @@ std::cout<<"graph.getNumberOfAtomSites() "<<graph.getNumberOfAtomSites()<<std::e
             graph.identifyRings(subSelectionGraph);
             for (lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(subSelectionGraph); nSiteA!=lemon::INVALID; ++nSiteA){
 //                if(graph.atomSites[nSiteA].label_atom_id.compare("N03")==0)graph.atomSites[nSiteA].pdbx_formal_charge=-1;
-                if(graph.atomSites[nSiteA].label_atom_id.compare("O13")==0)graph.atomSites[nSiteA].pdbx_formal_charge=-1;
-                if(graph.atomSites[nSiteA].label_atom_id.compare("O18")==0)graph.atomSites[nSiteA].pdbx_formal_charge=-1;
+//                if(graph.atomSites[nSiteA].label_atom_id.compare("O13")==0)graph.atomSites[nSiteA].pdbx_formal_charge=-1;
+//                if(graph.atomSites[nSiteA].label_atom_id.compare("O18")==0)graph.atomSites[nSiteA].pdbx_formal_charge=-1;
                 
             }
             for (lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeIt eSiteA(subSelectionGraph); eSiteA!=lemon::INVALID; ++eSiteA){
