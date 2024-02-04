@@ -14,6 +14,11 @@ namespace sylvanmats{
     bool operator==(const std::vector<sylvanmats::reading::atom_primitive>& ltp, const sylvanmats::constitution::_atom_site<double>& rtp);
 }
     namespace forcefield {
+        
+        struct vdw{
+        double epsilon=0.0;
+        double rmin_half=0.0;
+        };
     class OpenFF{
     protected:
         sylvanmats::constitution::Graph& graph;
@@ -23,6 +28,7 @@ namespace sylvanmats{
         double Eangle=0.0;
         double Eproper=0.0;
         double Eimproper=0.0;
+        double Evdw=0.0;
         sylvanmats::linear::ArrayXd g;
     public:
         OpenFF() = delete;
@@ -32,7 +38,7 @@ namespace sylvanmats{
         
         void operator()();
         
-        double getEnergy(){return Ebond+Eangle;};
+        double getEnergy(){return Ebond+Eangle+Eproper+Eimproper+Evdw;};
         sylvanmats::linear::ArrayXd& getGradients(){return g;};
         
     private:

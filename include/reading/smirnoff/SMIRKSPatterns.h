@@ -21,6 +21,7 @@ namespace sylvanmats::reading {
     };
     
     struct atom_primitive{
+    public:
         bool wildcard=false;
         char8_t atomic_number=0;
         char8_t connectivity=0;
@@ -28,7 +29,7 @@ namespace sylvanmats::reading {
         bool aliphatic=false;
         short ring_connectivity=0;
         short ring_membership=0;
-        short ring_size=0;
+        char8_t ring_size=0;
         short valence=0;
         char8_t formal_charge=0;
         CHIRALITY_TYPE chirality=UNSPECIFIED;
@@ -130,6 +131,17 @@ namespace sylvanmats::reading {
     };
     
     struct smirks_impropers_pattern : public smirks_torsions_pattern {
+    public:
+        using smirks_pattern::smirks;
+        using smirks_pattern::smirksGraph;
+        using smirks_torsions_pattern::periodicity1Value;
+        using smirks_torsions_pattern::k1Value;
+        using smirks_torsions_pattern::phase1Value;
+        using smirks_torsions_pattern::idivf1Value;
+        
+        smirks_impropers_pattern(): smirks_torsions_pattern(){};
+        smirks_impropers_pattern(std::string& smirks) : smirks_torsions_pattern(smirks){};
+        virtual ~smirks_impropers_pattern() = default;
     };
     
     struct smirks_vdw_pattern : public smirks_pattern {
@@ -144,14 +156,38 @@ namespace sylvanmats::reading {
         double epsilon=0.0;
         double rmin_half=0.0;
     };
+    
+    struct electrostatics_tag{
+        double scale12=0.0;
+        double scale13=0.0;
+        double scale14=0.0;
+        double scale15=0.0;
+        double cutoff=0.0;
+        double switch_width=0.0;
+        std::string method="";
+    };
+    
+    struct library_charge_pattern : public smirks_pattern{
+    public:
+        using smirks_pattern::smirks;
+        using smirks_pattern::smirksGraph;
+        
+        library_charge_pattern(): smirks_pattern(){};
+        library_charge_pattern(std::string& smirks,  char8_t charge1) : smirks_pattern(smirks, 0.0, 0.0), charge1 (charge1) {};
+        virtual ~library_charge_pattern() = default;
+        char8_t charge1=0;
+    };
+    
     class SMIRKSPatterns{
     protected:
         std::vector<smirks_pattern> bondSet;
 //        bond_set_by_smirks& smirksIndex;
         std::vector<smirks_pattern> angleSet;
         std::vector<smirks_torsions_pattern> properSet;
-        std::vector<smirks_torsions_pattern> improperSet;
+        std::vector<smirks_impropers_pattern> improperSet;
         std::vector<smirks_vdw_pattern> vdwSet;
+        electrostatics_tag electrostatics;
+        std::vector<library_charge_pattern> libraryChargeSet;
     public:
         SMIRKSPatterns();
         SMIRKSPatterns(const SMIRKSPatterns& orig) = delete;
@@ -160,7 +196,10 @@ namespace sylvanmats::reading {
         void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE type, char8_t connectivityB, char8_t atomic_numberB, std::function<bool(double length, double k, smirks_pattern& smirksPattern)> apply);
         void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, sylvanmats::forcefield::BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, std::function<bool(double angle, double k, smirks_pattern& smirksPattern)> apply);
         void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, sylvanmats::forcefield::BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, sylvanmats::forcefield::BOND_TYPE typeC, char8_t connectivityD, char8_t atomic_numberD, std::function<bool(smirks_torsions_pattern& smirksPattern)> apply);
+        void operator()(char8_t atomic_numberA, char8_t connectivityA, sylvanmats::forcefield::BOND_TYPE typeA, char8_t connectivityB, char8_t atomic_numberB, sylvanmats::forcefield::BOND_TYPE typeB, char8_t connectivityC, char8_t atomic_numberC, sylvanmats::forcefield::BOND_TYPE typeC, char8_t connectivityD, char8_t atomic_numberD, std::function<bool(double k1Value, smirks_impropers_pattern& smirksPattern)> apply);
+        void operator()(char8_t atomic_numberA, char8_t connectivityA, std::function<bool(smirks_vdw_pattern& smirksPatternA)> apply);
         
+        electrostatics_tag& getElectrostatics(){ return electrostatics;};
     private:
         lemon::ListGraph::Node processAtoms(sylvanmats::SMIRKSParser::AtomsContext* atoms, sylvanmats::reading::smirks_pattern& smirksPattern);
         void processBonds(sylvanmats::SMIRKSParser::Bond_primitivesContext* bc, lemon::ListGraph::Edge& e, sylvanmats::reading::smirks_pattern& smirksPattern);

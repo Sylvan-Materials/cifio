@@ -36,7 +36,7 @@ namespace sylvanmats::constitution {
         T Cartn_z;
         T occupancy;
         T B_iso_or_equiv;
-        short pdbx_formal_charge;
+        char8_t pdbx_formal_charge;
         int auth_seq_id;
         std::string auth_comp_id;
         std::string auth_asym_id;
@@ -46,7 +46,8 @@ namespace sylvanmats::constitution {
         char8_t sssr_ring=0;
         char8_t proton_count=0;
         bool visibility=true;
-        //std::optiona<> accessibleArea;
+        short map_class=0;
+        //std::optional<> accessibleArea;
 
     };
 

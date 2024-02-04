@@ -67,6 +67,7 @@ namespace sylvanmats::constitution {
                     graph.atomSites[n].auth_seq_id=1;
                     graph.atomSites[n].label_comp_id.assign(r->atom_subst_name(atomIndex)->getText());
                     atomMap[atomIndex+1]=n;
+                    graph.atomSites[n].pdbx_formal_charge=0;
                 }
             }
         }
