@@ -16,15 +16,19 @@
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
+#include "PeriodicTable.h"
 #include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
 #include "constitution/Populator.h"
+#include "constitution/MOL2Populator.h"
 #include "constitution/Selection.h"
+#include "dynamics/Particles.h"
 #include "density/Populator.h"
 #include "lattice/Populator.h"
 #include "density/ccp4/MapInput.h"
 #include "publishing/jgf/JGFPublisher.h"
+#include "publishing/smiles/SMILESPublisher.h"
 #include "publishing/st/MOL2Publisher.h"
 
 TEST_SUITE("publishing"){
@@ -107,6 +111,33 @@ TEST_CASE("test writing mol2 from 1ebcs hem") {
     CHECK_EQ(graph.getNumberOfRings(), 4);
     CHECK_EQ(graph.countFlexibles(), 35);
 
+}
+
+TEST_CASE("test writing to 4bkt ligand to smiles"){
+    sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
+    std::filesystem::path filePath="../../CASF-2016/coreset/4bkt/4bkt_ligand.mol2";
+std::cout<<"filePath "<<filePath<<std::endl;   
+    sylvanmats::constitution::Graph graph;
+    
+    sylvanmats::constitution::MOL2Populator populator;
+    populator(filePath, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+std::cout<<"graph.getNumberOfAtomSites() "<<graph.getNumberOfAtomSites()<<std::endl;   
+   CHECK_EQ(graph.getNumberOfAtomSites(), 36);
+   
+   });
+   CHECK_EQ(graph.getNumberOfAtomSites(), 36);
+   CHECK_EQ(lemon::countEdges(graph), 37);
+   CHECK_EQ(lemon::countNodes(graph.componentGraph), 1);  
+   CHECK_EQ(lemon::countEdges(graph.componentGraph), 0);
+    std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="QD0", .label_asym_id="*", .pdbx_PDB_ins_code="*", .auth_seq_id=1}};
+    sylvanmats::constitution::Selection selection(graph, true);
+    selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
+   sylvanmats::dynamics::Particles particles(graph, selectionGraph);
+   sylvanmats::publishing::SMILESPublisher smilesPublisher(graph, particles);
+   std::cout<<" "<<smilesPublisher<<std::endl;
+    });
+    CHECK_EQ(graph.getNumberOfRings(), 2);
+    CHECK_EQ(graph.countFlexibles(), 15);
 }
 
 }

@@ -76,7 +76,7 @@ namespace sylvanmats::standards{
 
     struct name{};
 
-    typedef multi_index::multi_index_container<
+    using standard_set = multi_index::multi_index_container<
       standard,
       multi_index::indexed_by<
         // sort by standard
@@ -87,9 +87,9 @@ namespace sylvanmats::standards{
         // sort by less<int> on terminal
         multi_index::ordered_non_unique<multi_index::member<standard,long,&standard::terminal> >
       >
-    > standard_set;
+    >;
     
-    typedef multi_index::index<standard_set,name>::type standard_set_by_name;
+    using standard_set_by_name = multi_index::index<standard_set,name>::type;
 
   class AminoStandards{
     protected:

@@ -1,0 +1,29 @@
+\documentclass[10pt]{article}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows,quotes,angles,positioning}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\urlstyle{same}
+\long\def\gobbleone#1{}
+\protected\def\atan{\futurelet\tmptoken\doatan}
+\protected\def\doatan{\operatorname{atan\ifx\tmptoken22\fi}\ifx\tmptoken2\expandafter\gobbleone\fi}
+\protected\def\arctan{\futurelet\tmptoken\doarctan}
+\protected\def\doarctan{\operatorname{arc\,tan\ifx\tmptoken22\fi}\ifx\tmptoken2\expandafter\gobbleone\fi}
+
+\begin{document}
+
+\input{geometric_algebra.tex}
+
+
+\end{document}
+

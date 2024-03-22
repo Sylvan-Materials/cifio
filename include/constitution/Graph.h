@@ -268,6 +268,7 @@ namespace sylvanmats::constitution {
             Graph() : atomSites(*this), compBond(*this), componentProperties(componentGraph), structConnType(componentGraph), componentNavigation(*this) {
             };
             Graph(const Graph& orig) = delete;
+            Graph(Graph&& other) = default;
             virtual ~Graph()=default;
 
             lemon::ListGraph::Node addComponentNode(){lemon::ListGraph::Node n=componentGraph.addNode();return std::move(n);};
@@ -316,7 +317,16 @@ namespace sylvanmats::constitution {
                 }
                 return ret;
             };
-            
+            unsigned int connectivity(lemon::ListGraph::Node& n){
+                return lemon::countIncEdges(*this, n);
+            };
+            unsigned int countIncidentProtons(lemon::ListGraph::Node& n){
+                unsigned int ret=0;
+                for(lemon::ListGraph::IncEdgeIt eSiteA(*this, n); eSiteA!=lemon::INVALID; ++eSiteA){
+                    if(atomSites[runningNode(eSiteA)].type_symbol.compare("H")==0)ret++;
+                }
+                return ret;
+            };
 
             std::string getXPath(lemon::ListGraph::Node& nSite){
                 return "/"+atomSites[nSite].label_asym_id+"/"+atomSites[nSite].label_comp_id+"/"+std::to_string(atomSites[nSite].auth_seq_id)+"/"+atomSites[nSite].pdbx_PDB_ins_code+"/";

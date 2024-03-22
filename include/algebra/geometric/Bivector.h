@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ostream>
+#include <numbers>
 #include "linear/Vector.h"
 
 namespace sylvanmats::algebra::geometric{
@@ -9,6 +10,7 @@ namespace sylvanmats::algebra::geometric{
         Type _B12;
         Type _B20;
     public:
+        Bivector(Type _B01, Type _B12, Type _B20): _B01 (_B01), _B12 (_B12), _B20(_B20) {};
         Bivector(sylvanmats::linear::Vector<Type, 3>& v1, sylvanmats::linear::Vector<Type, 3>& v2){
             _B01 = v1[0]*v2[1]-v1[1]*v2[0];
             _B12 = v1[1]*v2[2]-v1[2]*v2[1];
@@ -17,6 +19,27 @@ namespace sylvanmats::algebra::geometric{
         
         void operator+(){
         };
+        
+        Bivector<Type> operator*(Bivector<Type>& otherB){
+            return Bivector(this->B01()*otherB.B01(), this->B12()*otherB.B12(), this->B20()*otherB.B20());
+        };
+        
+        Bivector<Type> cross(Bivector<Type>& otherB){
+            return Bivector(this->B12()*otherB.B20()-this->B20()*otherB.B12(), this->B20()*otherB.B01()-this->B01()*otherB.B12(), this->B12()*otherB.B01());
+        }
+        
+        Type norm(){
+            Type sum=_B01*_B01+_B12*_B12+_B20*_B20;
+             return std::sqrt(sum);
+        };
+        Type dot(Bivector<Type>& otherB){
+            Type sum=_B01*otherB.B01()+_B12*otherB.B12()+_B20*otherB.B20();
+            return sum;
+        }
+        Type angle(Bivector<Type>& otherB){
+            Type dot=this->dot(otherB);
+            return std::acos(dot/(this->norm()*otherB.norm()))-std::numbers::pi;
+        }
 
         Type B01(){return _B01;};
         Type B12(){return _B12;};

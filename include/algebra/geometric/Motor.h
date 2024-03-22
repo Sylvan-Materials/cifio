@@ -96,7 +96,7 @@ namespace sylvanmats::algebra::geometric{
         }
 
     };
-    typedef Motor<double> Motord;
-    typedef Motor<long double> Motorl;
+    using Motord=Motor<double>;
+    using Motorl=Motor<long double>;
 }
 

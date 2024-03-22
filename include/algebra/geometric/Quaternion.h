@@ -24,4 +24,5 @@ namespace sylvanmats::algebra::geometric{
         virtual ~Quaternion() = default;
 
     };
+    using Quaterniond = Quaternion<double>;
 }

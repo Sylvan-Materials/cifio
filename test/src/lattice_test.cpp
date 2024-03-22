@@ -8,13 +8,15 @@
 #include <iterator>
 #include <numbers>
 
+#define protected public
+
 #include "algebra/geometric/Bivector.h"
 #include "algebra/geometric/Rotor.h"
 #include "algebra/geometric/Motor.h"
 
-#include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
+//#include "antlr4-runtime.h"
+//#include "parsing/CIFLexer.h"
+//#include "parsing/CIFParser.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 #include "constitution/Populator.h"
@@ -23,6 +25,8 @@
 #include "publishing/st/OBJPublisher.h"
 #include "symmetry/LatticeSites.h"
 #include "LuaException.h"
+
+#include "forcefield/OpenFF.h"
 
 #include "density/ccp4/MapInput.h"
 #include "png.h"
@@ -43,6 +47,81 @@ TEST_CASE("test bivector"){
     CHECK_EQ(bivector.B01(), -19.0);
     CHECK_EQ(bivector.B12(), 11.0);
     CHECK_EQ(bivector.B20(), 18.0);
+    sylvanmats::linear::Vector3d v3=v1.cross(v2);
+    CHECK_EQ(bivector.B01(), v3[2]);
+    CHECK_EQ(bivector.B12(), v3[0]);
+    CHECK_EQ(bivector.B20(), v3[1]);
+    
+}
+
+TEST_CASE("test torsion angle by bivector"){
+    sylvanmats::linear::Vector3d v1(-1.0, 1.0, 0.0);
+    sylvanmats::linear::Vector3d v2(0.0, 0.0, 0.0);
+    sylvanmats::linear::Vector3d v3(1.0, 0.0, 0.0);
+    sylvanmats::linear::Vector3d v4(2.0, 0.0, 1.0);
+    sylvanmats::linear::Vector3d v12=v1-v2;
+    sylvanmats::linear::Vector3d v32=v3-v2;
+    sylvanmats::linear::Vector3d v23=v2-v3;
+    sylvanmats::linear::Vector3d v43=v4-v3;
+    sylvanmats::algebra::geometric::Bivector<double> B1(v12, v32);
+    sylvanmats::algebra::geometric::Bivector<double> B2(v43, v23);
+    CHECK_EQ(B1.B01(), -1.0);
+    CHECK_EQ(B1.B12(), 0.0);
+    CHECK_EQ(B1.B20(), 0.0);
+    sylvanmats::linear::Vector3d va=v12.cross(v32);
+    CHECK_EQ(B1.B01(), va[2]);
+    CHECK_EQ(B1.B12(), va[0]);
+    CHECK_EQ(B1.B20(), va[1]);
+    CHECK_EQ(B2.B01(), 0.0);
+    CHECK_EQ(B2.B12(), 0.0);
+    CHECK_EQ(B2.B20(), -1.0);
+    sylvanmats::linear::Vector3d vb=v43.cross(v23);
+    CHECK_EQ(B2.B01(), vb[2]);
+    CHECK_EQ(B2.B12(), vb[0]);
+    CHECK_EQ(B2.B20(), vb[1]);
+    
+    sylvanmats::constitution::Graph graph;
+    sylvanmats::forcefield::OpenFF openFF(graph);
+    double torsion=openFF.findDihedralBetween(v1, v2, v3, v4);
+    CHECK(180.0*torsion/std::numbers::pi == doctest::Approx(-90.0));
+    double biTorsion=B1.angle(B2);
+    CHECK(180.0*biTorsion/std::numbers::pi == doctest::Approx(-90.0));
+    CHECK(torsion == doctest::Approx(biTorsion));
+}
+
+TEST_CASE("test torsion 120 angle by bivector"){
+    sylvanmats::linear::Vector3d v1(-1.0, 1.0, -0.26795);
+    sylvanmats::linear::Vector3d v2(0.0, 0.0, 0.0);
+    sylvanmats::linear::Vector3d v3(1.0, 0.0, 0.0);
+    sylvanmats::linear::Vector3d v4(2.0, -0.26795, 1.0);
+    sylvanmats::linear::Vector3d v12=v1-v2;
+    sylvanmats::linear::Vector3d v32=v3-v2;
+    sylvanmats::linear::Vector3d v23=v2-v3;
+    sylvanmats::linear::Vector3d v43=v4-v3;
+    sylvanmats::algebra::geometric::Bivector<double> B1(v12, v32);
+    sylvanmats::algebra::geometric::Bivector<double> B2(v43, v23);
+    CHECK_EQ(B1.B01(), -1.0);
+    CHECK_EQ(B1.B12(), 0.0);
+    CHECK_EQ(B1.B20(), -0.26795);
+    sylvanmats::linear::Vector3d va=v12.cross(v32);
+    CHECK_EQ(B1.B01(), va[2]);
+    CHECK_EQ(B1.B12(), va[0]);
+    CHECK_EQ(B1.B20(), va[1]);
+    CHECK_EQ(B2.B01(), -0.26795);
+    CHECK_EQ(B2.B12(), 0.0);
+    CHECK_EQ(B2.B20(), -1.0);
+    sylvanmats::linear::Vector3d vb=v43.cross(v23);
+    CHECK_EQ(B2.B01(), vb[2]);
+    CHECK_EQ(B2.B12(), vb[0]);
+    CHECK_EQ(B2.B20(), vb[1]);
+    
+    sylvanmats::constitution::Graph graph;
+    sylvanmats::forcefield::OpenFF openFF(graph);
+    double torsion=openFF.findDihedralBetween(v1, v2, v3, v4);
+    CHECK(180.0*torsion/std::numbers::pi == doctest::Approx(-120.0));
+    double biTorsion=B1.angle(B2);
+    CHECK(180.0*biTorsion/std::numbers::pi == doctest::Approx(-120.0));
+    CHECK(torsion == doctest::Approx(biTorsion));
 }
 
 TEST_CASE("test rotor"){

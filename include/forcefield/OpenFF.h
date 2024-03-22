@@ -42,7 +42,7 @@ namespace sylvanmats{
         double getEnergy(){return Ebond+Eangle+Eproper+Eimproper+Eelectrostatics+Evdw;};
         sylvanmats::linear::ArrayXd& getGradients(){return g;};
         
-    private:
+    protected:
         inline double findAngleBetween(sylvanmats::linear::Vector3d v1, sylvanmats::linear::Vector3d v2){
             double dot=v1.dot(v2);
             return std::acos(dot/(v1.norm()*v2.norm()));

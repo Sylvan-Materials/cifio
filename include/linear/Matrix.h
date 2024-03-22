@@ -6,15 +6,20 @@
 #include <valarray>
 #include <type_traits>
 
+namespace std{
+    template<typename T> 
+    concept numerical = std::integral<T> || std::floating_point<T>;
+}
+
 namespace sylvanmats::linear{
 
-    template<std::floating_point U, signed long long V, signed long long W> class Array;
-    template<std::floating_point U, signed long long V> class Vector;
+    template<std::numerical U, signed long long V, signed long long W> class Array;
+    template<std::numerical U, signed long long V> class Vector;
 
-    template<std::floating_point T, signed long long R, signed long long C>
+    template<std::numerical T, signed long long R, signed long long C>
     class Matrix : public std::valarray<T> {
-    template<std::floating_point, signed long long, signed long long> friend class Array;
-    template<std::floating_point, signed long long> friend class Vector;
+//    template<std::numerical, signed long long, signed long long> friend class Array;
+//    template<std::numerical, signed long long> friend class Vector;
 
     public:
         using std::valarray<T>::operator[];
@@ -24,6 +29,7 @@ namespace sylvanmats::linear{
     public:
         Matrix() : std::valarray<T>(0.0, R * C) {};
         Matrix(T a, unsigned int s) : std::valarray<T>(a, s), _rows (s), _cols (1) {};
+        Matrix(T a, unsigned int s, unsigned int t) : std::valarray<T>(a, s*t), _rows (s), _cols (t) {};
         Matrix(T a, T b) : std::valarray<T>(0.0, R * C) {operator[](0)=a;operator[](1)=b;};
         Matrix(T a, T b, T c) : std::valarray<T>(0.0, R * C) {operator[](0)=a;operator[](1)=b;operator[](2)=c;};
         Matrix(T* a, unsigned int s) : std::valarray<T>(s), _rows (s), _cols (1) {
@@ -78,7 +84,15 @@ namespace sylvanmats::linear{
             return m;
         };
 
-        template<std::floating_point U = T, signed long long V = R> friend class Vector<U, V> operator * (const Matrix<T, R, C>& m, const Vector<U, V>& v){
+        std::valarray<T> row(unsigned int s){
+            return (*this)[std::slice(s, _cols, _rows)];
+        }
+        
+        std::slice_array<T> block(unsigned int s, unsigned int t, unsigned int l, unsigned int m){
+            return (*this)[std::slice(s, _cols, _rows)];
+        }
+        
+        template<std::numerical U = T, signed long long V = R> friend class Vector<U, V> operator * (const Matrix<T, R, C>& m, const Vector<U, V>& v){
             Vector<T, R> v2(v);
             for(unsigned long long i=0;i<m.cols();i++)
                     /*co_yield*/ v2[i]=0.0;
@@ -104,6 +118,6 @@ namespace sylvanmats::linear{
         }
     };
 
-    typedef Matrix<double, 3, 3> Matrix3d;
-    typedef Matrix<long double, 3, 3> Matrix3l;
+    using Matrix3d = Matrix<double, 3, 3>;
+    using Matrix3l = Matrix<long double, 3, 3>;
 }

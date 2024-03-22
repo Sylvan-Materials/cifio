@@ -1,0 +1,21 @@
+\section{Derivation of Dihedral Gradients}
+\long\def\gobbleone#1{}
+\protected\def\atan{\futurelet\tmptoken\doatan}
+\protected\def\doatan{\operatorname{atan\ifx\tmptoken22\fi}\ifx\tmptoken2\expandafter\gobbleone\fi}
+\protected\def\arctan{\futurelet\tmptoken\doarctan}
+\protected\def\doarctan{\operatorname{arc\,tan\ifx\tmptoken22\fi}\ifx\tmptoken2\expandafter\gobbleone\fi}
+\begin{align}
+r_i=(\begin{array}{ccc}x_{1} & y_{1} & z_{1}\end{array})\text{ and } & r_j=(\begin{array}{ccc}x_{2} & y_{2} & z_{2}\end{array})
+\end{align}
+
+\[r_k=(\begin{array}{ccc}x_{3} & y_{3} & z_{3}\end{array})\]
+\[r_l=(\begin{array}{ccc}x_{4} & y_{4} & z_{4}\end{array})\]
+\[x=(\vec{r_j-r_i}\times\vec{r_k-r_j})\cdot(\vec{r_k-r_j}\times\vec{r_l-r_k})\]
+\[y=(\vec{r_j-r_i}\times\vec{r_k-r_j})\times(\hat{r_k-r_j})\cdot(\vec{r_k-r_j}\times\vec{r_l-r_k})\]
+\[\Theta=\atan2(x, y)=\arccos{\frac{\vec{B_{ijk}}\cdot\vec{B_{lkj}}}{B_{ijk} B_{lkj}}}-\pi\]
+\[E_{dihedral}=\sum_{n=1}^{6}1+\cos(n\cdot\Theta+\delta_{n})\]
+
+\input{dihedral_drawing.tex}
+
+\[\frac{\partial \theta}{\partial \vec{r_{i}}}=\frac{\partial \theta}{\partial r_{ij}}\frac{\partial r_{ij}}{\partial \vec{r_{ij}}}\frac{\partial \vec{r_{ij}}}{\partial \vec{r_{i}}}=\frac{\partial \theta}{\partial }=?\]
+

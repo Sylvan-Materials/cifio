@@ -5,7 +5,7 @@
 
 namespace sylvanmats::linear{
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     class Vector : public Matrix<T, R, 1> {
     protected:
         using Matrix<T, R, 1>::_rows;
@@ -141,6 +141,26 @@ namespace sylvanmats::linear{
             return v2;
         };
 
+        Vector<T, R>  operator=(const std::valarray<T>& s){
+            for(unsigned int i=0;i<_rows;i++)
+                    /*co_yield*/ operator[](i)=s[i];
+            return *this;
+        };
+        
+        Vector<T, R> operator + (const std::valarray<T>& s){
+            Vector<T, R> v2(*this);
+            for(unsigned int i=0;i<_rows;i++)
+                    /*co_yield*/ v2[i]=(operator[](i)+s[i]);
+            return v2;
+        };
+
+        Vector<T, R> operator - (const std::valarray<T>& s){
+            Vector<T, R> v2(*this);
+            for(unsigned int i=0;i<_rows;i++)
+                    /*co_yield*/ v2[i]=(operator[](i)-s[i]);
+            return v2;
+        };
+
         T dot(const Vector<T, R>& v){
             Vector<T, R> v2(*this);
             v2*=v;
@@ -182,15 +202,20 @@ namespace sylvanmats::linear{
                 //v2[]
             return v2;
         }
+        
+        Vector<T, R> row(unsigned int s){
+            Vector<T, R> v2(*this[std::slice(s, _cols, _rows)]);
+            return v2;
+        }
     };
 
-    typedef Vector<double, 2> Vector2d;
-    typedef Vector<long double, 2> Vector2l;
+    using Vector2d = Vector<double, 2>;
+    using Vector2l = Vector<long double, 2>;
 
-    typedef Vector<double, 3> Vector3d;
-    typedef Vector<long double, 3> Vector3l;
+    using Vector3d = Vector<double, 3>;
+    using Vector3l = Vector<long double, 3>;
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator + (const typename Vector<T, R>::value_type& s, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -198,7 +223,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator + (const Vector<T, R>& lv, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -206,7 +231,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator - (const typename Vector<T, R>::value_type& s, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -214,7 +239,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator - (const Vector<T, R>& lv, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -222,7 +247,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator * (const typename Vector<T, R>::value_type& s, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -230,7 +255,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator * (const Vector<T, R>& lv, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -238,7 +263,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator / (const typename Vector<T, R>::value_type& s, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -246,7 +271,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator / (const Vector<T, R>& v, const typename Vector<T, R>::value_type& s){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)
@@ -254,7 +279,7 @@ namespace sylvanmats::linear{
         return v2;
     };
 
-    template<std::floating_point T, signed long long R>
+    template<std::numerical T, signed long long R>
     Vector<T, R> operator / (const Vector<T, R>& lv, const Vector<T, R>& v){
         Vector<T, R> v2(v);
         for(unsigned int i=0;i<v.rows();i++)

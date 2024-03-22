@@ -36,7 +36,7 @@ namespace sylvanmats{
     struct name{};
     struct symbol{};
 
-    typedef multi_index::multi_index_container<
+    using element_set =  multi_index::multi_index_container<
       element,
       multi_index::indexed_by<
         // sort by element
@@ -48,10 +48,9 @@ namespace sylvanmats{
         // sort by less<int> on terminal
         multi_index::ordered_non_unique<multi_index::member<element,unsigned int,&element::atomic_number> >
       >
-    > element_set;
+    >;
     
-    //typedef multi_index::index<element_set,name>::type element_set_by_name;
-    typedef multi_index::index<element_set,symbol>::type element_set_by_symbol;
+    using element_set_by_symbol = multi_index::index<element_set,symbol>::type;
 
     class PeriodicTable {
         static PeriodicTable* periodicTable;

@@ -1,0 +1,19 @@
+\section{Derivation of Angle Gradients}
+\[E_{angle}=\sum_{n=1}^{N}K_{\theta}\cdot(\theta-\theta_{0})^2\]
+
+\input{angle_drawing.tex}
+
+\[\theta=\arccos{\frac{\vec{r_{ij}}\cdot\vec{r_{kj}}}{r_{ij} r_{kj}}}\]
+
+\[\frac{\partial \theta}{\partial \vec{r_{i}}}=\frac{\partial \theta}{\partial r_{ij}}\frac{\partial r_{ij}}{\partial \vec{r_{ij}}}\frac{\partial \vec{r_{ij}}}{\partial \vec{r_{i}}}=\frac{-1}{\sqrt{1-(\frac{\vec{r_{ij}}\cdot\vec{r_{kj}}}{\vec{r_{ij}}\vec{r_{kj}}})^2}}(\frac{\partial \vec{r_{ij}}}{\partial r_{ij}}\cdot\frac{\vec{r_{ij}}}{r_{ij}r_{kj}}+\frac{-1}{r_{ij}^2}{\frac{\vec{r_{ij}}\cdot\vec{r_{kj}}}{r_{kj}}})\frac{\partial r_{ij}}{\partial \vec{r_{ij}}}\frac{\partial \vec{r_{ij}}}{\partial \vec{r_{i}}}\]
+Since \[\vec{r_{ij}}=\vec{r_{i}}-\vec{r_{j}}\], the last derivative term is simply identity. Also, for \[\vec{r}=r(x,y,z)\],\[r=\sqrt{x^2+y^2+z^2}\], so the second last derivative is:
+\[\frac{\partial r}{\partial \vec{r}}=\frac{1}{2\sqrt{x^2+y^2+z^2}}(2x, 2y,2z)=\frac{\vec{r}}{r}\]
+Thus:
+\[\frac{\partial \theta}{\partial \vec{r_{i}}}=\frac{-r_{ij}r_{kj}}{\sqrt{r_{ij}^2 r_{kj}^2-(\vec{r_{ij}}\cdot{\vec{r_{kj}}})^2}}(\frac{\vec{r_{kj}}}{r_{ij}r_{kj}}-\frac{\vec{r_{ij}}\cdot\vec{r_{kj}}}{r_{ij}^2 r_{kj}}\frac{\vec{r_{ij}}}{r_{ij}})=\frac{-1}{r_{ij}}\frac{r_{ij}^2 \vec{r_{kj}}-(\vec{r_{ij}}\cdot\vec{r_{kj}})\vec{r_{ij}}}{\sqrt{r_{ij}^4 r_{kj}^2-(\vec{r_{ij}}\cdot\vec{r_{kj}})^2 r_{ij}^2}}\]
+
+The numerator is the vector triple product, so the final result is:
+\[\frac{\partial \theta}{\partial \vec{r_{i}}}=\frac{norm(\vec{r_{ij}} \times (\vec{r_{ij}} \times \vec{r_{kj}}))}{r_{ij}}\]
+By symmetry:
+\[\frac{\partial \theta}{\partial \vec{r_{k}}}=\frac{\partial \theta}{\partial r_{kj}}\frac{\partial r_{kj}}{\partial \vec{r_{kj}}}\frac{\partial \vec{r_{kj}}}{\partial \vec{r_{k}}}=\frac{norm(\vec{r_{kj}} \times (\vec{r_{kj}} \times \vec{r_{ij}}))}{r_{kj}}\]
+
+Hoang Tran \url{https://math.stackexchange.com/users/43744/hoang-tran}, Gradient of an angle in terms of the vertices, URL (version: 2017-08-15): \url{https://math.stackexchange.com/q/2394136}

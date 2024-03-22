@@ -1,0 +1,13 @@
+
+\newcommand\normalize[3][(0,0,0)]{%
+  \draw[red,->] #1 -- ($#1!1cm!#2$);}
+
+\begin{tikzpicture}[>=latex]
+\coordinate[label=above:$r_i$] (a)  at (-2.5,4.5,0);
+\coordinate[label=above:$r_j$] (b)  at (-.5,2,0);
+\coordinate[label=above:$r_k$] (c)  at (2,4,0);
+\draw[->,ultra thin] (a) -- (b);
+\draw[->,ultra thin] (b) -- (c);
+\normalize[(b)]{(a)};
+\normalize[(b)]{(c)};
+\end{tikzpicture}
