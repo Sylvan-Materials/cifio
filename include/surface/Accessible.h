@@ -33,15 +33,32 @@ namespace sylvanmats::surface {
         protected:
         sylvanmats::constitution::Graph& graph;
         double probe_radius=0.0;
-        std::unordered_map<std::string, double> radii={{"C", 2.0}, {"N", 2.0}, {"O", 1.0}, {"P", 4.0}, {"S", 6.0}};
+        std::unordered_map<std::string, double> radii={{"H", 1.2}, {"C", 1.7}, {"N", 1.55}, {"O", 1.52}, {"P", 1.8}, {"S", 1.8}, {"Cl", 1.75}, {"Cu", 1.4}};
         lemon::ListGraph::NodeMap<accessible_surface<double>> accessibles;
 
         public:
+        Accessible() = delete;
         Accessible(sylvanmats::constitution::Graph& graph) : graph (graph), accessibles (graph) {};
         Accessible(const Accessible& orig) = delete;
         virtual ~Accessible() = default;
 
         lemon::ListGraph::NodeMap<accessible_surface<double>>& getAccessibleSurface(){return accessibles;};
+        
+        double getVolume(){
+            double v=0.0;
+            for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+                v+=getAccessibleSurface()[nSiteA].atom_site_volume;
+            }
+            return v;
+        };
+        
+        double getArea(){
+            double a=0.0;
+            for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+                a+=getAccessibleSurface()[nSiteA].atom_site_area;
+            }
+            return a;
+        };
 
         void operator()(std::function<void(std::string name, std::vector<circle<double>>& circles)> apply){
             double V=0.0;

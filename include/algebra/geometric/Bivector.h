@@ -26,20 +26,27 @@ namespace sylvanmats::algebra::geometric{
         
         Bivector<Type> cross(Bivector<Type>& otherB){
             return Bivector(this->B12()*otherB.B20()-this->B20()*otherB.B12(), this->B20()*otherB.B01()-this->B01()*otherB.B12(), this->B12()*otherB.B01());
-        }
+        };
         
         Type norm(){
             Type sum=_B01*_B01+_B12*_B12+_B20*_B20;
              return std::sqrt(sum);
         };
+        
         Type dot(Bivector<Type>& otherB){
             Type sum=_B01*otherB.B01()+_B12*otherB.B12()+_B20*otherB.B20();
             return sum;
-        }
+        };
+        
+        Type dot(sylvanmats::linear::Vector<Type, 3>& v){
+            Type sum=_B01*v[0]+_B12*v[1]+_B20*v[2];
+            return sum;
+        };
+        
         Type angle(Bivector<Type>& otherB){
             Type dot=this->dot(otherB);
             return std::acos(dot/(this->norm()*otherB.norm()))-std::numbers::pi;
-        }
+        };
 
         Type B01(){return _B01;};
         Type B12(){return _B12;};

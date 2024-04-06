@@ -65,7 +65,7 @@ TEST_CASE("test jvm singleton") {
     }
     std::filesystem::path path="../templates/cif";
     sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
-    cifPublisher.add("entry_id", "3SGS");
+    cifPublisher.setEntryID("3SGS");
     std::string&& content = cifPublisher.render();
     CHECK(!content.empty());
 }
@@ -646,22 +646,16 @@ TEST_CASE("test 3sgs") {
     CHECK_EQ(graph.countFlexibles(), 35);
     std::filesystem::path path="../templates/cif";
     sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
-    cifPublisher.add("entry_id", "3SGS");
-    std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>> atomSitesLoop;
+    cifPublisher.setEntryID("3SGS");
     for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-        atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
+        cifPublisher.insertAtomSites(std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
     }
-    cifPublisher.add("atom_sites", atomSitesLoop);
-    std::vector<std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string, std::string>> pdxPolySchemesLoop;
-    std::vector<std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string>> pdxNonpolySchemesLoop;
     for(lemon::ListGraph::NodeIt nComponentA(graph.componentGraph); nComponentA!=lemon::INVALID; ++nComponentA){
-        if(graph.componentProperties[nComponentA].termination==sylvanmats::constitution::MONOMER)pdxNonpolySchemesLoop.insert(pdxNonpolySchemesLoop.begin(), std::make_tuple(graph.componentProperties[nComponentA].asym_id, graph.componentProperties[nComponentA].entity_id, graph.componentProperties[nComponentA].seq_id, graph.componentProperties[nComponentA].mon_id, graph.componentProperties[nComponentA].ndb_seq_num, graph.componentProperties[nComponentA].pdb_seq_num, graph.componentProperties[nComponentA].auth_seq_num, graph.componentProperties[nComponentA].pdb_mon_id, graph.componentProperties[nComponentA].auth_mon_id, graph.componentProperties[nComponentA].pdb_strand_id, graph.componentProperties[nComponentA].pdb_ins_code));
-        else pdxPolySchemesLoop.insert(pdxPolySchemesLoop.begin(), std::make_tuple(graph.componentProperties[nComponentA].asym_id, graph.componentProperties[nComponentA].entity_id, graph.componentProperties[nComponentA].seq_id, graph.componentProperties[nComponentA].mon_id, graph.componentProperties[nComponentA].ndb_seq_num, graph.componentProperties[nComponentA].pdb_seq_num, graph.componentProperties[nComponentA].auth_seq_num, graph.componentProperties[nComponentA].pdb_mon_id, graph.componentProperties[nComponentA].auth_mon_id, graph.componentProperties[nComponentA].pdb_strand_id, graph.componentProperties[nComponentA].pdb_ins_code, graph.componentProperties[nComponentA].hetero));
+        if(graph.componentProperties[nComponentA].termination==sylvanmats::constitution::MONOMER)cifPublisher.insertNonpolymers(std::make_tuple(graph.componentProperties[nComponentA].asym_id, graph.componentProperties[nComponentA].entity_id, graph.componentProperties[nComponentA].seq_id, graph.componentProperties[nComponentA].mon_id, graph.componentProperties[nComponentA].ndb_seq_num, graph.componentProperties[nComponentA].pdb_seq_num, graph.componentProperties[nComponentA].auth_seq_num, graph.componentProperties[nComponentA].pdb_mon_id, graph.componentProperties[nComponentA].auth_mon_id, graph.componentProperties[nComponentA].pdb_strand_id, graph.componentProperties[nComponentA].pdb_ins_code));
+        else cifPublisher.insertPolymers(std::make_tuple(graph.componentProperties[nComponentA].asym_id, graph.componentProperties[nComponentA].entity_id, graph.componentProperties[nComponentA].seq_id, graph.componentProperties[nComponentA].mon_id, graph.componentProperties[nComponentA].ndb_seq_num, graph.componentProperties[nComponentA].pdb_seq_num, graph.componentProperties[nComponentA].auth_seq_num, graph.componentProperties[nComponentA].pdb_mon_id, graph.componentProperties[nComponentA].auth_mon_id, graph.componentProperties[nComponentA].pdb_strand_id, graph.componentProperties[nComponentA].pdb_ins_code, graph.componentProperties[nComponentA].hetero));
     }
-    cifPublisher.add("pdbx_poly_seq_schemes", pdxPolySchemesLoop);
-    cifPublisher.add("pdbx_nonpoly_schemes", pdxNonpolySchemesLoop);
-    CHECK_EQ(pdxPolySchemesLoop.size(), 6);
-    CHECK_EQ(pdxNonpolySchemesLoop.size(), 2);
+//    CHECK_EQ(pdxPolySchemesLoop.size(), 6);
+//    CHECK_EQ(pdxNonpolySchemesLoop.size(), 2);
     std::string&& content = cifPublisher.render();
     //std::cout<<"content "<<content<<std::endl;
     CHECK_EQ(content.size(), 5591);

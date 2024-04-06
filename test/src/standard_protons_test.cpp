@@ -60,29 +60,30 @@ TEST_CASE("test putting standard protons on 3SGS"){
         });
         std::filesystem::path path="../../cifio/templates/cif";
         sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
-        cifPublisher.add("entry_id", "3SGS");
+        cifPublisher.setEntryID("3SGS");
         std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>> atomSitesLoop;
         for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-            atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
+            cifPublisher.insertAtomSites(std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
         }
-        cifPublisher.add("atom_sites", atomSitesLoop);
         std::string&& content = cifPublisher.render();
         std::ofstream ofs("test_3sgs.cif");
         ofs<<content<<std::endl;
         path="../../cifio/templates/obj";
         sylvanmats::publishing::st::OBJPublisher objPublisher(path);
-        std::string vertexCount=std::to_string(2*12*lemon::countEdges(graph));
-        objPublisher.add("vertex_count", vertexCount);
+        objPublisher.setVertexCount(2*12*lemon::countEdges(graph));
         std::vector<std::tuple<double, double, double>> vertexLoop;
+        for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+            sylvanmats::linear::Vector3d vA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
+            objPublisher.append(vA);            
+        }
         for(lemon::ListGraph::EdgeIt eSiteA(graph); eSiteA!=lemon::INVALID; ++eSiteA){
             lemon::ListGraph::Node nSiteA=graph.u(eSiteA);
             lemon::ListGraph::Node nSiteB=graph.v(eSiteA);
             sylvanmats::linear::Vector3d vA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
-            sylvanmats::linear::Vector3d vB(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
+            sylvanmats::linear::Vector3d vB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
             
             //vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v(0), v(1), v(2)));
         }
-        objPublisher.add("vertices", vertexLoop);
         std::string&& content2 = cifPublisher.render();
         std::ofstream ofs2("test.obj");
         ofs2<<content2<<std::endl;
@@ -121,29 +122,29 @@ TEST_CASE("test putting standard protons on"){
         });
         std::filesystem::path path="../../cifio/templates/cif";
         sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
-        cifPublisher.add("entry_id", "4K7T");
+        cifPublisher.setEntryID("4K7T");
         std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>> atomSitesLoop;
         for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-            atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
+            cifPublisher.insertAtomSites(std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
         }
-        cifPublisher.add("atom_sites", atomSitesLoop);
         std::string&& content = cifPublisher.render();
         std::ofstream ofs("test.cif");
         ofs<<content<<std::endl;
         path="../templates/obj";
         sylvanmats::publishing::st::OBJPublisher objPublisher(path);
-        std::string vertexCount=std::to_string(2*12*lemon::countEdges(graph));
-        objPublisher.add("vertex_count", vertexCount);
-        std::vector<std::tuple<double, double, double>> vertexLoop;
+        objPublisher.setVertexCount(2*12*lemon::countEdges(graph));
+        for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+            sylvanmats::linear::Vector3d vA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
+            objPublisher.append(vA);            
+        }
         for(lemon::ListGraph::EdgeIt eSiteA(graph); eSiteA!=lemon::INVALID; ++eSiteA){
             lemon::ListGraph::Node nSiteA=graph.u(eSiteA);
             lemon::ListGraph::Node nSiteB=graph.v(eSiteA);
             sylvanmats::linear::Vector3d vA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
-            sylvanmats::linear::Vector3d vB(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
+            sylvanmats::linear::Vector3d vB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
             
             //vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v(0), v(1), v(2)));
         }
-        objPublisher.add("vertices", vertexLoop);
         std::string&& content2 = cifPublisher.render();
         std::ofstream ofs2("test.obj");
         ofs2<<content2<<std::endl;
@@ -192,11 +193,9 @@ TEST_CASE("test putting standard protons on"){
         ofs<<content<<std::endl;*/
         path="../templates/obj";
         sylvanmats::publishing::st::OBJPublisher objPublisher(path);
-        std::string vertexCount=std::to_string(2*12*lemon::countEdges(graph));
-        objPublisher.add("vertex_count", vertexCount);
-        std::string faceCount=std::to_string(12*lemon::countEdges(graph));
-        objPublisher.add("face_count", faceCount);
-        objPublisher.add("material_count", "1");
+        objPublisher.setVertexCount(2*12*lemon::countEdges(graph));
+        objPublisher.setFaceCount(12*lemon::countEdges(graph));
+        objPublisher.setMaterialCount(1);
         std::vector<std::tuple<double, double, double, double, double, double>> vertexLoop;
         std::vector<std::tuple<double, double, double>> normalLoop;
         std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long>> indexLoop;
@@ -312,30 +311,30 @@ TEST_CASE("test putting standard protons on 1Q8H"){
         std::filesystem::path path="../templates/cif";
         sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
         facet.toupper(&comp_id[0], &comp_id[0] + comp_id.size());
-        cifPublisher.add("entry_id", comp_id);
+        cifPublisher.setEntryID(comp_id);
         std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>> atomSitesLoop;
         for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-            atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
+            cifPublisher.insertAtomSites(std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
         }
-        cifPublisher.add("atom_sites", atomSitesLoop);
         std::string&& content = cifPublisher.render();
         std::ofstream ofs("test_"+comp_id+".cif");
         ofs<<content<<std::endl;
         path="../templates/obj";
        std::cout<<"OBJPublisher "<<std::endl;
         sylvanmats::publishing::st::OBJPublisher objPublisher(path);
-        std::string vertexCount=std::to_string(2*12*lemon::countEdges(graph));
-        objPublisher.add("vertex_count", vertexCount);
-        std::vector<std::tuple<double, double, double>> vertexLoop;
+        objPublisher.setVertexCount(2*12*lemon::countEdges(graph));
+        for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+            sylvanmats::linear::Vector3d vA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
+            objPublisher.append(vA);            
+        }
         for(lemon::ListGraph::EdgeIt eSiteA(graph); eSiteA!=lemon::INVALID; ++eSiteA){
             lemon::ListGraph::Node nSiteA=graph.u(eSiteA);
             lemon::ListGraph::Node nSiteB=graph.v(eSiteA);
             sylvanmats::linear::Vector3d vA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
-            sylvanmats::linear::Vector3d vB(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
+            sylvanmats::linear::Vector3d vB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
             
             //vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v(0), v(1), v(2)));
         }
-        objPublisher.add("vertices", vertexLoop);
         std::string&& content2 = cifPublisher.render();
         std::ofstream ofs2("test.obj");
         ofs2<<content2<<std::endl;

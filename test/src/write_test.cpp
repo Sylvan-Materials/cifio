@@ -84,16 +84,11 @@ TEST_CASE("test writing mol2 from 1ebcs hem") {
                 subst_name=graph.atomSites[nSiteA].auth_comp_id;
                 chain=graph.atomSites[nSiteA].auth_asym_id;
                 mol2Publisher.insertAtomSites(std::make_tuple(ordinal--, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].type_symbol, 1, graph.atomSites[nSiteA].auth_comp_id, 0.0));
-//                atomSitesLoop.insert(atomSitesLoop.begin(), std::make_tuple(ordinal--, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].type_symbol, 1, graph.atomSites[nSiteA].auth_comp_id, 0.0));
             }
-//            mol2Publisher.add("atom_sites", atomSitesLoop);
             ordinal=lemon::countEdges(subSelectionGraph);
-//            std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, std::string>> atomBondsLoop;
             for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeIt e(subSelectionGraph); e!=lemon::INVALID; ++e){
                 mol2Publisher.insertAtomBonds(std::make_tuple(ordinal--,  ordinalMap[subSelectionGraph.u(e)], ordinalMap[subSelectionGraph.v(e)], std::to_string(graph.compBond[e].value_order)));
-//                atomBondsLoop.insert(atomBondsLoop.begin(), std::make_tuple(ordinal--,  ordinalMap[subSelectionGraph.u(e)], ordinalMap[subSelectionGraph.v(e)], std::to_string(graph.compBond[e].value_order)));
             }
-//            mol2Publisher.add("atom_bonds", atomBondsLoop);
             ordinal=1;
 //            std::vector<std::tuple<unsigned long long, std::string, unsigned long long, std::string, unsigned long long, std::string, std::string, unsigned long long, std::string>> substructureLoop;
 //                substructureLoop.insert(substructureLoop.begin(), std::make_tuple(ordinal--, subst_name, 1l, "RESIDUE", 1l, chain, subst_name, 0l, "ROOT"));

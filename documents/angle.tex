@@ -9,7 +9,7 @@
 Since \[\vec{r_{ij}}=\vec{r_{i}}-\vec{r_{j}}\], the last derivative term is simply identity. Also, for \[\vec{r}=r(x,y,z)\],\[r=\sqrt{x^2+y^2+z^2}\], so the second last derivative is:
 \[\frac{\partial r}{\partial \vec{r}}=\frac{1}{2\sqrt{x^2+y^2+z^2}}(2x, 2y,2z)=\frac{\vec{r}}{r}\]
 Thus:
-\[\frac{\partial \theta}{\partial \vec{r_{i}}}=\frac{-r_{ij}r_{kj}}{\sqrt{r_{ij}^2 r_{kj}^2-(\vec{r_{ij}}\cdot{\vec{r_{kj}}})^2}}(\frac{\vec{r_{kj}}}{r_{ij}r_{kj}}-\frac{\vec{r_{ij}}\cdot\vec{r_{kj}}}{r_{ij}^2 r_{kj}}\frac{\vec{r_{ij}}}{r_{ij}})=\frac{-1}{r_{ij}}\frac{r_{ij}^2 \vec{r_{kj}}-(\vec{r_{ij}}\cdot\vec{r_{kj}})\vec{r_{ij}}}{\sqrt{r_{ij}^4 r_{kj}^2-(\vec{r_{ij}}\cdot\vec{r_{kj}})^2 r_{ij}^2}}\]
+\[\frac{\partial \theta}{\partial \vec{r_{i}}}=\frac{-r_{ij}r_{kj}}{\sqrt{r_{ij}^2 r_{kj}^2-(\vec{r_{ij}}\cdot{\vec{r_{kj}}})^2}}(\frac{\vec{r_{kj}}}{r_{ij}r_{kj}}-\frac{\vec{r_{ij}}\cdot\vec{r_{kj}}}{r_{ij}^2 r_{kj}}\frac{\vec{r_{ij}}}{r_{ij}})\allowbreak =\frac{-1}{r_{ij}}\frac{r_{ij}^2 \vec{r_{kj}}-(\vec{r_{ij}}\cdot\vec{r_{kj}})\vec{r_{ij}}}{\sqrt{r_{ij}^4 r_{kj}^2-(\vec{r_{ij}}\cdot\vec{r_{kj}})^2 r_{ij}^2}}\]
 
 The numerator is the vector triple product, so the final result is:
 \[\frac{\partial \theta}{\partial \vec{r_{i}}}=\frac{norm(\vec{r_{ij}} \times (\vec{r_{ij}} \times \vec{r_{kj}}))}{r_{ij}}\]

@@ -9,6 +9,7 @@
 #include <numbers>
 #include <ranges>
 
+#define protected public
 
 #include "algebra/geometric/Bivector.h"
 #include "algebra/geometric/Rotor.h"
@@ -200,6 +201,7 @@ TEST_CASE("test accessible three spheres"){
     graph.atomSites[atomSiteA].label_atom_id="C";
 
     sylvanmats::surface::Accessible accessible(graph);
+    accessible.radii["C"]=3.0;
     accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){
         std::filesystem::path path="../../cifio/templates/svg";
         sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
@@ -219,6 +221,10 @@ TEST_CASE("test accessible three spheres"){
         std::ofstream ofs2("three"+name);
         ofs2<<content<<std::endl;
     });
+    for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+        if(graph.atomSites[nSiteA].type_symbol.compare("H")!=0)std::cout<<"three /"<<graph.atomSites[nSiteA].label_comp_id<<"/"<<graph.atomSites[nSiteA].label_seq_id<<"/"<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
+    }
+    std::cout<<"V "<<accessible.getVolume()<<" A "<<accessible.getArea()<<std::endl;
 }
 
 TEST_CASE("test accessible eight spheres"){
@@ -228,8 +234,8 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_x=0.0;
     graph.atomSites[atomSiteA].Cartn_y=0.0;
     graph.atomSites[atomSiteA].Cartn_z=0.0;
-    graph.atomSites[atomSiteA].type_symbol="C";
-    graph.atomSites[atomSiteA].label_atom_id="C";
+    graph.atomSites[atomSiteA].type_symbol="N";
+    graph.atomSites[atomSiteA].label_atom_id="N";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=2;
     graph.atomSites[atomSiteA].Cartn_x=-5.0;
@@ -320,19 +326,21 @@ TEST_CASE("test accessible eight spheres"){
 //            svgPublisher.add("offset_x", 2*maxRadius);
 //            svgPublisher.add("offset_y", 2*maxRadius);
 //            svgPublisher.add("circles", circleLoop);
-            svgPublisher.rawSetAttribute("has_arcs", true); 
+//            svgPublisher.rawSetAttribute("has_arcs", true);
             std::vector<std::tuple<double, double, double, double, double, int, std::string>> arcLoop;
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
                 arcLoop.insert(arcLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red"));
             }
-//            std::cout<<"# of arcs "<<arcLoop.size()<<std::endl;
+            std::cout<<"# of arcs "<<arcLoop.size()<<std::endl;
             svgPublisher.addWedges("arcs", arcLoop);
-            svgPublisher.rawSetAttribute("has_text", true); 
+            std::cout<<"set has_text "<<std::endl;
+//            svgPublisher.rawSetAttribute("has_text", true); 
+            std::cout<<"set has_text loop"<<std::endl;
             std::vector<std::tuple<double, double, double, double, double, int, std::string, double>> textLoop;
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
                 textLoop.insert(textLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red", (double)arcMap[aSiteA].length));
             }
-//            std::cout<<"# of text listed "<<textLoop.size()<<std::endl;
+            std::cout<<"# of text listed "<<textLoop.size()<<std::endl;
             svgPublisher.addLabelToWedges("text_list", textLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("eight_one.svg");
@@ -342,6 +350,11 @@ TEST_CASE("test accessible eight spheres"){
 
     SUBCASE("test all eight spheres"){
         sylvanmats::surface::Accessible accessible(graph);
+        accessible.radii["C"]=3.0;
+        accessible.radii["N"]=2.0;
+        accessible.radii["O"]=1.0;
+        accessible.radii["S"]=6.0;
+        accessible.radii["P"]=4.0;
         accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){
             std::filesystem::path path="../templates/svg";
             sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
@@ -360,9 +373,10 @@ TEST_CASE("test accessible eight spheres"){
             std::ofstream ofs2("eight"+name);
             ofs2<<content<<std::endl;
         });
-        for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-//            std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
-        }
+    for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+        if(graph.atomSites[nSiteA].type_symbol.compare("H")!=0)std::cout<<"eight /"<<graph.atomSites[nSiteA].label_comp_id<<"/"<<graph.atomSites[nSiteA].label_seq_id<<"/"<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
+    }
+    std::cout<<"V "<<accessible.getVolume()<<" A "<<accessible.getArea()<<std::endl;
     }
 }
 
@@ -411,8 +425,62 @@ TEST_CASE("test accessible 3sgs.cif.gz"){
             ofs2<<content<<std::endl;*/
         });
         for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
-//            std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
+            std::cout<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
         }
+        std::cout<<"V "<<accessible.getVolume()<<" A "<<accessible.getArea()<<std::endl;
+    });
+
+}
+
+TEST_CASE("test accessible 1j4m.cif.gz"){
+    std::string comp_id="1j4m";
+    std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
+    sylvanmats::constitution::Graph graph;
+    std::filesystem::path  filePath="./"+comp_id+".cif.gz";
+    sylvanmats::reading::TCPReader tcpReader;
+    tcpReader(url, [&graph, &filePath, &comp_id](std::istream& is){
+        sylvanmats::constitution::Populator populator;
+        populator(is, graph, [&filePath](sylvanmats::constitution::Graph& graph){
+       CHECK_EQ(graph.getNumberOfAtomSites(), 236);
+       CHECK_EQ(graph.getCell().length_a, 4.821);
+       CHECK_EQ(graph.getCell().length_b, 19.5);
+       CHECK_EQ(graph.getCell().length_c, 21.004);
+       CHECK_EQ(graph.getCell().angle_alpha, 90.000);
+       CHECK_EQ(graph.getCell().angle_beta, 94.23);
+       CHECK_EQ(graph.getCell().angle_gamma, 90.000);
+       CHECK_EQ(graph.getSymmetry().space_group_name_H_M, "P 1 21 1");
+       CHECK_EQ(graph.getSymmetry().Int_Tables_number, 4);
+       });
+       CHECK_EQ(graph.getNumberOfAtomSites(), 236);
+       CHECK_EQ(lemon::countEdges(graph), 239);
+       CHECK_EQ(lemon::countNodes(graph.componentGraph), 14);
+       CHECK_EQ(lemon::countEdges(graph.componentGraph), 12);
+//       std::cout<<"Accessible "<<std::endl;
+       graph.hydrogenVisibilityOff();
+        sylvanmats::surface::Accessible accessible(graph);
+        
+        accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){
+            /*std::filesystem::path path="../../cifio/templates/svg";
+            sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
+            std::vector<std::tuple<double, double, double, std::string>> circleLoop;
+            double maxRadius=0.0;
+            for(sylvanmats::surface::circle<double> c : circles){
+                circleLoop.insert(circleLoop.begin(), std::make_tuple(c.t0, c.s0, c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
+                maxRadius=std::max(maxRadius, c.r0);
+            }
+            svgPublisher.setHeight(4*maxRadius);
+            svgPublisher.setWidth(4*maxRadius);
+//            svgPublisher.add("offset_x", 2*maxRadius);
+//            svgPublisher.add("offset_y", 2*maxRadius);
+//            svgPublisher.add("circles", circleLoop);
+            std::string&& content = svgPublisher.render();
+            std::ofstream ofs2(name);
+            ofs2<<content<<std::endl;*/
+        });
+        for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
+            if(graph.atomSites[nSiteA].type_symbol.compare("H")!=0)std::cout<<"/"<<graph.atomSites[nSiteA].label_comp_id<<"/"<<graph.atomSites[nSiteA].label_seq_id<<"/"<<graph.atomSites[nSiteA].label_atom_id<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_volume<<" "<<accessible.getAccessibleSurface()[nSiteA].atom_site_area<<std::endl;
+        }
+        std::cout<<"V "<<accessible.getVolume()<<" A "<<accessible.getArea()<<std::endl;
     });
 
 }

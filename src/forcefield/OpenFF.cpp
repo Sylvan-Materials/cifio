@@ -336,14 +336,17 @@ namespace sylvanmats{
                                     sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
                                     sylvanmats::linear::Vector3d pointC(graph.atomSites[nSiteC].Cartn_x, graph.atomSites[nSiteC].Cartn_y, graph.atomSites[nSiteC].Cartn_z);
                                     sylvanmats::linear::Vector3d pointD(graph.atomSites[nSiteD].Cartn_x, graph.atomSites[nSiteD].Cartn_y, graph.atomSites[nSiteD].Cartn_z);
-                                    double dihedral=0.0;//findDihedralBetween(pointA, pointB, pointC, pointD);
+                                    double improper=findImproperBetween(pointA, pointB, pointC, pointD);
 
-                                    double et=0.0;//(smirksPattern.k1Value*(1.0+std::cos(smirksPattern.periodicity1Value*dihedral-smirksPattern.phase1Value))+smirksPattern.k2Value*(1.0+std::cos(smirksPattern.periodicity2Value*dihedral-smirksPattern.phase2Value))+smirksPattern.k3Value*(1.0+std::cos(smirksPattern.periodicity3Value*dihedral-smirksPattern.phase3Value))+smirksPattern.k4Value*(1.0+std::cos(smirksPattern.periodicity4Value*dihedral-smirksPattern.phase4Value)))/2.0;
-                                    double det=0.0;//k*(norm-angle);
+                                    double et=k1Value*std::pow(improper-smirksPattern.phase1Value, 2);
+                                    double det=k1Value*(improper-smirksPattern.phase1Value);
     //////
                                     Eimproper+=et;
+//                                    g[3*graph.id(nSiteB)] +=det;
+//                                    g[3*graph.id(nSiteB)+1] +=det;
+//                                    g[3*graph.id(nSiteB)+2] +=det;
                                     improperCount++;
-                                ssImpropers<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteC].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<graph.atomSites[nSiteD].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<eleD.atomic_number<<" "<<dihedral<<" "<<smirksPattern.phase1Value<<" "<<smirksPattern.k1Value<<" "<<et<<" "<<det<<std::endl;
+                                ssImpropers<<"\t"<<graph.atomSites[nSiteA].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteA].value_order)<<" "<<graph.atomSites[nSiteB].label_atom_id<<" "<<static_cast<int>(graph.compBond[eSiteC].value_order)<<" "<<graph.atomSites[nSiteC].label_atom_id<<" "<<graph.atomSites[nSiteD].label_atom_id<<" "<<eleA.atomic_number<<" "<<eleB.atomic_number<<" "<<eleC.atomic_number<<" "<<eleD.atomic_number<<" "<<improper<<" "<<smirksPattern.phase1Value<<" "<<smirksPattern.k1Value<<" "<<et<<" "<<det<<std::endl;
                                 properCount++;
                                 hit=true;
                                 }
@@ -425,9 +428,15 @@ namespace sylvanmats{
                         if(norm<=smirksPatterns.getElectrostatics().cutoff){
                             double D=1.0;
                             Eelectrostatics+=(graph.atomSites[nSiteA].partial_charge*graph.atomSites[nSiteB].partial_charge)/(4.0*std::numbers::pi*D*norm);
+                            double det=(graph.atomSites[nSiteA].partial_charge*graph.atomSites[nSiteB].partial_charge)/(4.0*std::numbers::pi*D*std::pow(norm,2));
+                            g[std::slice(3*graph.id(nSiteA), 3, 1)] -=det*(pointA-pointB)/norm;
+                            g[std::slice(3*graph.id(nSiteB), 3, 1)] +=det*(pointA-pointB)/norm;
                             double εij=std::sqrt(vdwMap[nSiteA].epsilon*vdwMap[nSiteB].epsilon);
                             double Rmin=(vdwMap[nSiteA].rmin_half+vdwMap[nSiteB].rmin_half)/2.0;
                             Evdw+=εij*(std::pow(Rmin/norm, 12)-2.0*std::pow(Rmin/norm, 6));
+                            det=0.0;//εij*(std::pow(Rmin/norm, 12)-2.0*std::pow(Rmin/norm, 6))
+                            g[std::slice(3*graph.id(nSiteA), 3, 1)] -=det*(pointA-pointB)/norm;
+                            g[std::slice(3*graph.id(nSiteB), 3, 1)] +=det*(pointA-pointB)/norm;
                             vdwCount++;
                         }
                     }

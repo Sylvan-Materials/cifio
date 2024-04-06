@@ -32,7 +32,12 @@ namespace sylvanmats::surface{
     struct circle{
         unsigned int id=0;
         mutable sylvanmats::linear::Vector2d center;
+        mutable sylvanmats::linear::Vector3d center3d;
         mutable T r0;
+        mutable T a;
+        mutable T b;
+        mutable T c;
+        mutable T d;
         mutable DIRECTION direction=COUNTER_CLOCKWISE;
         mutable bool connected=false;
     };
@@ -43,10 +48,14 @@ namespace sylvanmats::surface{
         mutable T length;
         mutable bool member_of_domain=false;
         arc(){};
-        arc(T α, T β, unsigned int id, T t0, T s0, T r0, DIRECTION direction) : α (α), β (β) {
+        arc(T α, T β, unsigned int id, T t0, T s0, T r0, DIRECTION direction, T a, T b, T c, T d) : α (α), β (β) {
             this->id=id;
             this->center=sylvanmats::linear::Vector2d(t0, s0);
             this->r0=r0;
+            this->a=a;
+            this->b=b;
+            this->c=c;
+            this->d=d;
             this->direction=direction;
             length=(direction==COUNTER_CLOCKWISE) ? std::abs(β-α)*r0 : -std::abs(β-α)*r0;
         };
@@ -83,6 +92,7 @@ namespace sylvanmats::surface{
                 status.store(RUNNING);
                 siteV=0.0;
                 siteA=0.0;
+                if(graph.atomSites[nSiteA].visibility){
                 bool engulfed=false;
                 std::vector<circle<double>>&& circles=project(graph, nSiteA, ri, engulfed);
                 if(circles.empty()){}
@@ -101,6 +111,7 @@ namespace sylvanmats::surface{
                     }
                     siteV+=dV;
                     siteA+=dA;
+                }
                 }
                 
                 if(status.load()==RUNNING)status.store(DATA_READY);
@@ -124,10 +135,12 @@ namespace sylvanmats::surface{
         double getVolume(){return siteV;};
         double getArea(){return siteA;};
 
+    protected:
         std::vector<circle<double>> project(sylvanmats::constitution::Graph& graph, lemon::ListGraph::Node& nSiteA, double ri, bool& engulfed){
             std::vector<circle<double>> circles;
             sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
             for(lemon::ListGraph::NodeIt nSiteB(graph); nSiteB!=lemon::INVALID; ++nSiteB){
+                if(graph.atomSites[nSiteB].visibility){
                 sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
                 double rj=(radii.contains(graph.atomSites[nSiteB].type_symbol)) ? radii[graph.atomSites[nSiteB].type_symbol]: 2.0;
                 double d=(pointB-pointA).norm();
@@ -160,10 +173,16 @@ namespace sylvanmats::surface{
                             circles.back().id=circles.size();
                             circles.back().center=center;
                             circles.back().r0=r0;
+                            circles.back().a=a;
+                            circles.back().b=b;
+                            circles.back().c=c;
+                            circles.back().d=d;
+                            circles.back().center3d=pointB;
                             if(a>0.0)circles.back().direction=CLOCKWISE;
                             //std::cout<<pointA.transpose()<<" "<<pointB.transpose()<<" a: "<<a<<" b: "<<b<<" c: "<<c<<" d: "<<d<<" ground zero t0="<<circles.back().center(0)<<" s0="<<circles.back().center(1)<<" r0="<<circles.back().r0<<" ri="<<ri<<" rj="<<rj<<std::endl;
                         }
                     }
+                }
                 }
             }
             return circles;
@@ -230,8 +249,10 @@ namespace sylvanmats::surface{
                     double β=(angleIndex<circleAngle.second.size()-1) ? std::get<0>(circleAngle.second[angleIndex+1]) : std::get<0>(circleAngle.second[0])+2.0*std::numbers::pi;
                     //std::cout<<idA<<" α: "<<α<<" β: "<<β<<std::endl;
                     lemon::ListDigraph::Arc a=projectedGraph.addArc(std::get<1>(circleAngle.second[angleIndex]), (angleIndex<circleAngle.second.size()-1) ? std::get<1>(circleAngle.second[angleIndex+1]) : std::get<1>(circleAngle.second[0]));
-                    for(sylvanmats::surface::circle<double>& circleA : circles | std::views::filter([&idA](sylvanmats::surface::circle<double>& c){return c.id==idA;}))
-                        arcMap[a]=arc<double>(α, β, circleA.id, circleA.center[0], circleA.center[1], circleA.r0, circleA.direction);
+                    for(sylvanmats::surface::circle<double>& circleA : circles | std::views::filter([&idA](sylvanmats::surface::circle<double>& c){return c.id==idA;})){
+                        arcMap[a]=arc<double>(α, β, circleA.id, circleA.center[0], circleA.center[1], circleA.r0, circleA.direction, circleA.a, circleA.b, circleA.c, circleA.d);
+                        arcMap[a].center3d=circleA.center3d;
+                    }
                 }
             }
             
@@ -276,7 +297,8 @@ namespace sylvanmats::surface{
                 if(countIntersections==0){
                     lemon::ListDigraph::Node nA=projectedGraph.addNode();
                     lemon::ListDigraph::Arc e=projectedGraph.addArc(nA, nA);
-                    arcMap[e]=arc<double>(0.0, 2.0*std::numbers::pi, circles[0].id, circles[0].center[0], circles[0].center[1], circles[0].r0, circles[0].direction);
+                    arcMap[e]=arc<double>(0.0, 2.0*std::numbers::pi, circles[0].id, circles[0].center[0], circles[0].center[1], circles[0].r0, circles[0].direction, circles[0].a, circles[0].b, circles[0].c, circles[0].d);
+                    arcMap[e].center3d=circles[0].center3d;
                     if(arcMap[e].direction==COUNTER_CLOCKWISE)clockwiseCount++;
                     arcMap[e].member_of_domain=true;
                     return integrate(zi, ri, arcMap[e].center[0], arcMap[e].center[1], arcMap[e].r0, arcMap[e].direction);
@@ -286,11 +308,12 @@ namespace sylvanmats::surface{
                         for(lemon::ListDigraph::ArcIt eSiteA(projectedGraph); eSiteA!=lemon::INVALID; ++eSiteA){
                             lemon::ListDigraph::Node nA=projectedGraph.addNode();
                             lemon::ListDigraph::Arc e=projectedGraph.addArc(nA, nA);
-                            arcMap[e]=arc<double>(0.0, 2.0*std::numbers::pi, circleA.id, circleA.center[0], circleA.center[1], circleA.r0, circleA.direction);
+                            arcMap[e]=arc<double>(0.0, 2.0*std::numbers::pi, circleA.id, circleA.center[0], circleA.center[1], circleA.r0, circleA.direction, circleA.a, circleA.b, circleA.c, circleA.d);
+                            arcMap[e].center3d=circleA.center3d;
                             if(arcMap[e].direction==COUNTER_CLOCKWISE)clockwiseCount++;
                             arcMap[e].member_of_domain=true;
                             return integrate(zi, ri, arcMap[e].center[0], arcMap[e].center[1], arcMap[e].r0, arcMap[e].direction);
-                        }                        
+                        }
                     }
                 }
                 else{
@@ -351,6 +374,10 @@ namespace sylvanmats::surface{
             sylvanmats::linear::ArrayXd αj(shortestPath.length());
             sylvanmats::linear::ArrayXd βj(shortestPath.length());
             sylvanmats::linear::ArrayXd sign(shortestPath.length());
+            sylvanmats::linear::ArrayXd a(shortestPath.length());
+            sylvanmats::linear::ArrayXd b(shortestPath.length());
+            sylvanmats::linear::ArrayXd c(shortestPath.length());
+            sylvanmats::linear::ArrayXd d(shortestPath.length());
             for(unsigned int j=0;j<shortestPath.length();j++){
                 t0[j]=arcMap[shortestPath.nth(j)].center[0];
                 s0[j]=arcMap[shortestPath.nth(j)].center[1];
@@ -359,6 +386,10 @@ namespace sylvanmats::surface{
                 βj[j]=arcMap[shortestPath.nth(j)].β;//α;
                 sign[j]=(arcMap[shortestPath.nth(j)].direction==COUNTER_CLOCKWISE) ? 1.0 : -1.0;
                 arcMap[shortestPath.nth(j)].member_of_domain=true;
+                a[j]=arcMap[shortestPath.nth(j)].a;
+                b[j]=arcMap[shortestPath.nth(j)].b;
+                c[j]=arcMap[shortestPath.nth(j)].c;
+                d[j]=arcMap[shortestPath.nth(j)].d;
             }
             sylvanmats::linear::ArrayXd A=(4.0*std::pow(ri,2)+t0.pow(2)+s0.pow(2)+r0.pow(2))/2.0;
             sylvanmats::linear::ArrayXd B=t0*r0;
@@ -386,6 +417,13 @@ namespace sylvanmats::surface{
             double dV=(sign*((128.0*J3*std::pow(ri, 7)+8.0*J2*std::pow(ri,5)+ 2.0*J1*std::pow(ri,3))/3.0-8.0*std::pow(ri,4)*J2*(zi+ri))).sum();
             double dA=(sign*2*J1*ri*ri).sum();
 //            std::cout<<" arc dV "<<(dV)<<" dA "<<dA<<std::endl;
+            //gradients
+            sylvanmats::linear::ArrayXd amplitude=8.0*std::pow(ri, 4)*std::numbers::pi/((4.0*std::pow(ri, 2)*a-d).pow(2)+4.0*std::pow(ri, 2)*(b.pow(2)+c.pow(2))).pow(1.5);
+            sylvanmats::linear::ArrayXd pA=amplitude*(4.0*std::pow(ri, 2)*(b.pow(2)+c.pow(2)-2.0*a*d)+2.0*d.pow(2));
+            sylvanmats::linear::ArrayXd pB=amplitude*(-b*(d+4.0*std::pow(ri, 2)*a));
+            sylvanmats::linear::ArrayXd pC=amplitude*(-c*(d+4.0*std::pow(ri, 2)*a));
+            sylvanmats::linear::ArrayXd pD=amplitude*(b.pow(2)+c.pow(2)-2.0*a*d+8.0*std::pow(ri, 2)*a.pow(2));
+            
             return std::forward_as_tuple(dV, dA);
         }
 

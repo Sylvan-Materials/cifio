@@ -4,6 +4,7 @@
 #include "reading/smirnoff/SMIRKSPatterns.h"
 #include "linear/Vector.h"
 #include "linear/Array.h"
+#include "algebra/geometric/Bivector.h"
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
@@ -57,6 +58,15 @@ namespace sylvanmats{
             double x=n1.dot(n2);
             double y=n1.cross(b2.normalized()).dot(n2);
             return std::atan2(y, x);
+        }
+        
+        inline double findImproperBetween(sylvanmats::linear::Vector3d v1, sylvanmats::linear::Vector3d v2, sylvanmats::linear::Vector3d v3, sylvanmats::linear::Vector3d v4){
+            sylvanmats::linear::Vector3d b1=v1-v2;
+            sylvanmats::linear::Vector3d b2=v3-v2;
+            sylvanmats::linear::Vector3d b3=v4-v2;
+            sylvanmats::algebra::geometric::Bivector<double> bv(b1, b2);
+            double x=bv.dot(b3)/(bv.norm()*b3.norm());
+            return std::acos(x);
         }
         
     };

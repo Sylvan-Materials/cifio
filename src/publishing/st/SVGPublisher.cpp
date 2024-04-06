@@ -19,25 +19,25 @@ namespace sylvanmats::publishing::st{
       auto hArg=fmt::arg("height", height);
       auto wArg=fmt::arg("width", width);
 //      auto mcArg=fmt::arg("material_count", material_count);
-//      auto vArg=fmt::arg("vertices", vertices);
-        std::string ret=fmt::vformat(svgTemplate, fmt::make_format_args(hArg, wArg));
+      auto vArg=fmt::arg("arcs", arcs);
+        std::string ret=fmt::vformat(svgTemplate, fmt::make_format_args(hArg, wArg, vArg));
         return ret;
     }
     
     void SVGPublisher::addWedges(std::string name, std::vector<std::tuple<double, double, double, double, double, int, std::string>>& wedges){
-        std::vector<std::tuple<double, double, double, double, double, double, double, int, int, std::string>> arcs;
         for(std::tuple<double, double, double, double, double, int, std::string> wedge : wedges){
             int direction = std::get<5>(wedge);
+//            std::cout<<"direction "<<direction<<" "<<std::endl;
             int large_arc_flag = (std::abs(std::get<4>(wedge)-std::get<3>(wedge))<=std::numbers::pi) ? 0: 1;
             auto [startX, startY] = polarToCartesian(std::get<0>(wedge), std::get<1>(wedge), std::get<2>(wedge), (direction==1 ) ? std::get<3>(wedge) : std::get<4>(wedge));
             auto [endX, endY] = polarToCartesian(std::get<0>(wedge), std::get<1>(wedge), std::get<2>(wedge), (direction==1 ) ? std::get<4>(wedge) : std::get<3>(wedge));
-            //std::cout<<direction<<" "<<large_arc_flag<<" alpha "<<std::get<3>(wedge)<<" "<<std::get<4>(wedge)<<" "<<(std::get<4>(wedge)-std::get<3>(wedge))<<std::endl;
+//            std::cout<<direction<<" "<<large_arc_flag<<" alpha "<<std::get<3>(wedge)<<" "<<std::get<4>(wedge)<<" "<<(std::get<4>(wedge)-std::get<3>(wedge))<<std::endl;
             arcs.push_back(std::make_tuple(std::get<0>(wedge), std::get<1>(wedge), std::get<2>(wedge), startX, startY, endX, endY, large_arc_flag, direction, std::get<6>(wedge)));
         }
-        add(name, arcs);
+//         std::cout<<"add "<<name<<" "<<std::endl;
+//        add(name, arcs);
     };
     void SVGPublisher::addLabelToWedges(std::string name, std::vector<std::tuple<double, double, double, double, double, int, std::string, double>>& wedgeText){
-        std::vector<std::tuple<double, double, double>> labelText;
         for(std::tuple<double, double, double, double, double, int, std::string, double> wedge : wedgeText){
             int direction = std::get<5>(wedge);
             int large_arc_flag = (std::abs(std::get<4>(wedge)-std::get<3>(wedge))<=std::numbers::pi) ? 0: 1;
@@ -47,7 +47,7 @@ namespace sylvanmats::publishing::st{
             auto [startX, startY] = polarToCartesian(std::get<0>(wedge), std::get<1>(wedge), std::get<2>(wedge), aveAngle);
             labelText.push_back(std::make_tuple(startX, startY, std::get<7>(wedge)));
         }
-        add(name, labelText);
+//        add(name, labelText);
     };
 }
 

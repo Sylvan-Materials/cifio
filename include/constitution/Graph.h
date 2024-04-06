@@ -283,6 +283,8 @@ namespace sylvanmats::constitution {
             unsigned long getNumberOfConnections(){return lemon::countEdges(*this);};
             void visibilityOn(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);
             void visibilityOff(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);
+            void hydrogenVisibilityOn();
+            void hydrogenVisibilityOff();
             void flipVisibility();
             _cell<double>& getCell(){return cell;};
             _symmetry& getSymmetry(){return symmetry;};

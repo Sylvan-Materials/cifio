@@ -1,0 +1,6 @@
+\section{Derivation of Nonbond Gradients}
+\[E_{nonbonded}=E_{electrostatic}+E_{vdw}\]
+\[E_{nonbonded}=\sum_{ij=1}^{(N\cdot(N-1)/2}\frac{q_i*q_j}{4\cdot \pi\cdot D\cdot r_{ij}} + \sum_{ij=1}^{(M\cdot(M-1)/2}\epsilon_{ij}\cdot[(\frac{R_{min,ij}}{r_{ij}})^{12}-2\cdot(\frac{R_{min,ij}}{r_{ij}})^6]\]
+
+\[\frac{\partial E_{ele,ij}}{\partial r}=-\frac{q_i*q_j}{4\cdot \pi\cdot D}\cdot \frac{q_i*q_j}{4\cdot \pi\cdot D\cdot r_{ij}^2}\]
+\[\frac{\partial E_{vdw,ij}}{\partial r}=-\epsilon_{ij} ?\]

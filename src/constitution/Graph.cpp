@@ -24,6 +24,19 @@ namespace sylvanmats::constitution {
 
     }
 
+    void Graph::hydrogenVisibilityOn(){
+        for(lemon::ListGraph::NodeIt nSiteA(*this); nSiteA!=lemon::INVALID; ++nSiteA){
+            if(atomSites[nSiteA].type_symbol.compare("H")==0)atomSites[nSiteA].visibility=true;
+        }
+    }
+
+    void  Graph::hydrogenVisibilityOff(){
+        for(lemon::ListGraph::NodeIt nSiteA(*this); nSiteA!=lemon::INVALID; ++nSiteA){
+            if(atomSites[nSiteA].type_symbol.compare("H")==0)atomSites[nSiteA].visibility=false;
+        }
+
+    }
+
     void Graph::flipVisibility(){
         for(lemon::ListGraph::NodeIt nSiteA(*this); nSiteA!=lemon::INVALID; ++nSiteA){
             atomSites[nSiteA].visibility=!atomSites[nSiteA].visibility;
