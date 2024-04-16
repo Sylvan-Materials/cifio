@@ -71,17 +71,17 @@ namespace sylvanmats::surface{
         sylvanmats::constitution::Graph& graph;
         lemon::ListGraph::Node nSiteA;
         double ri;
+        std::unordered_map<std::string, double>& radii;
+        double probe_radius=1.4;
+        std::atomic<STATUS> status;
 
         double siteV=0.0;
         double siteA=0.0;
-        std::unordered_map<std::string, double> radii={{"C", 2.0}, {"N", 2.0}, {"O", 1.0}, {"P", 4.0}, {"S", 6.0}};
-        double probe_radius=0.0;
-        std::atomic<STATUS> status;
         std::mutex m;
         std::condition_variable cv;
 
         public:
-        AtomAreaExposure(sylvanmats::constitution::Graph& graph, lemon::ListGraph::Node& nSiteA, double ri) : graph (graph), nSiteA (nSiteA), ri (ri), status (UNKNOWN) {
+        AtomAreaExposure(sylvanmats::constitution::Graph& graph, lemon::ListGraph::Node& nSiteA, double ri,std::unordered_map<std::string, double>& radii, double probe_radius=1.4) : graph (graph), nSiteA (nSiteA), ri (ri), radii (radii), probe_radius (probe_radius), status (UNKNOWN) {
         };
         AtomAreaExposure(const AtomAreaExposure& orig) = delete;
         virtual ~AtomAreaExposure() = default;

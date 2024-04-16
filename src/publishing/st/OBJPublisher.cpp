@@ -14,7 +14,7 @@ namespace sylvanmats::publishing::st{
         std::cout<<" "<<path.string()<<std::endl;
         std::ifstream file(path);
         objTemplate=std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    };
+    }
     
     std::string OBJPublisher::render(){
       auto vcArg=fmt::arg("vertex_count", vertex_count);

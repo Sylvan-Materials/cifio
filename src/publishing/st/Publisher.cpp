@@ -121,97 +121,97 @@ namespace sylvanmats::publishing::st{
 //       constructorDoubleId = jniEnv->GetMethodID(jdoublecls, "<init>", "(D)V");
     };
 
-    void Publisher::add(std::string name, const char* value){
-       if (jcls != NULL) {
-          jmethodID methodId = jniEnv->GetMethodID(jcls,
-             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
-          if (methodId != NULL) {
-             jstring jname = jniEnv->NewStringUTF(name.c_str());
-             jstring jvalue = jniEnv->NewStringUTF(value);
-             jniEnv->CallObjectMethod(stObject, methodId, jname, jvalue);
-             if (jniEnv->ExceptionCheck()) {
-                jniEnv->ExceptionDescribe();
-                jniEnv->ExceptionClear();
-             }
-          }
-       }
-    };
-
-    void Publisher::add(std::string name, std::string value){
-       Publisher::add(name, value.c_str());
-    };
-
-    void Publisher::add(std::string name, bool value){
-       if (jcls != NULL) {
-          jmethodID methodId = jniEnv->GetMethodID(jcls,
-             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
-          if (methodId != NULL) {
-             jstring jname = jniEnv->NewStringUTF(name.c_str());
-             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
-             if (jniEnv->ExceptionCheck()) {
-                jniEnv->ExceptionDescribe();
-                jniEnv->ExceptionClear();
-             }
-          }
-       }
-    };
-    void Publisher::add(std::string name, long long value){
-       if (jcls != NULL) {
-          jmethodID methodId = jniEnv->GetMethodID(jcls,
-             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
-          if (methodId != NULL) {
-             jstring jname = jniEnv->NewStringUTF(name.c_str());
-             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
-             if (jniEnv->ExceptionCheck()) {
-                jniEnv->ExceptionDescribe();
-                jniEnv->ExceptionClear();
-             }
-          }
-       }
-    };
-    void Publisher::add(std::string name, unsigned long long value){
-       if (jcls != NULL) {
-          jmethodID methodId = jniEnv->GetMethodID(jcls,
-             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
-          if (methodId != NULL) {
-             jstring jname = jniEnv->NewStringUTF(name.c_str());
-             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
-             if (jniEnv->ExceptionCheck()) {
-                jniEnv->ExceptionDescribe();
-                jniEnv->ExceptionClear();
-             }
-          }
-       }
-    };
-    void Publisher::add(std::string name, double value){
-       if (jcls != NULL) {
-          jmethodID methodId = jniEnv->GetMethodID(jcls,
-             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
-          if (methodId != NULL) {
-             jstring jname = jniEnv->NewStringUTF(name.c_str());
-             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
-             if (jniEnv->ExceptionCheck()) {
-                jniEnv->ExceptionDescribe();
-                jniEnv->ExceptionClear();
-             }
-          }
-       }
-    };
-
-    void Publisher::rawSetAttribute(std::string name, bool value){
-       if (jcls != NULL) {
-          jmethodID methodId = jniEnv->GetMethodID(jcls,
-             "rawSetAttribute", "(Ljava/lang/String;Ljava/lang/Object;)V");
-          if (methodId != NULL) {
-             jstring jname = jniEnv->NewStringUTF(name.c_str());
-             jniEnv->CallVoidMethod(stObject, methodId, jname, toArgs(value));
-             if (jniEnv->ExceptionCheck()) {
-                jniEnv->ExceptionDescribe();
-                jniEnv->ExceptionClear();
-             }
-          }
-       }
-    };
+//    void Publisher::add(std::string name, const char* value){
+//       if (jcls != NULL) {
+//          jmethodID methodId = jniEnv->GetMethodID(jcls,
+//             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
+//          if (methodId != NULL) {
+//             jstring jname = jniEnv->NewStringUTF(name.c_str());
+//             jstring jvalue = jniEnv->NewStringUTF(value);
+//             jniEnv->CallObjectMethod(stObject, methodId, jname, jvalue);
+//             if (jniEnv->ExceptionCheck()) {
+//                jniEnv->ExceptionDescribe();
+//                jniEnv->ExceptionClear();
+//             }
+//          }
+//       }
+//    };
+//
+//    void Publisher::add(std::string name, std::string value){
+//       Publisher::add(name, value.c_str());
+//    };
+//
+//    void Publisher::add(std::string name, bool value){
+//       if (jcls != NULL) {
+//          jmethodID methodId = jniEnv->GetMethodID(jcls,
+//             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
+//          if (methodId != NULL) {
+//             jstring jname = jniEnv->NewStringUTF(name.c_str());
+//             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
+//             if (jniEnv->ExceptionCheck()) {
+//                jniEnv->ExceptionDescribe();
+//                jniEnv->ExceptionClear();
+//             }
+//          }
+//       }
+//    };
+//    void Publisher::add(std::string name, long long value){
+//       if (jcls != NULL) {
+//          jmethodID methodId = jniEnv->GetMethodID(jcls,
+//             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
+//          if (methodId != NULL) {
+//             jstring jname = jniEnv->NewStringUTF(name.c_str());
+//             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
+//             if (jniEnv->ExceptionCheck()) {
+//                jniEnv->ExceptionDescribe();
+//                jniEnv->ExceptionClear();
+//             }
+//          }
+//       }
+//    };
+//    void Publisher::add(std::string name, unsigned long long value){
+//       if (jcls != NULL) {
+//          jmethodID methodId = jniEnv->GetMethodID(jcls,
+//             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
+//          if (methodId != NULL) {
+//             jstring jname = jniEnv->NewStringUTF(name.c_str());
+//             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
+//             if (jniEnv->ExceptionCheck()) {
+//                jniEnv->ExceptionDescribe();
+//                jniEnv->ExceptionClear();
+//             }
+//          }
+//       }
+//    };
+//    void Publisher::add(std::string name, double value){
+//       if (jcls != NULL) {
+//          jmethodID methodId = jniEnv->GetMethodID(jcls,
+//             "add", "(Ljava/lang/String;Ljava/lang/Object;)Lorg/stringtemplate/v4/ST;");
+//          if (methodId != NULL) {
+//             jstring jname = jniEnv->NewStringUTF(name.c_str());
+//             jniEnv->CallObjectMethod(stObject, methodId, jname, toArgs(value));
+//             if (jniEnv->ExceptionCheck()) {
+//                jniEnv->ExceptionDescribe();
+//                jniEnv->ExceptionClear();
+//             }
+//          }
+//       }
+//    };
+//
+//    void Publisher::rawSetAttribute(std::string name, bool value){
+//       if (jcls != NULL) {
+//          jmethodID methodId = jniEnv->GetMethodID(jcls,
+//             "rawSetAttribute", "(Ljava/lang/String;Ljava/lang/Object;)V");
+//          if (methodId != NULL) {
+//             jstring jname = jniEnv->NewStringUTF(name.c_str());
+//             jniEnv->CallVoidMethod(stObject, methodId, jname, toArgs(value));
+//             if (jniEnv->ExceptionCheck()) {
+//                jniEnv->ExceptionDescribe();
+//                jniEnv->ExceptionClear();
+//             }
+//          }
+//       }
+//    };
 
 }
 

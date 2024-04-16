@@ -32,7 +32,7 @@ namespace sylvanmats::surface {
     class Accessible{
         protected:
         sylvanmats::constitution::Graph& graph;
-        double probe_radius=0.0;
+        double probe_radius=1.4;
         std::unordered_map<std::string, double> radii={{"H", 1.2}, {"C", 1.7}, {"N", 1.55}, {"O", 1.52}, {"P", 1.8}, {"S", 1.8}, {"Cl", 1.75}, {"Cu", 1.4}};
         lemon::ListGraph::NodeMap<accessible_surface<double>> accessibles;
 
@@ -71,7 +71,7 @@ namespace sylvanmats::surface {
                 
                 if(atomAreaExposures.size()<totalThreadCount){
                     double ri=(radii.contains(graph.atomSites[nSiteA].type_symbol)) ? radii[graph.atomSites[nSiteA].type_symbol]: 2.0;
-                    atomAreaExposures.push_back(std::shared_ptr<AtomAreaExposure>(new AtomAreaExposure(graph, nSiteA, ri)));
+                    atomAreaExposures.push_back(std::shared_ptr<AtomAreaExposure>(new AtomAreaExposure(graph, nSiteA, ri, radii, probe_radius)));
                     threads.push_back(std::jthread(&AtomAreaExposure::operator(), atomAreaExposures.back().get()));
                     threads.back().detach();
                 }
@@ -98,7 +98,7 @@ namespace sylvanmats::surface {
                 }
                 //apply(graph.getUniqueName(nSiteA)+".svg", circles);
             }
-            //std::cout<<atomAreaExposures.size()<<" V "<<V<<" A "<<A<<" "<<count<<" "<<lemon::countNodes(graph)<<std::endl;
+            std::cout<<atomAreaExposures.size()<<" V "<<V<<" A "<<A<<" count "<<count<<" "<<lemon::countNodes(graph)<<std::endl;
             do{
                 for(auto aae : atomAreaExposures | std::views::filter([](std::shared_ptr<AtomAreaExposure>& a){ std::this_thread::yield();return a->checkStatus()==DATA_READY; })){
                          accessibles[aae->getAtomSite()].atom_site_volume = aae->getVolume();
@@ -109,7 +109,7 @@ namespace sylvanmats::surface {
                         //std::vector<std::shared_ptr<AtomAreaExposure>>::iterator pos=std::find(atomAreaExposures.begin(), atomAreaExposures.end(), aae);
                         //if(pos!=atomAreaExposures.end())atomAreaExposures.erase(pos);
                         count++;
-                        //std::cout<<count<<" "<<lemon::countNodes(graph)<<std::endl;
+                        std::cout<<count<<" "<<lemon::countNodes(graph)<<std::endl;
                         break;
                 }
                 std::this_thread::yield();

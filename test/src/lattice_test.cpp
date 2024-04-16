@@ -578,12 +578,9 @@ TEST_CASE("test symmetry operations on 1q8h"){
 
         std::filesystem::path path="../templates/obj";
         sylvanmats::publishing::st::OBJPublisher objPublisher(path);
-        std::string vertexCount=std::to_string(2*2*12*lemon::countEdges(graph));
-//        std::cout<<"vertexCount "<<std::endl;
-        objPublisher.add("vertex_count", vertexCount);
-        std::string faceCount=std::to_string(2*12*lemon::countEdges(graph));
-        objPublisher.add("face_count", faceCount);
-        objPublisher.add("material_count", "1");
+        objPublisher.setVertexCount(2*2*12*lemon::countEdges(graph));
+        objPublisher.setFaceCount(2*12*lemon::countEdges(graph));
+        objPublisher.setMaterialCount(1);
         std::vector<std::tuple<double, double, double, double, double, double>> vertexLoop;
         std::vector<std::tuple<double, double, double>> normalLoop;
 //        std::vector<std::tuple<unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long>> indexLoop;
