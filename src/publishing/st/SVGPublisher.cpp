@@ -18,10 +18,18 @@ namespace sylvanmats::publishing::st{
     std::string SVGPublisher::render(){
       auto hArg=fmt::arg("height", height);
       auto wArg=fmt::arg("width", width);
+      auto oxArg=fmt::arg("offset_x", offset_x);
+      auto oyArg=fmt::arg("offset_y", offset_y);
 //      auto mcArg=fmt::arg("material_count", material_count);
+      auto cArg=fmt::arg("circles", circles);
       auto vArg=fmt::arg("arcs", arcs);
-        std::string ret=fmt::vformat(svgTemplate, fmt::make_format_args(hArg, wArg, vArg));
+      auto tArg=fmt::arg("text_list", labelText);
+        std::string ret=fmt::vformat(svgTemplate, fmt::make_format_args(hArg, wArg, oxArg, oyArg, cArg, vArg, tArg));
         return ret;
+    }
+    
+    void SVGPublisher::addCircles(std::string name, std::vector<std::tuple<double, double, double, std::string>>& circles){
+        this->circles=circles;
     }
     
     void SVGPublisher::addWedges(std::string name, std::vector<std::tuple<double, double, double, double, double, int, std::string>>& wedges){
@@ -36,7 +44,8 @@ namespace sylvanmats::publishing::st{
         }
 //         std::cout<<"add "<<name<<" "<<std::endl;
 //        add(name, arcs);
-    };
+    }
+    
     void SVGPublisher::addLabelToWedges(std::string name, std::vector<std::tuple<double, double, double, double, double, int, std::string, double>>& wedgeText){
         for(std::tuple<double, double, double, double, double, int, std::string, double> wedge : wedgeText){
             int direction = std::get<5>(wedge);
@@ -45,7 +54,7 @@ namespace sylvanmats::publishing::st{
             //auto [endX, endY] = polarToCartesian(std::get<0>(wedge), std::get<1>(wedge), std::get<2>(wedge), (direction==1 ) ? std::get<4>(wedge) : std::get<3>(wedge));
             double aveAngle = (std::get<3>(wedge)+std::get<4>(wedge))/2.0;
             auto [startX, startY] = polarToCartesian(std::get<0>(wedge), std::get<1>(wedge), std::get<2>(wedge), aveAngle);
-            labelText.push_back(std::make_tuple(startX, startY, std::get<7>(wedge)));
+            labelText.push_back(std::make_tuple(startX, startY, std::get<6>(wedge), std::get<7>(wedge)));
         }
 //        add(name, labelText);
     };

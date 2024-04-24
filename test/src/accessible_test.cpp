@@ -308,6 +308,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=0.0;
     graph.atomSites[atomSiteA].type_symbol="S";
     graph.atomSites[atomSiteA].label_atom_id="S";
+    CHECK_EQ(lemon::countNodes(graph), 8);
 
     SUBCASE("test first of eight spheres"){
         lemon::ListGraph::NodeIt nSiteA(graph);
@@ -352,10 +353,9 @@ TEST_CASE("test accessible eight spheres"){
             }
             svgPublisher.setHeight(4*maxRadius);
             svgPublisher.setWidth(4*maxRadius);
-//            svgPublisher.add("offset_x", 2*maxRadius);
-//            svgPublisher.add("offset_y", 2*maxRadius);
-//            svgPublisher.add("circles", circleLoop);
-//            svgPublisher.rawSetAttribute("has_arcs", true);
+            svgPublisher.setXOffset(2*maxRadius);
+            svgPublisher.setYOffset(2*maxRadius);
+            svgPublisher.addCircles("circles", circleLoop);
             std::vector<std::tuple<double, double, double, double, double, int, std::string>> arcLoop;
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
                 arcLoop.insert(arcLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red"));

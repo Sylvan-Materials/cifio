@@ -211,6 +211,15 @@ namespace sylvanmats::linear{
             return v2;
         }
         
+        Array<T, R, C> transpose(){
+            Array<T, R> v2(*this);
+            for(unsigned long long j=0;j<_cols;j++)
+            for(unsigned long long i=0;i<_rows;i++)
+                    /*co_yield*/ v2[j+C*i]=operator[](i+_rows*j);
+                
+            return v2;
+        };
+        
 //        Array<T, R, C> row(unsigned int s){
 //            Array<T, R, C> v2((*this)[std::slice(s, _cols, _rows)]);
 //            return v2;

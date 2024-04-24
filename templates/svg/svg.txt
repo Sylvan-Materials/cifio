@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" height="{height}" width="{width}">
   <style>
-    .small {{ font: normal 4px sans-serif; }}
+    .small {{ font: normal 1px sans-serif; }}
     .heavy {{ font: bold 10px sans-serif; }}
   </style>
   <defs>
@@ -10,9 +10,9 @@
     </marker>
   </defs>
    <rect x="0" y="0" width="100%" height="100%" fill="white" />
-   <g transform="translate(<offset_x; format="%,.4f"> <offset_y; format="%,.4f">), scale(4,4)">
-<circles:{{ circle |    <circle cx="<circle.value0; format="%,.4f">" cy="<circle.value1; format="%,.4f">" r="<circle.value2; format="%,.4f">" stroke="<circle.value3>" stroke-width="0.2" fill="none"/><\n>}}>
+   <g transform="translate({offset_x} {offset_y}), scale(4,4)">
+{circles:}
 {arcs:}
-<if(has_text)><text_list:{{ text | <text x="<text.value0; format="%,.4f">" y="<text.value1; format="%,.4f">" class="small"><text.value2; format="%,.2f"></text><\n>}}><else>print("no text");<endif>
+{text_list:}
   </g>
 </svg>

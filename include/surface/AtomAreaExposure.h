@@ -102,7 +102,7 @@ namespace sylvanmats::surface{
                     lemon::ListDigraph projectedGraph;
                     lemon::ListDigraph::ArcMap<arc<double>> arcMap(projectedGraph);
                     auto [clockwiseCount, countOverlays, countIntersections, countFulls] = graphProjection(projectedGraph, circles, arcMap);
-                    //std::cout<<"clockwiseCount "<<clockwiseCount<<" "<<circles.size()<<" "<<countOverlays<<" "<<countIntersections<<" "<<countFulls<<std::endl;
+//                    std::cout<<"clockwiseCount "<<clockwiseCount<<" "<<circles.size()<<" "<<countOverlays<<" "<<countIntersections<<" "<<countFulls<<std::endl;
                     clockwiseCount=0;
                     auto [dV, dA] = integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraph, circles, arcMap, clockwiseCount);
                     if(clockwiseCount==0 || circles.size()<=1){
@@ -148,7 +148,7 @@ namespace sylvanmats::surface{
                     if(d+ri<=rj){
                         circles.clear();
                         engulfed=true;
-                        //std::cout<<"engulfed "<<pointA.transpose()<<" "<<pointB.transpose()<<" ri="<<ri<<" rj="<<rj<<std::endl;
+//                        std::cout<<"engulfed "<<pointA<<" "<<pointB<<" ri="<<ri<<" rj="<<rj<<std::endl;
                         return circles;
                     }
                     else if(d+rj>ri){
@@ -157,7 +157,7 @@ namespace sylvanmats::surface{
                         double c=8.0*std::pow(ri, 2)*(graph.atomSites[nSiteA].Cartn_y-graph.atomSites[nSiteB].Cartn_y);
                         double d=4.0*std::pow(ri, 2)*(std::pow(graph.atomSites[nSiteA].Cartn_x-graph.atomSites[nSiteB].Cartn_x, 2)+std::pow(graph.atomSites[nSiteA].Cartn_y-graph.atomSites[nSiteB].Cartn_y, 2)+std::pow(graph.atomSites[nSiteA].Cartn_z-ri-graph.atomSites[nSiteB].Cartn_z, 2)-std::pow(rj, 2));
                         double r0=((std::pow(b, 2)+std::pow(c, 2)-4.0*a*d)<0.0) ? std::sqrt((std::pow(b, 2)+std::pow(c, 2)+4.0*a*d)/(4.0*std::pow(a, 2))) : std::sqrt((std::pow(b, 2)+std::pow(c, 2)-4.0*a*d)/(4.0*std::pow(a, 2)));
-                        if(r0==0.0)continue;
+                         if(r0==0.0)continue;
                         sylvanmats::linear::Vector2d center(-b/(2.0*a), -c/(2.0*a));
                         bool hit=false;
                         if(a<=0.0){
@@ -168,7 +168,7 @@ namespace sylvanmats::surface{
                             hit=checkInsideAtLeastOneCircle(circles, center, r0);
                             if(!hit)eraseAnyPreviousCirclesInside(circles, center, r0);
                         }
-                        if(!hit){
+                       if(!hit){
                             circles.push_back(circle<double>());
                             circles.back().id=circles.size();
                             circles.back().center=center;
@@ -179,11 +179,14 @@ namespace sylvanmats::surface{
                             circles.back().d=d;
                             circles.back().center3d=pointB;
                             if(a>0.0)circles.back().direction=CLOCKWISE;
-                            //std::cout<<pointA.transpose()<<" "<<pointB.transpose()<<" a: "<<a<<" b: "<<b<<" c: "<<c<<" d: "<<d<<" ground zero t0="<<circles.back().center(0)<<" s0="<<circles.back().center(1)<<" r0="<<circles.back().r0<<" ri="<<ri<<" rj="<<rj<<std::endl;
+//                            std::cout<<pointA<<" "<<pointB<<" a: "<<a<<" b: "<<b<<" c: "<<c<<" d: "<<d<<" ground zero t0="<<circles.back().center[0]<<" s0="<<circles.back().center[1]<<" r0="<<circles.back().r0<<" ri="<<ri<<" rj="<<rj<<std::endl;
                         }
                     }
+//                    else std::cout<<"neither "<<pointB<<std::endl;
                 }
+//                else if(nSiteA!=nSiteB)std::cout<<pointB<<" outside "<<d<<" "<<(ri+rj+probe_radius)<<std::endl;
                 }
+//                else std::cout<<"invisible "<<pointA<<std::endl;
             }
             return circles;
         };
@@ -224,7 +227,7 @@ namespace sylvanmats::surface{
                         circleAngleMap[circleA.id].push_back(std::make_tuple(α0, nA));
                         circleAngleMap[circleA.id].push_back(std::make_tuple(β0, nB));
                         //if(β>2.0*std::numbers::pi){α-=2.0*std::numbers::pi;β-=2.0*std::numbers::pi;};
-                        //std::cout<<"P0 t0 "<<circleA.t0<<" s0 "<<circleA.s0<<" r0 "<<circleA.r0<<" α "<<α<<" β "<<β<<std::endl;
+//                        std::cout<<"t1 "<<circleA.center[0]<<" s1 "<<circleA.center[1]<<" r1 "<<circleA.r0<<" α "<<α0<<" β "<<β0<<" "<<(β0-α0)<<std::endl;
                         double α1=findAngleBetween(unitX, (P3b-P1));
                         double β1=findAngleBetween(unitX, (P3a-P1));
                         //if(a>d)std::swap(α1, β1);
@@ -232,7 +235,7 @@ namespace sylvanmats::surface{
                         circleAngleMap[circleB.id].push_back(std::make_tuple(α1, nB));
                         circleAngleMap[circleB.id].push_back(std::make_tuple(β1, nA));
                         //if(β>2.0*std::numbers::pi){α-=2.0*std::numbers::pi;β-=2.0*std::numbers::pi;};
-                        //std::cout<<"P1 t0 "<<circleB.t0<<" s0 "<<circleB.s0<<" r0 "<<circleB.r0<<" α "<<α<<" β "<<β<<std::endl;
+//                        std::cout<<"t1 "<<circleB.center[0]<<" s1 "<<circleB.center[1]<<" r1 "<<circleB.r0<<" α "<<α1<<" β "<<β1<<" "<<(β1-α1)<<std::endl;
                         countIntersections++;
                         circleA.connected=true;
                         circleB.connected=true;
@@ -288,7 +291,7 @@ namespace sylvanmats::surface{
             }
 
             for(sylvanmats::surface::circle<double> circleA : circles){
-                if(!circleA.connected)countFulls++;
+                if(!circleA.connected /*&& circleA.direction==COUNTER_CLOCKWISE*/)countFulls++;
             }
             return std::make_tuple(clockwiseCount, countOverlays, countIntersections, countFulls);
         };
@@ -304,6 +307,7 @@ namespace sylvanmats::surface{
                     return integrate(zi, ri, arcMap[e].center[0], arcMap[e].center[1], arcMap[e].r0, arcMap[e].direction);
                 }
                 else if(countFulls>0){
+//                    std::cout<<"countFulls "<<countFulls<<std::endl;
                     for(sylvanmats::surface::circle<double>& circleA : circles | std::views::filter([](sylvanmats::surface::circle<double>& c){return !c.connected;})){
                         for(lemon::ListDigraph::ArcIt eSiteA(projectedGraph); eSiteA!=lemon::INVALID; ++eSiteA){
                             lemon::ListDigraph::Node nA=projectedGraph.addNode();
@@ -317,14 +321,14 @@ namespace sylvanmats::surface{
                     }
                 }
                 else{
-                    //std::cout<<" nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
+//                    std::cout<<" nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
                     lemon::ListDigraph::NodeMap<int> componentMap(projectedGraph);
                     sylvanmats::linear::Array<double, -1l> componentCounts(lemon::connectedComponents(projectedGraph, componentMap));
                     for(lemon::ListDigraph::NodeIt nProjected(projectedGraph); nProjected!=lemon::INVALID; ++nProjected){
                         //std::cout<<"componentMap "<<componentMap[nProjected]<<std::endl;
                         componentCounts[componentMap[nProjected]]++;
                     }
-                    //if(componentCounts.size()>1)std::cout<<"componentCounts "<<componentCounts.transpose()<<std::endl;
+//                    if(componentCounts.size()>1)std::cout<<"componentCounts "<<componentCounts.transpose()<<std::endl;
                     lemon::ListDigraph::ArcMap<double> lengthMap(projectedGraph);
                     for(lemon::ListDigraph::ArcIt eSiteA(projectedGraph); eSiteA!=lemon::INVALID; ++eSiteA){
                         lengthMap[eSiteA]=arcMap[eSiteA].length;
@@ -358,7 +362,7 @@ namespace sylvanmats::surface{
                                 lemon::pathCopy(testPath, shortestPath);
                                 shortestPath.addFront(aSiteA);
                             }
-                        //std::cout<<length<<" bestLength: "<<bestLength<<" "<<testPath.length()<<" "<<shortestPath.length()<<std::endl;
+//                        std::cout<<length<<" bestLength: "<<bestLength<<" "<<testPath.length()<<" "<<shortestPath.length()<<std::endl;
                         }
                     }
                     return integrate(zi, ri, shortestPath, arcMap);
@@ -395,10 +399,10 @@ namespace sylvanmats::surface{
             sylvanmats::linear::ArrayXd B=t0*r0;
             sylvanmats::linear::ArrayXd C=s0*r0;
             sylvanmats::linear::ArrayXd D=A.pow(2)-B.pow(2)-C.pow(2);
-            //std::cout<<" A "<<A.transpose()<<std::endl;
-            //std::cout<<" B "<<B.transpose()<<std::endl;
-            //std::cout<<" C "<<C.transpose()<<std::endl;
-            //std::cout<<" D "<<D.transpose()<<std::endl;
+//            std::cout<<" A "<<A.transpose()<<std::endl;
+//            std::cout<<" B "<<B.transpose()<<std::endl;
+//            std::cout<<" C "<<C.transpose()<<std::endl;
+//            std::cout<<" D "<<D.transpose()<<std::endl;
             //std::cout<<" αj "<<αj.transpose()<<std::endl;
             //std::cout<<" βj "<<βj.transpose()<<std::endl;
             sylvanmats::linear::ArrayXd I1=(2.0/D.sqrt())*(std::numbers::pi/2.0 - ((A*((βj-αj)/2.0).cos()+B*((αj+βj)/2.0).cos()+C*((αj+βj)/2.0).sin())/(D.sqrt()*((βj-αj)/2.0).sin())).atan());
@@ -455,10 +459,10 @@ namespace sylvanmats::surface{
         }
 
         inline double findAngleBetween(sylvanmats::linear::Vector2d v1, sylvanmats::linear::Vector2d v2){
-            double dot=v1.normalized().dot(v2.normalized());
+//            double dot=v1.normalized().dot(v2.normalized());
             //std::cout<<"dot "<<dot<<std::endl;
             //return (dot>=0) ? std::acos(dot) : 2.0*std::numbers::pi-std::acos(dot);
-            v2.normalize();
+//            v2.normalize();
             return (v2.y()>=0.0) ? std::atan2(v2.y(), v2.x()) : 2.0*std::numbers::pi + std::atan2(v2.y(), v2.x()); 
         }
         inline sylvanmats::linear::Vector2d polarToCartesian(double centerX, double centerY, double radius, double θ) {
