@@ -128,7 +128,7 @@ struct fmt::formatter<std::vector<std::tuple<double, double, std::string, double
             double i1=std::get<1>((std::tuple<double, double, std::string, double>)v[i]);
             std::string i2=std::get<2>((std::tuple<double, double, std::string, double>)v[i]);
             double i3=std::get<3>((std::tuple<double, double, std::string, double>)v[i]);
-            fmt::vformat_to(ctx.out(), "    <text x=\"{:>.4f}\" y=\"{:>.4f}\" class=\"small\">{:>.4f}\</text>\n", fmt::make_format_args(i0, i1, i3));
+            fmt::vformat_to(ctx.out(), "    <text x=\"{:>.4f}\" y=\"{:>.4f}\" class=\"medium\">{:>.4f}\</text>\n", fmt::make_format_args(i0, i1, i3));
         }
         constexpr char* fmt={"\n"};
         return fmt::format_to(ctx.out(), fmt);

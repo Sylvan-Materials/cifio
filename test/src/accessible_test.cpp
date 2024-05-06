@@ -259,6 +259,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=0.0;
     graph.atomSites[atomSiteA].type_symbol="N";
     graph.atomSites[atomSiteA].label_atom_id="N";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=2;
     graph.atomSites[atomSiteA].Cartn_x=-5.0;
@@ -266,6 +267,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=0.0;
     graph.atomSites[atomSiteA].type_symbol="S";
     graph.atomSites[atomSiteA].label_atom_id="S";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=3;
     graph.atomSites[atomSiteA].Cartn_x=5.0;
@@ -273,6 +275,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=0.0;
     graph.atomSites[atomSiteA].type_symbol="S";
     graph.atomSites[atomSiteA].label_atom_id="S";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=4;
     graph.atomSites[atomSiteA].Cartn_x=0.0;
@@ -280,6 +283,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=0.0;
     graph.atomSites[atomSiteA].type_symbol="P";
     graph.atomSites[atomSiteA].label_atom_id="P";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=5;
     graph.atomSites[atomSiteA].Cartn_x=-1.0;
@@ -287,6 +291,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=3.0;
     graph.atomSites[atomSiteA].type_symbol="N";
     graph.atomSites[atomSiteA].label_atom_id="N";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=6;
     graph.atomSites[atomSiteA].Cartn_x=1.0;
@@ -294,6 +299,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=1.0;
     graph.atomSites[atomSiteA].type_symbol="O";
     graph.atomSites[atomSiteA].label_atom_id="O";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=7;
     graph.atomSites[atomSiteA].Cartn_x=0.0;
@@ -301,6 +307,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=1.0;
     graph.atomSites[atomSiteA].type_symbol="N";
     graph.atomSites[atomSiteA].label_atom_id="N";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     atomSiteA=graph.addNode();
     graph.atomSites[atomSiteA].id=8;
     graph.atomSites[atomSiteA].Cartn_x=10.0;
@@ -308,6 +315,7 @@ TEST_CASE("test accessible eight spheres"){
     graph.atomSites[atomSiteA].Cartn_z=0.0;
     graph.atomSites[atomSiteA].type_symbol="S";
     graph.atomSites[atomSiteA].label_atom_id="S";
+    graph.atomSites[atomSiteA].label_comp_id="EIG";
     CHECK_EQ(lemon::countNodes(graph), 8);
 
     SUBCASE("test first of eight spheres"){
@@ -316,7 +324,7 @@ TEST_CASE("test accessible eight spheres"){
         ++nSiteA;
         ++nSiteA;
         ++nSiteA;
-        ++nSiteA;
+//        ++nSiteA;
         //++nSiteA;
         //++nSiteA;
         std::unordered_map<std::string, double> radii={{"C", 3.0}, {"N", 2.0}, {"O", 1.0}, {"P", 4.0}, {"S", 6.0}};
@@ -330,13 +338,15 @@ TEST_CASE("test accessible eight spheres"){
         atomAreaExposure.radii["S"]=6.0;
         bool engulfed=false;
         std::vector<sylvanmats::surface::circle<double>>&& circles=atomAreaExposure.project(graph, nSiteA, ri, engulfed);
+        if(atomAreaExposure.adjustAnyTangentNorthPoles(graph, nSiteA, ri, circles))std::cout<<"hit at least one north pole "<<std::endl;
         if(!engulfed){
             lemon::ListDigraph projectedGraph;
             lemon::ListDigraph::ArcMap<sylvanmats::surface::arc<double>> arcMap(projectedGraph);
             auto [clockwiseCount, countOverlays, countIntersections, countFulls] = atomAreaExposure.graphProjection(projectedGraph, circles, arcMap);
-            std::cout<<" circles.size() "<<circles.size()<<" "<<graph.atomSites[nSiteA].id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" clockwiseCount "<<clockwiseCount<<" circles: "<<circles.size()<<" nodes: "<<lemon::countNodes(projectedGraph)<<" arcs: "<<lemon::countArcs(projectedGraph)<<" countOverlays: "<<countOverlays<<" countIntersections "<<countIntersections<<" "<<countFulls<<std::endl;
+            std::cout<<" circles.size() "<<circles.size()<<" "<<graph.atomSites[nSiteA].id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" clockwiseCount "<<clockwiseCount<<" circles: "<<circles.size()<<" nodes: "<<lemon::countNodes(projectedGraph)<<" arcs: "<<lemon::countArcs(projectedGraph)<<" countOverlays: "<<countOverlays<<" countIntersections "<<countIntersections<<" countFulls: "<<countFulls<<std::endl;
             clockwiseCount=0;
             auto [dV, dA] = atomAreaExposure.integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraph, circles, arcMap, clockwiseCount);
+            std::cout<<"domain connectivity nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
             if(clockwiseCount==0 || circles.size()<=1){
                 dV+=(4.0*std::numbers::pi*std::pow(ri, 3)/3.0);
                 dA+=(4.0*std::numbers::pi*std::pow(ri, 2));
@@ -346,19 +356,23 @@ TEST_CASE("test accessible eight spheres"){
             sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
             std::vector<std::tuple<double, double, double, std::string>> circleLoop;
             double maxRadius=20.0;
-            double scale=0.5;
+            double scale=1.0;
             for(sylvanmats::surface::circle<double> c : circles){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(scale*c.center[0], scale*c.center[1], scale*c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0+c.center.norm());
             }
-            svgPublisher.setHeight(4*maxRadius);
-            svgPublisher.setWidth(4*maxRadius);
-            svgPublisher.setXOffset(2*maxRadius);
-            svgPublisher.setYOffset(2*maxRadius);
+            svgPublisher.setHeight(8*maxRadius);
+            svgPublisher.setWidth(8*maxRadius);
+            svgPublisher.setXOffset(4*maxRadius);
+            svgPublisher.setYOffset(4*maxRadius);
             svgPublisher.addCircles("circles", circleLoop);
             std::vector<std::tuple<double, double, double, double, double, int, std::string>> arcLoop;
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
-                arcLoop.insert(arcLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red"));
+                double α=arcMap[aSiteA].α;
+                double β=arcMap[aSiteA].β;
+                std::cout<<"arcs "<<arcMap[aSiteA].member_of_domain<<" "<<scale*arcMap[aSiteA].r0<<" "<<(180.0*α/std::numbers::pi)<<" "<<(180.0*β/std::numbers::pi)<<" "<<(180.0*(β-α)/std::numbers::pi)<<std::endl;
+                if(arcMap[aSiteA].member_of_domain)std::swap(α, β);
+                arcLoop.insert(arcLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, α, β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 1, (arcMap[aSiteA].member_of_domain) ? "black" : "red"));
             }
             std::cout<<"# of arcs "<<arcLoop.size()<<std::endl;
             svgPublisher.addWedges("arcs", arcLoop);

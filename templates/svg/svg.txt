@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" height="{height}" width="{width}">
   <style>
     .small {{ font: normal 1px sans-serif; }}
+    .medium {{ font: normal 8px sans-serif; }}
     .heavy {{ font: bold 10px sans-serif; }}
   </style>
   <defs>
