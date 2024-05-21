@@ -367,22 +367,23 @@ TEST_CASE("test accessible eight spheres"){
             svgPublisher.setYOffset(4*maxRadius);
             svgPublisher.addCircles("circles", circleLoop);
             std::vector<std::tuple<double, double, double, double, double, int, std::string>> arcLoop;
+            std::vector<std::tuple<double, double, double, double, double, int, std::string, double>> textLoop;
             for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
                 double α=arcMap[aSiteA].α;
                 double β=arcMap[aSiteA].β;
-                std::cout<<"arcs "<<arcMap[aSiteA].member_of_domain<<" "<<scale*arcMap[aSiteA].r0<<" "<<(180.0*α/std::numbers::pi)<<" "<<(180.0*β/std::numbers::pi)<<" "<<(180.0*(β-α)/std::numbers::pi)<<std::endl;
+                std::cout<<"arcs "<<arcMap[aSiteA].member_of_domain<<" "<<scale*arcMap[aSiteA].r0<<" "<<(180.0*α/std::numbers::pi)<<" "<<(180.0*β/std::numbers::pi)<<" "<<(180.0*(β-α)/std::numbers::pi)<<" "<<(arcMap[aSiteA].r0*(β-α))<<" l="<<arcMap[aSiteA].length<<std::endl;
                 if(arcMap[aSiteA].member_of_domain)std::swap(α, β);
                 arcLoop.insert(arcLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, α, β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 1, (arcMap[aSiteA].member_of_domain) ? "black" : "red"));
+                textLoop.insert(textLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red", arcMap[aSiteA].length));
             }
             std::cout<<"# of arcs "<<arcLoop.size()<<std::endl;
             svgPublisher.addWedges("arcs", arcLoop);
-            std::cout<<"set has_text "<<std::endl;
-//            svgPublisher.rawSetAttribute("has_text", true); 
-            std::cout<<"set has_text loop"<<std::endl;
-            std::vector<std::tuple<double, double, double, double, double, int, std::string, double>> textLoop;
-            for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
-                textLoop.insert(textLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red", (double)arcMap[aSiteA].length));
-            }
+//            std::cout<<"set has_text "<<std::endl;
+////            svgPublisher.rawSetAttribute("has_text", true); 
+//            std::cout<<"set has_text loop"<<std::endl;
+//            for(lemon::ListDigraph::ArcIt aSiteA(projectedGraph); aSiteA!=lemon::INVALID; ++aSiteA){
+//                textLoop.insert(textLoop.begin(), std::make_tuple(scale*arcMap[aSiteA].center[0], scale*arcMap[aSiteA].center[1], scale*arcMap[aSiteA].r0, arcMap[aSiteA].α, arcMap[aSiteA].β, (arcMap[aSiteA].direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? 1 : 0, (arcMap[aSiteA].member_of_domain) ? "black" : "red", arcMap[aSiteA].length));
+//            }
             std::cout<<"# of text listed "<<textLoop.size()<<std::endl;
             svgPublisher.addLabelToWedges("text_list", textLoop);
             std::string&& content = svgPublisher.render();
@@ -501,7 +502,7 @@ TEST_CASE("test accessible 1j4m.cif.gz"){
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 14);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 12);
 //       std::cout<<"Accessible "<<std::endl;
-       graph.hydrogenVisibilityOff();
+//       graph.hydrogenVisibilityOff();
         sylvanmats::surface::Accessible accessible(graph);
         
         accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){

@@ -226,19 +226,24 @@ namespace sylvanmats::linear{
 //        }
     };
 
+    using Array2f = Array<float, 2>;
     using Array2d = Array<double, 2>;
     using Array2l = Array<long double, 2>;
 
+    using Array3f = Array<float, 3>;
     using Array3d = Array<double, 3>;
     using Array3l = Array<long double, 3>;
 
     using ArrayXi = Array<int, -1>;
+    using ArrayXf = Array<float, -1>;
     using ArrayXd = Array<double, -1>;
     using ArrayXl = Array<long double, -1>;
 
+    using ArrayX3f = Array<float, -1, 3>;
     using ArrayX3d = Array<double, -1, 3>;
     
     using ArrayXXi = Array<int, -1, -1>;
+    using ArrayXXf = Array<float, -1, -1>;
     using ArrayXXd = Array<double, -1, -1>;
     using ArrayXXl = Array<long double, -1, -1>;
 

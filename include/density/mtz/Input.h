@@ -14,9 +14,20 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "density/cell.h"
+#include "linear/Array.h"
+
 #include "mio/mmap.hpp"
 
 namespace sylvanmats::density::mtz{
+    
+    struct labels{
+        std::string label{};
+        std::string type{};
+        double minimum;
+        double maximum;
+        unsigned int dataset_id=0;
+    };
     
     struct mtz_header{
         std::string version{};
@@ -26,7 +37,12 @@ namespace sylvanmats::density::mtz{
         unsigned int number_of_batches=0;
         unsigned int number_of_symmetry_operations;
         unsigned int number_of_primitive_operations;
-        std::vector<std::string> labels;       
+        unsigned int number_of_datasets;
+        sylvanmats::density::cell<double> cell;
+        double minimum_resolution;
+        double maximum_resolution;
+        std::vector<labels> column_labels;
+        std::vector<std::string> symmetry_operations;
     };
 
     class Input{
@@ -35,6 +51,8 @@ namespace sylvanmats::density::mtz{
         std::string machineStamp={0,0,0,0};
         int headerOffset=0;
         mtz_header mtzHeader;
+        std::vector<std::string> headerKeys={"VERS", "TITLE", "NCOL", "CELL", "SORT", "SYMINF", "SYMM", "RESO", "VALM", "COL", "NDIF", "PROJECT", "CRYSTAL", "DATASET", "DCELL", "DWAVEL", "BATCH"};
+        std::vector<sylvanmats::linear::ArrayXf> reflections;
     public:
         Input(){};
         Input(const Input& orig) = delete;
@@ -49,68 +67,138 @@ namespace sylvanmats::density::mtz{
             machineStamp=std::string((char*)&mmap1rst[8], 4);
             headerOffset=( 0x0f&machineStamp[0] )*(headerOffset-1);
             mmap1rst.unmap();
-            mio::mmap_source mmap2nd(filePath.string(), headerOffset, 1760);
-            std::string VERS=std::string((char*)&mmap2nd[0], 15);
-            mtzHeader.version=VERS.substr(5);
-            trim(mtzHeader.version);
-            std::string TITLE((char*)&mmap2nd[80], 76);
-            mtzHeader.title=TITLE.substr(6);
-            trim(mtzHeader.title);
-            std::vector<std::string>&& NCOL=tokenize(std::string((char*)&mmap2nd[160], 80));
-            if(NCOL.size()>1)mtzHeader.number_of_columns=std::strtoul(NCOL[1].c_str(), nullptr, 10);
-            if(NCOL.size()>2)mtzHeader.number_of_reflections_in_file=std::strtoul(NCOL[2].c_str(), nullptr, 10);
-            if(NCOL.size()>3)mtzHeader.number_of_batches=std::strtoul(NCOL[3].c_str(), nullptr, 10);
-            std::string CELL((char*)&mmap2nd[240], 80);
-            std::cout<<CELL<<std::endl;
-            std::string SORT((char*)&mmap2nd[320], 80);
-            std::cout<<SORT<<std::endl;
-            std::vector<std::string>&& SYMINF=tokenize(std::string((char*)&mmap2nd[400], 80));
-            if(SYMINF.size()>1)mtzHeader.number_of_symmetry_operations=std::strtoul(SYMINF[1].c_str(), nullptr, 10);
-            if(SYMINF.size()>2)mtzHeader.number_of_primitive_operations=std::strtoul(SYMINF[1].c_str(), nullptr, 10);
-            unsigned int offset=480;
-            for(unsigned int index=0;index<mtzHeader.number_of_symmetry_operations;index++){
-                std::string SYMM((char*)&mmap2nd[offset], 80);
-                std::cout<<SYMM<<std::endl;
-                offset+=80;
+            mio::mmap_source mmap2nd(filePath.string(), headerOffset, (fileSize-headerOffset));
+            int headerPosition=0;
+            for(int index=0;index<std::min(1, (int)headerKeys.size());index++){
+                for(int keyIndex=0;keyIndex<headerKeys.size();keyIndex++){
+                    if(std::strncmp((char*)&mmap2nd[headerPosition], headerKeys[keyIndex].c_str(), headerKeys[keyIndex].size())==0){
+                        if(headerKeys[keyIndex].compare("VERS")==0){
+                            std::string VERS=std::string((char*)&mmap2nd[headerPosition], 15);
+                            mtzHeader.version=VERS.substr(5);
+                            trim(mtzHeader.version);
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("TITLE")==0){
+                            std::string TITLE((char*)&mmap2nd[headerPosition], 76);
+                            mtzHeader.title=TITLE.substr(6);
+                            trim(mtzHeader.title);
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("NCOL")==0){
+                            std::vector<std::string>&& NCOL=tokenize(std::string((char*)&mmap2nd[headerPosition], 80));
+                            if(NCOL.size()>1)mtzHeader.number_of_columns=std::strtoul(NCOL[1].c_str(), nullptr, 10);
+                            if(NCOL.size()>2)mtzHeader.number_of_reflections_in_file=std::strtoul(NCOL[2].c_str(), nullptr, 10);
+                            if(NCOL.size()>3)mtzHeader.number_of_batches=std::strtoul(NCOL[3].c_str(), nullptr, 10);
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("CELL")==0){
+                            std::vector<std::string>&& CELL=tokenize(std::string((char*)&mmap2nd[headerPosition], 80));
+                            if(CELL.size()>1)mtzHeader.cell.a=std::strtod(CELL[1].c_str(), nullptr);
+                            if(CELL.size()>2)mtzHeader.cell.b=std::strtod(CELL[2].c_str(), nullptr);
+                            if(CELL.size()>3)mtzHeader.cell.c=std::strtod(CELL[3].c_str(), nullptr);
+                            if(CELL.size()>4)mtzHeader.cell.α=std::strtod(CELL[4].c_str(), nullptr);
+                            if(CELL.size()>5)mtzHeader.cell.β=std::strtod(CELL[5].c_str(), nullptr);
+                            if(CELL.size()>6)mtzHeader.cell.γ=std::strtod(CELL[6].c_str(), nullptr);
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("SORT")==0){
+                            std::string SORT((char*)&mmap2nd[headerPosition], 80);
+                            std::cout<<SORT<<std::endl;
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("SYMINF")==0){
+                            std::vector<std::string>&& SYMINF=tokenize(std::string((char*)&mmap2nd[headerPosition], 80));
+                            if(SYMINF.size()>1)mtzHeader.number_of_symmetry_operations=std::strtoul(SYMINF[1].c_str(), nullptr, 10);
+                            if(SYMINF.size()>2)mtzHeader.number_of_primitive_operations=std::strtoul(SYMINF[2].c_str(), nullptr, 10);
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("SYMM")==0){
+                            for(unsigned int symIndex=0;symIndex<mtzHeader.number_of_symmetry_operations;symIndex++){
+                                std::string SYMM((char*)&mmap2nd[headerPosition+4], 76);
+                                trim(SYMM);
+                                mtzHeader.symmetry_operations.push_back(SYMM);
+//                                std::cout<<SYMM<<std::endl;
+                                headerPosition+=80;
+                            }
+                        }
+                        else if(headerKeys[keyIndex].compare("RESO")==0){
+                            std::vector<std::string>&& RESO=tokenize(std::string((char*)&mmap2nd[headerPosition], 80));
+                            if(RESO.size()>1)mtzHeader.minimum_resolution=std::strtod(RESO[1].c_str(), nullptr);
+                            if(RESO.size()>2)mtzHeader.maximum_resolution=std::strtod(RESO[2].c_str(), nullptr);
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("VALM")==0){
+                            std::string VALM((char*)&mmap2nd[headerPosition], 80);
+                            std::cout<<VALM<<std::endl;
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("COL")==0){
+                            for(unsigned int index=0;index<mtzHeader.number_of_columns;index++){
+                                mtzHeader.column_labels.push_back(labels{});
+                                std::vector<std::string>&& COL=tokenize(std::string((char*)&mmap2nd[headerPosition], 80));
+                                if(COL.size()>1)mtzHeader.column_labels.back().label=COL[1];
+                                if(COL.size()>2)mtzHeader.column_labels.back().type=COL[2];
+                                if(COL.size()>3)mtzHeader.column_labels.back().minimum=std::strtod(COL[3].c_str(), nullptr);
+                                if(COL.size()>4)mtzHeader.column_labels.back().maximum=std::strtod(COL[4].c_str(), nullptr);
+                                if(COL.size()>5)mtzHeader.column_labels.back().dataset_id=std::strtoul(COL[5].c_str(), nullptr, 10);
+                                headerPosition+=80;
+                                std::string COLSRC((char*)&mmap2nd[headerPosition], 80);
+                                if(COLSRC.substr(0, 6).compare("COLSRC")==0){
+                                    std::cout<<COLSRC<<std::endl;
+                                    headerPosition+=80;
+                                }
+                            }
+                        }
+                        else if(headerKeys[keyIndex].compare("NDIF")==0){
+                            std::vector<std::string>&& NDIF=tokenize(std::string((char*)&mmap2nd[headerPosition], 80));
+                            if(NDIF.size()>1)mtzHeader.number_of_datasets=std::strtoul(NDIF[1].c_str(), nullptr, 10);
+                            std::cout<<"NDIF "<<mtzHeader.number_of_datasets<<std::endl;
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("PROJECT")==0){
+                            std::string PROJECT((char*)&mmap2nd[headerPosition], 80);
+                            std::cout<<PROJECT<<std::endl;
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("CRYSTAL")==0){
+                            std::string CRYSTAL((char*)&mmap2nd[headerPosition], 80);
+                            std::cout<<CRYSTAL<<std::endl;
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("DATASET")==0){
+                            std::string DATASET((char*)&mmap2nd[headerPosition], 80);
+                            std::cout<<DATASET<<std::endl;
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("DCELL")==0){
+                            std::vector<std::string>&& DCELL=tokenize(std::string((char*)&mmap2nd[headerPosition], 80));
+                            if(DCELL.size()>2)mtzHeader.cell.a=std::strtod(DCELL[2].c_str(), nullptr);
+                            if(DCELL.size()>3)mtzHeader.cell.b=std::strtod(DCELL[3].c_str(), nullptr);
+                            if(DCELL.size()>4)mtzHeader.cell.c=std::strtod(DCELL[4].c_str(), nullptr);
+                            if(DCELL.size()>5)mtzHeader.cell.α=std::strtod(DCELL[5].c_str(), nullptr);
+                            if(DCELL.size()>6)mtzHeader.cell.β=std::strtod(DCELL[6].c_str(), nullptr);
+                            if(DCELL.size()>7)mtzHeader.cell.γ=std::strtod(DCELL[7].c_str(), nullptr);
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("DWAVEL")==0){
+                            std::string DWAVEL((char*)&mmap2nd[headerPosition], 80);
+                            std::cout<<DWAVEL<<std::endl;
+                            headerPosition+=80;
+                        }
+                        else if(headerKeys[keyIndex].compare("BATCH")==0){
+                            std::string BATCH((char*)&mmap2nd[headerPosition], 80);
+                            std::cout<<BATCH<<" "<<headerPosition<<std::endl;
+                            headerPosition+=80;
+                        }
+                    }
+                }
             }
-            std::string RESO((char*)&mmap2nd[offset], 80);
-            std::cout<<"RESO "<<RESO<<std::endl;
-            offset+=80;
-            std::string VALM((char*)&mmap2nd[offset], 80);
-            std::cout<<"VALM "<<VALM<<std::endl;
-            offset+=80;
-            for(unsigned int index=0;index<mtzHeader.number_of_columns;index++){
-                std::string COL((char*)&mmap2nd[offset], 80);
-                std::cout<<COL<<std::endl;
-                offset+=80;
-            }
-            std::string NDIF((char*)&mmap2nd[offset], 80);
-            std::cout<<"NDIF "<<NDIF<<std::endl;
-            offset+=80;
-//            std::string PROJECT((char*)&mmap2nd[offset], 80);
-//            std::cout<<PROJECT<<std::endl;
-//            offset+=80;
-//            std::string CRYSTAL((char*)&mmap2nd[offset], 80);
-//            std::cout<<CRYSTAL<<std::endl;
-//            offset+=80;
-//            std::string DATASET((char*)&mmap2nd[offset], 80);
-//            std::cout<<DATASET<<std::endl;
-//            offset+=80;
-//            std::string DCELL((char*)&mmap2nd[offset], 80);
-//            std::cout<<DCELL<<std::endl;
-//            offset+=80;
-//            std::string DWAVEL((char*)&mmap2nd[offset], 80);
-//            std::cout<<DWAVEL<<std::endl;
-//            offset+=80;
-//            std::string BATCH((char*)&mmap2nd[offset], 80);
-//            std::cout<<BATCH<<" "<<offset<<std::endl;
-//            offset+=80;
 //            for(unsigned int index=0;index<30;index++){
 //            std::string history((char*)&mmap2nd[1380+80*index], 80);
 //            std::cout<<index<<" "<<history<<std::endl;
 //                
 //            }
-//            std::strncpy((char*)&mtzHeader.NC, &mmap2nd[0], 4);
+////            std::strncpy((char*)&mtzHeader.NC, &mmap2nd[0], 4);
 //            std::strncpy((char*)&mtzHeader.NR, &mmap2nd[4], 4);
 //            std::strncpy((char*)&mtzHeader.NS, &mmap2nd[8], 4);
 //            std::strncpy((char*)&mtzHeader.MODE, &mmap2nd[12], 4);
@@ -148,18 +236,26 @@ namespace sylvanmats::density::mtz{
 //std::cout<<mtzHeader.NLABL<<" LABEL "<<mtzHeader.LABEL.back()<<" "<<mtzHeader.LABEL.back().size()<<std::endl;
 //            }
             mmap2nd.unmap();
-//            unsigned int offset = 1024;//mtzHeader.NLABL*80+224;
-//            std::cout<<"MACHST "<<std::hex<<" "<<mtzHeader.MACHST<<" "<<(mtzHeader.MACHST&0x0f)<<std::dec<<std::endl;
-            //std::unique_ptr<float[]> slice(new float[mtzHeader.NR*mtzHeader.NC]);
-//            for(unsigned int sectionIndex=0;sectionIndex<mtzHeader.NS;sectionIndex++){
-//                mio::basic_mmap_source<std::byte> mmapSlice(filePath.string(), 4*sectionIndex*mtzHeader.NR*mtzHeader.NC+offset, 4*(1)*mtzHeader.NR*mtzHeader.NC);
-//                apply(mtzHeader);
-//                /*for(unsigned int index=0;index<mmapSlice.size();index+=4){
-//                    ((float*)&mmapSlice[index]);
-//                }*/
-//                mmapSlice.unmap();
-//            }
-//            
+            mio::mmap_source mmapReflections(filePath.string(), 20, (headerOffset-20));
+            for(unsigned int colIndex=0;colIndex<mtzHeader.number_of_columns;colIndex++){
+                reflections.push_back(sylvanmats::linear::ArrayXf(mtzHeader.number_of_reflections_in_file));
+            }
+            std::cout<<"refl "<<(headerOffset-20)<<" "<<(4*mtzHeader.number_of_columns*mtzHeader.number_of_reflections_in_file)<<std::endl;
+            int reflectionOffset=0;
+            for(unsigned int rowIndex=0;rowIndex<mtzHeader.number_of_reflections_in_file;rowIndex++){
+            for(unsigned int colIndex=0;colIndex<3;colIndex++){
+                reflections[colIndex][rowIndex]=((float*)&mmapReflections[0])[reflectionOffset];
+//                std::cout<<std::setw(5)<<std::setprecision(2)<<reflections[colIndex][rowIndex];
+                reflectionOffset++;
+            }
+            for(unsigned int colIndex=3;colIndex<mtzHeader.number_of_columns;colIndex++){
+                reflections[colIndex][rowIndex]=((float*)&mmapReflections[0])[reflectionOffset];
+//                std::cout<<std::setw(5)<<std::setprecision(2)<<reflections[colIndex][rowIndex];
+                reflectionOffset++;
+            }
+//            std::cout<<std::endl;
+            }
+            mmapReflections.unmap();
         };
         
         mtz_header& getHeader(){return mtzHeader;};
