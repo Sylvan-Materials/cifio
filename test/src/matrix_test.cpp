@@ -17,6 +17,7 @@
 #include "linear/Array.h"
 #include "linear/Vector.h"
 #include "linear/Matrix.h"
+#include "domain/DiscreteFourierTransform.h"
 
 TEST_SUITE("matrix"){
 
@@ -66,7 +67,20 @@ TEST_CASE("construct complex array"){
     using namespace std::complex_literals;
     arr+=(1.0+0.0i);
     CHECK_EQ(arr.sum().real(), doctest::Approx(5.0));
-    
+    sylvanmats::domain::DiscreteFourierTransform<sylvanmats::linear::ArrayXcd> dft(sylvanmats::domain::FORWARD);
+    sylvanmats::linear::ArrayXcd input(64);
+    for(size_t i=0;i<input.size();i++){
+        input[i]=std::complex<double>(std::sin(8.0*std::numbers::pi*i/input.size()), 0.0);
+    }
+    sylvanmats::linear::ArrayXcd output=dft(input);
+    for(size_t i=0;i<output.size();i++){
+        output[i]/=output.size();
+    }
+    sylvanmats::domain::DiscreteFourierTransform<sylvanmats::linear::ArrayXcd> idft(sylvanmats::domain::INVERSE);
+    sylvanmats::linear::ArrayXcd ioutput=idft(output);
+    for(size_t i=0;i<ioutput.size();i++){
+    CHECK_EQ(input[i].real(), doctest::Approx(ioutput[i].real()));
+    }
 }
 
 }
