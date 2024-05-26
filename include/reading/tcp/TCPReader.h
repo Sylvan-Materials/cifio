@@ -299,12 +299,12 @@ namespace sylvanmats::reading{
                 generator<std::pair<int, char *>> rs = read();
                 for(auto it=rs.begin();it !=rs.end();it++){
                     len=(*it).first;
-                    if(len>0)ss<<(*it).second;
+                    if(len>0)ss.write((*it).second, len);
                 }
             } while (len>0);
             if (len < 0) {
                 int err = SSL_get_error(ssl, len);
-            if (err == SSL_ERROR_WANT_READ)
+                if (err == SSL_ERROR_WANT_READ)
                     return 0;
                 if (err == SSL_ERROR_WANT_WRITE)
                     return 0;

@@ -36,9 +36,9 @@ namespace sylvanmats::density::mtz{
         std::string project{};
         std::string dataset_name{};
         unsigned int dataset_id;
-        unsigned int number_of_columns=0;
         sylvanmats::density::cell<double> cell;
         double wave_length=0.0;
+        std::vector<unsigned int> columnList;
     };
     
     struct mtz_header{
@@ -76,6 +76,9 @@ namespace sylvanmats::density::mtz{
         Input(const Input& orig) = delete;
         virtual ~Input() = default;
     public:
+//        void operator()(std::filesystem::path& filePath, std::function<void(mtz_header& mtzHeader)> apply){
+//            this->operator()(, apply);
+//        }
         void operator()(std::filesystem::path& filePath, std::function<void(mtz_header& mtzHeader)> apply){
             std::uintmax_t fileSize=std::filesystem::file_size(filePath);
             mio::mmap_source mmap1rst(filePath.string(), 0, 20);
@@ -273,7 +276,7 @@ namespace sylvanmats::density::mtz{
             mmap2nd.unmap();
             for(unsigned int crystalIndex=0;crystalIndex<mtzHeader.structure_crystals.size();crystalIndex++){
                 for(unsigned int colIndex=0;colIndex<mtzHeader.number_of_columns;colIndex++){
-                    if(mtzHeader.column_labels[colIndex].dataset_id==mtzHeader.structure_crystals[crystalIndex].dataset_id)mtzHeader.structure_crystals[crystalIndex].number_of_columns++;
+                    if(mtzHeader.column_labels[colIndex].dataset_id==mtzHeader.structure_crystals[crystalIndex].dataset_id)mtzHeader.structure_crystals[crystalIndex].columnList.push_back(colIndex);
                 }
             }
             mio::mmap_source mmapReflections(filePath.string(), 20, (headerOffset-20));

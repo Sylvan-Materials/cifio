@@ -7,13 +7,33 @@
 
 #define protected public
 
+#include "reading/tcp/TCPReader.h"
 #include "mio/mmap.hpp"
 #include "density/mtz/Input.h"
 
 TEST_SUITE("crystallography"){
 
 TEST_CASE("test 1q8h mtz input"){
-    std::filesystem::path path="../../1q8h_phases.mtz";
+    std::string comp_id="1q8h";
+    std::string url = "https://edmaps.rcsb.org/coefficients/"+comp_id+".mtz";
+    sylvanmats::reading::TCPReader tcpReader;
+    CHECK(tcpReader(url, [&comp_id](std::istream& is){
+        char buf[32768];
+        std::string path="./examples/"+comp_id+".mtz";
+        std::ofstream ofs(path, std::ios::out | std::ios::trunc | std::ios::binary);
+        std::size_t totalCount=0;
+        std::streamsize readCount=0;
+        do{
+            readCount=is.readsome(buf, 32768);
+//            std::cout<<"readCount "<<readCount<<std::endl;
+            if(readCount>0)ofs.write(buf, readCount);
+            totalCount+=readCount;
+        }
+        while(readCount>0);
+        ofs.close();
+        CHECK_EQ(totalCount, 258736);
+    }));
+    std::filesystem::path path="./examples/"+comp_id+".mtz";
 
     CHECK(std::filesystem::exists(path));
     sylvanmats::density::mtz::Input mtzInput;
@@ -35,12 +55,12 @@ TEST_CASE("test 1q8h mtz input"){
     CHECK_EQ(mtzInput.getHeader().number_of_datasets, 2);
     CHECK_EQ(mtzInput.getHeader().structure_crystals.size(), 2);
     if(mtzInput.getHeader().structure_crystals.size()>0){
-        CHECK_EQ(mtzInput.getHeader().structure_crystals[0].number_of_columns, 4);
+        CHECK_EQ(mtzInput.getHeader().structure_crystals[0].columnList.size(), 4);
         CHECK_EQ(mtzInput.getHeader().structure_crystals[0].name, "HKL_base");
         CHECK_EQ(mtzInput.getHeader().structure_crystals[0].project, "HKL_base");
     }
     if(mtzInput.getHeader().structure_crystals.size()>1){
-        CHECK_EQ(mtzInput.getHeader().structure_crystals[1].number_of_columns, 13);
+        CHECK_EQ(mtzInput.getHeader().structure_crystals[1].columnList.size(), 13);
         CHECK_EQ(mtzInput.getHeader().structure_crystals[1].name, "cryst_1");
         CHECK_EQ(mtzInput.getHeader().structure_crystals[1].project, "sf_convert");
     }
@@ -60,6 +80,14 @@ TEST_CASE("test 1q8h mtz input"){
     CHECK_EQ(mtzInput.getHeader().column_labels[0].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[1].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[2].type, "H");
+    CHECK(mtzInput.reflections[0].min() == doctest::Approx(1.0));
+    CHECK(mtzInput.reflections[0].max() == doctest::Approx(22.0));
+    CHECK(mtzInput.reflections[1].min() == doctest::Approx(0.0));
+    CHECK(mtzInput.reflections[1].max() == doctest::Approx(12.0));
+    CHECK(mtzInput.reflections[2].min() == doctest::Approx(-16.0));
+    CHECK(mtzInput.reflections[2].max() == doctest::Approx(16.0));
+    CHECK(mtzInput.reflections[3].min() == doctest::Approx(0.0));
+    CHECK(mtzInput.reflections[3].max() == doctest::Approx(1.0));
         
     }
 //    for(int index=0;index<34;index++){
@@ -70,7 +98,26 @@ TEST_CASE("test 1q8h mtz input"){
 }
 
 TEST_CASE("test 1lri mtz input"){
-    std::filesystem::path path="../../1lri_phases.mtz";
+    std::string comp_id="1lri";
+    std::string url = "https://edmaps.rcsb.org/coefficients/"+comp_id+".mtz";
+    sylvanmats::reading::TCPReader tcpReader;
+    CHECK(tcpReader(url, [&comp_id](std::istream& is){
+        char buf[32768];
+        std::string path="./examples/"+comp_id+".mtz";
+        std::ofstream ofs(path, std::ios::out | std::ios::trunc | std::ios::binary);
+        std::size_t totalCount=0;
+        std::streamsize readCount=0;
+        do{
+            readCount=is.readsome(buf, 32768);
+//            std::cout<<"readCount "<<readCount<<std::endl;
+            if(readCount>0)ofs.write(buf, readCount);
+            totalCount+=readCount;
+        }
+        while(readCount>0);
+        ofs.close();
+        CHECK_EQ(totalCount, 1190496);
+    }));
+    std::filesystem::path path="./examples/"+comp_id+".mtz";
 
     CHECK(std::filesystem::exists(path));
     sylvanmats::density::mtz::Input mtzInput;
@@ -92,12 +139,12 @@ TEST_CASE("test 1lri mtz input"){
     CHECK_EQ(mtzInput.getHeader().number_of_datasets, 2);
     CHECK_EQ(mtzInput.getHeader().structure_crystals.size(), 2);
     if(mtzInput.getHeader().structure_crystals.size()>0){
-        CHECK_EQ(mtzInput.getHeader().structure_crystals[0].number_of_columns, 4);
+        CHECK_EQ(mtzInput.getHeader().structure_crystals[0].columnList.size(), 4);
         CHECK_EQ(mtzInput.getHeader().structure_crystals[0].name, "HKL_base");
         CHECK_EQ(mtzInput.getHeader().structure_crystals[0].project, "HKL_base");
     }
     if(mtzInput.getHeader().structure_crystals.size()>1){
-        CHECK_EQ(mtzInput.getHeader().structure_crystals[1].number_of_columns, 13);
+        CHECK_EQ(mtzInput.getHeader().structure_crystals[1].columnList.size(), 13);
         CHECK_EQ(mtzInput.getHeader().structure_crystals[1].name, "cryst_1");
         CHECK_EQ(mtzInput.getHeader().structure_crystals[1].project, "sf_convert");
     }
@@ -118,6 +165,14 @@ TEST_CASE("test 1lri mtz input"){
     CHECK_EQ(mtzInput.getHeader().column_labels[0].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[1].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[2].type, "H");
+    CHECK(mtzInput.reflections[0].min() == doctest::Approx(0.0));
+    CHECK(mtzInput.reflections[0].max() == doctest::Approx(21.0));
+    CHECK(mtzInput.reflections[1].min() == doctest::Approx(0.0));
+    CHECK(mtzInput.reflections[1].max() == doctest::Approx(65.0));
+    CHECK(mtzInput.reflections[2].min() == doctest::Approx(0.0));
+    CHECK(mtzInput.reflections[2].max() == doctest::Approx(45.0));
+    CHECK(mtzInput.reflections[3].min() == doctest::Approx(0.0));
+    CHECK(mtzInput.reflections[3].max() == doctest::Approx(1.0));
         
     }
 //    for(int index=0;index<34;index++){
