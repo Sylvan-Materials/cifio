@@ -10,6 +10,7 @@
 #include <utility>
 #include <charconv>
 #include <valarray>
+#include <complex>
 #include <ranges>
 #include <type_traits>
 
@@ -58,6 +59,14 @@ std::valarray<double> array {7.0,  8.0, 9.0, 10.0, 11.0, 12.0};
 //        std::cout << i << ' ';
 //    }
 //    std::cout << '\n';
+}
+
+TEST_CASE("construct complex array"){
+    sylvanmats::linear::ArrayXcd arr(5);
+    using namespace std::complex_literals;
+    arr+=(1.0+0.0i);
+    CHECK_EQ(arr.sum().real(), doctest::Approx(5.0));
+    
 }
 
 }

@@ -247,6 +247,14 @@ namespace sylvanmats::linear{
     using ArrayXXd = Array<double, -1, -1>;
     using ArrayXXl = Array<long double, -1, -1>;
 
+    using ArrayXcf = Array<std::complex<float>, -1>;
+    using ArrayXcd = Array<std::complex<double>, -1>;
+    using ArrayXcl = Array<std::complex<long double>, -1>;
+    
+    using ArrayX3cf = Array<std::complex<float>, -1, 3>;
+    using ArrayX3cd = Array<std::complex<double>, -1, 3>;
+    using ArrayX3cl = Array<std::complex<long double>, -1, 3>;
+    
     template<std::numerical T, signed long long R, signed long long C=1>
     Array<T, R, C> operator + (const typename Array<T, R, C>::value_type& s, const Array<T, R, C>& v){
         Array<T, R, C> v2(v);

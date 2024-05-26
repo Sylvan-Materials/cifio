@@ -4,11 +4,16 @@
 #include <iomanip>
 #include <utility>
 #include <valarray>
+#include <complex>
 #include <type_traits>
 
 namespace std{
+    template <typename T, typename F = T::value_type>
+    concept Complex = (std::is_floating_point_v<F> &&
+                   std::is_same_v<std::remove_cv_t<T>, std::complex<F>>);
+
     template<typename T> 
-    concept numerical = std::integral<T> || std::floating_point<T>;
+    concept numerical = std::integral<T> || std::floating_point<T> || Complex<T>;
 }
 
 namespace sylvanmats::linear{
