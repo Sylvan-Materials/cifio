@@ -5,6 +5,7 @@
 #include <utility>
 #include <valarray>
 #include <complex>
+#include <concepts>
 #include <type_traits>
 
 namespace std{
@@ -111,6 +112,19 @@ namespace sylvanmats::linear{
         unsigned long long rows() const {return _rows;};
         unsigned long long cols() const {return _cols;};
         unsigned long long size() const {return _rows*_cols;};
+//         T& operator[](std::convertible_to<std::size_t> auto index){
+//             return (*this)[index];
+//         }
+         T& operator[](std::convertible_to<std::size_t> auto ... indices){
+             const size_t size = sizeof...(indices);
+             size_t res[size] = {indices...};
+             size_t t = res[0];
+             size_t s = (size>=2)? res[1] : 0;
+//             std::cout<<"t "<<t<<" s "<<s<<" "<<((std::valarray<T>&)(*this))[t+s*_rows]<<std::endl;
+//             if(_cols<=1)return ((std::valarray<T>&)(*this))[t];
+//             else if(_cols>=1)return ((std::valarray<T>&)(*this))[s+t*_cols];
+             return std::valarray<T>::operator[](t+s*_rows);
+         }
         
         friend std::ostream& operator<<(std::ostream& s, const Matrix<T, R, C>& r) {
             for(unsigned long long j=0;j<r.cols();j++){

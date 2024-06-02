@@ -11,10 +11,12 @@ namespace sylvanmats::linear{
         using Matrix<T, R, C>::_rows;
         using Matrix<T, R, C>::_cols;
     public:
-        using std::valarray<T>::operator[];
+        using Matrix<T, R, C>::operator[];
+//        using std::valarray<T>::operator[];
         using std::valarray<T>::operator+=;
         using std::valarray<T>::operator/=;
         using std::valarray<T>::sum;
+//        using std::valarray<T>::pow;
         using Matrix<T, R, C>::rows;
         using Matrix<T, R, C>::cols;
         using Matrix<T, R, C>::transpose;
@@ -251,9 +253,17 @@ namespace sylvanmats::linear{
     using ArrayXcd = Array<std::complex<double>, -1>;
     using ArrayXcl = Array<std::complex<long double>, -1>;
     
+    using ArrayX2cf = Array<std::complex<float>, -1, 2>;
+    using ArrayX2cd = Array<std::complex<double>, -1, 2>;
+    using ArrayX2cl = Array<std::complex<long double>, -1, 2>;
+    
     using ArrayX3cf = Array<std::complex<float>, -1, 3>;
     using ArrayX3cd = Array<std::complex<double>, -1, 3>;
     using ArrayX3cl = Array<std::complex<long double>, -1, 3>;
+    
+    using ArrayXXcf = Array<std::complex<float>, -1, -1>;
+    using ArrayXXcd = Array<std::complex<double>, -1, -1>;
+    using ArrayXXcl = Array<std::complex<long double>, -1, -1>;
     
     template<std::numerical T, signed long long R, signed long long C=1>
     Array<T, R, C> operator + (const typename Array<T, R, C>::value_type& s, const Array<T, R, C>& v){
