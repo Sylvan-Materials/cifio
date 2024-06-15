@@ -31,7 +31,7 @@
     "fmt": "cd cpp_modules/fmt && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../dist .. && make install",
     "json": "cd cpp_modules/json-thresher && pwd && make -f Makefile all",
     "build": "cd test && pwd && which make && make -j 3 -f Makefile all",
-    "test": "cnpm build && cd test && pwd && ./test --test-suite='matrix' ",
+    "test": "cnpm build && cd test && pwd && ./test --test-suite='crystallography' ",
     "lib": "which make && make -j 3 -f Makefile all"
   },
   "author": "rimmartin",

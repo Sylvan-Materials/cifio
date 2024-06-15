@@ -72,6 +72,7 @@ TEST_CASE("test 1q8h mtz input"){
     CHECK(mtzInput.getHeader().cell.α == doctest::Approx(90.0));
     CHECK(mtzInput.getHeader().cell.β == doctest::Approx(90.0));
     CHECK(mtzInput.getHeader().cell.γ == doctest::Approx(120.0));
+    CHECK(mtzInput.getHeader().cell.volume(sylvanmats::density::Tetragonal) == doctest::Approx(93827.7));
     CHECK_EQ(mtzInput.getHeader().column_labels.size(), 17);
     if(mtzInput.getHeader().column_labels.size(), 17){
     CHECK_EQ(mtzInput.getHeader().column_labels[0].label, "H");
@@ -156,6 +157,7 @@ TEST_CASE("test 1lri mtz input"){
     CHECK(mtzInput.getHeader().cell.α == doctest::Approx(90.0));
     CHECK(mtzInput.getHeader().cell.β == doctest::Approx(90.0));
     CHECK(mtzInput.getHeader().cell.γ == doctest::Approx(90.0));
+    CHECK(mtzInput.getHeader().cell.volume(sylvanmats::density::Orthorhombic) == doctest::Approx(191669));
     CHECK_EQ(mtzInput.getHeader().column_labels.size(), 17);
     CHECK_EQ(mtzInput.getHeader().symmetry_operations.size(), 8);
     if(mtzInput.getHeader().column_labels.size(), 17){
