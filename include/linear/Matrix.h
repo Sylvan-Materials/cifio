@@ -120,11 +120,11 @@ namespace sylvanmats::linear{
              size_t res[size] = {indices...};
              size_t t = res[0];
              size_t s = (size>=2)? res[1] : 0;
-//             std::cout<<"t "<<t<<" s "<<s<<" "<<((std::valarray<T>&)(*this))[t+s*_rows]<<std::endl;
+//             if(s==0)std::cout<<"t "<<t<<" s "<<s<<" "<<((std::valarray<T>&)(*this))[t+s*_rows]<<std::endl;
 //             if(_cols<=1)return ((std::valarray<T>&)(*this))[t];
 //             else if(_cols>=1)return ((std::valarray<T>&)(*this))[s+t*_cols];
              return std::valarray<T>::operator[](t+s*_rows);
-         }
+         };
         
         friend std::ostream& operator<<(std::ostream& s, const Matrix<T, R, C>& r) {
             for(unsigned long long j=0;j<r.cols();j++){
@@ -134,7 +134,7 @@ namespace sylvanmats::linear{
                 s<<std::endl;
             }
           return s;
-        }
+        };
     };
 
     using Matrix3d = Matrix<double, 3, 3>;
