@@ -10,6 +10,7 @@
 #include "reading/tcp/TCPReader.h"
 #include "mio/mmap.hpp"
 #include "density/mtz/Input.h"
+#include "density/Space.h"
 
 TEST_SUITE("crystallography"){
 
@@ -89,6 +90,10 @@ TEST_CASE("test 1q8h mtz input"){
     CHECK(mtzInput.reflections[2].max() == doctest::Approx(16.0));
     CHECK(mtzInput.reflections[3].min() == doctest::Approx(0.0));
     CHECK(mtzInput.reflections[3].max() == doctest::Approx(1.0));
+    sylvanmats::density::Space<double> space;
+    space.cell=mtzInput.getHeader().cell;
+    std::cout<<"G*\n"<<space.reciprocal(sylvanmats::density::Tetragonal)<<std::endl;
+    std::cout<<"G\n"<<space.G<<std::endl;
         
     }
 //    for(int index=0;index<34;index++){
@@ -175,13 +180,36 @@ TEST_CASE("test 1lri mtz input"){
     CHECK(mtzInput.reflections[2].max() == doctest::Approx(45.0));
     CHECK(mtzInput.reflections[3].min() == doctest::Approx(0.0));
     CHECK(mtzInput.reflections[3].max() == doctest::Approx(1.0));
-        
+    sylvanmats::density::Space<double> space;
+    space.cell=mtzInput.getHeader().cell;
+    std::cout<<"GStar\n"<<space.reciprocal(sylvanmats::density::Orthorhombic)<<std::endl;
+    std::cout<<"G\n"<<space.G<<std::endl;
     }
 //    for(int index=0;index<34;index++){
 //        std::cout <<std::setw(4)<<index<<std::setprecision(4)<<std::dec;
 //        for(int colIndex=0;colIndex<mtzInput.reflections.size();colIndex++)std::cout<<" "<<std::setw(6)<<mtzInput.reflections[colIndex][index];
 //        std::cout<<std::endl;
 //    }
+}
+
+TEST_CASE("test calcite reciprocal"){
+    sylvanmats::density::Space<double> space;
+    space.cell.a=4.990;
+    space.cell.b=4.990;
+    space.cell.c=17.061;
+    space.cell.α=90.0;
+    space.cell.β=90.0;
+    space.cell.γ=120.0;
+    std::cout<<"calcite GStar\n"<<space.reciprocal(sylvanmats::density::Hexagonal)<<std::endl;
+    std::cout<<"G\n"<<space.G<<std::endl;
+//    CHECK(space.cStar == doctest::Approx(0.058613));
+    CHECK(space.GStar[0, 0] == doctest::Approx(0.053546));
+    CHECK(space.GStar[1, 1] == doctest::Approx(0.053546));
+    CHECK(space.GStar[2, 2] == doctest::Approx(0.0034354));
+    CHECK(space.GStar[0, 1] == doctest::Approx(0.026773));
+    CHECK(space.GStar[0, 2] == doctest::Approx(0.0));
+    CHECK(space.GStar[1, 2] == doctest::Approx(0.0));
+    
 }
 
 }
