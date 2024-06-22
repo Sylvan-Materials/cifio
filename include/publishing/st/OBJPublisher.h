@@ -65,6 +65,9 @@ struct fmt::formatter<std::vector<sylvanmats::linear::Vector3d>>{
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t>>>{
+    auto parse(format_parse_context& ctx){
+        return ctx.begin();
+    }
 //    auto parse(format_parse_context& ctx)
 //    {
 //        value_format= "{:";        
@@ -96,6 +99,7 @@ struct fmt::formatter<std::vector<std::tuple<size_t, size_t, size_t, size_t, siz
 //            size_t d=v[0];
 //            std::format_to(ctx.out(), vf, d);
 //        }
+         std::cout<<"indices "<<v.size()<<std::endl;
         for (int i= 0; i < v.size(); ++i){
             size_t i0=std::get<0>((std::tuple<size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t>)v[i]);
             size_t i1=std::get<1>((std::tuple<size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t>)v[i]);

@@ -5,6 +5,11 @@ test/examples/
 test/*.json
 /tmp/
 /db/
+/documents/*.aux
+/documents/*.log
+/documents/*.out
+/documents/*.pdf
+/documents/*.gz
 dictionaries
 private
 /libcifio.so

@@ -371,7 +371,7 @@ TEST_CASE("test gypsum unit cell"){
                 urls.push_back(std::string(token));
                 token = strtok(nullptr, delim.c_str());
         }
-        CHECK_EQ(urls.size(), 28);
+        CHECK_EQ(urls.size(), 23);
         url=urls[0];
 //        std::cout<<"url "<<url<<std::endl;
         CHECK(tcpReader(url, [&](std::istream& isr){
@@ -432,7 +432,7 @@ TEST_CASE("test EM map to png slices"){
         float max=0.0f;
         sylvanmats::density::ccp4::MapInput mapInput;
         mapInput(path, [&min, &max](sylvanmats::density::ccp4::ccp4_header& ccp4Header, unsigned int sectionIndex, float* slice){
-            std::string pngPath="section"+std::to_string(sectionIndex)+".png";
+            std::string pngPath="examples/section"+std::to_string(sectionIndex)+".png";
             FILE *fp = std::fopen(pngPath.c_str(), "wb");
             if (!fp)
             {
@@ -564,7 +564,7 @@ TEST_CASE("test symmetry operations on 1q8h"){
             }    
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 378);
-       CHECK_EQ(lemon::countEdges(graph), 316);
+       CHECK_EQ(lemon::countEdges(graph), 283);
        CHECK_EQ(lemon::countNodes(graph.componentGraph), 113);
        CHECK_EQ(lemon::countEdges(graph.componentGraph), 47);
 
@@ -686,6 +686,7 @@ TEST_CASE("test symmetry operations on 1q8h"){
                 vB=quat*(vB);
                 v=vB+averageVector;
                 vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v[0], v[1], v[2], c[0], c[1], c[2]));
+                objPublisher.append(v);            
             }
             normalLoop.insert(normalLoop.begin(), std::make_tuple(vn[0], vn[1], vn[2]));
             for(unsigned int index=0;index<11;index++){

@@ -17,11 +17,11 @@ to generate a lookup json.
 (Note: this will change as this project setup becomes more automated)
 
 
-Set compiler(>=10)
+Set compiler(>=14 -std=c++26)
 
 ```
 export PATH=~~/Software/gcc-dev/dist/bin:$PATH
-export LD_LIBRARY_PATH=`pwd`/../cnpm/cpp_modules/urlcpp:`pwd`/../cnpm/cpp_modules/libgit2/dist/lib:`pwd`:`pwd`/cpp_modules/json-thresher:`pwd`/cpp_modules/xml-thresher:$JAVA_HOME/lib:$JAVA_HOME/lib/server:~/Software/gcc-dev/dist/lib64::`pwd`/cpp_modules/antlr4/runtime/Cpp/run/lib:`pwd`/cpp_modules/urlcpp:`pwd`/cpp_modules/openssl/openssl/lib64:`pwd`/cpp_modules/zlib/dist/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=`pwd`/cpp_modules/urlcpp:`pwd`/cpp_modules/libgit2/dist/lib:`pwd`:`pwd`/cpp_modules/json-thresher:`pwd`/cpp_modules/xml-thresher:$JAVA_HOME/lib:$JAVA_HOME/lib/server:~/Software/gcc-dev/dist/lib64::`pwd`/cpp_modules/antlr4/runtime/Cpp/run/lib:`pwd`/cpp_modules/urlcpp:`pwd`/cpp_modules/openssl/openssl/lib64:`pwd`/cpp_modules/zlib/dist/lib:$LD_LIBRARY_PATH
 ```
 
 Generate the c++ lexer/parser code once from the grammars:

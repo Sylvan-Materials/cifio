@@ -17,6 +17,7 @@
 
 #include "density/cell.h"
 #include "linear/Array.h"
+#include "linear/Tensor.h"
 
 #include "mio/mmap.hpp"
 
@@ -302,6 +303,39 @@ namespace sylvanmats::density::mtz{
         };
         
         mtz_header& getHeader(){return mtzHeader;};
+        
+        sylvanmats::linear::Tensor<std::complex<double>> getSF(size_t fIndex, size_t phiIndex){
+            std::unique_ptr<size_t[]> dims(new size_t[3]);
+            bool first=true;
+            int64_t hMin=0;
+            int64_t kMin=0;
+            int64_t lMin=0;
+            int64_t hMax=0;
+            int64_t kMax=0;
+            int64_t lMax=0;
+            if(!reflections.empty() && fIndex<reflections.size() && phiIndex<reflections.size())
+            for(size_t i=0;i<reflections[0].size();i++){
+                if(first || hMin>reflections[0][i])hMax=reflections[0][i];
+                if(first || kMin>reflections[1][i])kMax=reflections[1][i];
+                if(first || lMin>reflections[2][i])lMax=reflections[2][i];
+                if(first || hMax<reflections[0][i])hMax=reflections[0][i];
+                if(first || kMax<reflections[1][i])kMax=reflections[1][i];
+                if(first || lMax<reflections[2][i])lMax=reflections[2][i];
+                first=false;
+            }
+            dims[0]=hMax-hMin+1;
+            dims[1]=kMax-kMin+1;
+            dims[2]=lMax-lMin+1;
+            sylvanmats::linear::Tensor<std::complex<double>> hkl(3, dims);
+            for(size_t i=0;i<reflections[0].size();i++){
+                int64_t h=reflections[0][i]-hMin;
+                int64_t k=reflections[1][i]-kMin;
+                int64_t l=reflections[2][i]-lMin;
+                hkl[h, k, l]=reflections[fIndex][i];
+                
+            }
+            return hkl;
+        };
         
     private:
         std::vector<std::string> tokenize(std::string input, const char* delimiters = " '"){

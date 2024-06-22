@@ -11,6 +11,8 @@
 #include "mio/mmap.hpp"
 #include "density/mtz/Input.h"
 #include "density/Space.h"
+#include "domain/DiscreteFourierTransform.h"
+#include "statistics/Accumulator.h"
 
 TEST_SUITE("crystallography"){
 
@@ -79,9 +81,13 @@ TEST_CASE("test 1q8h mtz input"){
     CHECK_EQ(mtzInput.getHeader().column_labels[0].label, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[1].label, "K");
     CHECK_EQ(mtzInput.getHeader().column_labels[2].label, "L");
+    CHECK_EQ(mtzInput.getHeader().column_labels[3].label, "FREE");
+    CHECK_EQ(mtzInput.getHeader().column_labels[4].label, "FP");
     CHECK_EQ(mtzInput.getHeader().column_labels[0].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[1].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[2].type, "H");
+    CHECK_EQ(mtzInput.getHeader().column_labels[3].type, "I");
+    CHECK_EQ(mtzInput.getHeader().column_labels[4].type, "F");
     CHECK(mtzInput.reflections[0].min() == doctest::Approx(1.0));
     CHECK(mtzInput.reflections[0].max() == doctest::Approx(22.0));
     CHECK(mtzInput.reflections[1].min() == doctest::Approx(0.0));
@@ -101,6 +107,23 @@ TEST_CASE("test 1q8h mtz input"){
 //        for(int colIndex=0;colIndex<mtzInput.reflections.size();colIndex++)std::cout<<" "<<std::setw(6)<<mtzInput.reflections[colIndex][index];
 //        std::cout<<std::endl;
 //    }
+    if(mtzInput.reflections.size()>7){
+        sylvanmats::statistics::min<double> min;
+        sylvanmats::statistics::max<double> max;
+        sylvanmats::statistics::mean<double> mean;
+        sylvanmats::statistics::median<double> median;
+        sylvanmats::statistics::Accumulator<double, double, sylvanmats::statistics::min<double>, sylvanmats::statistics::max<double>, sylvanmats::statistics::mean<double>, sylvanmats::statistics::median<double>> acc(5, min, max, mean, median);
+        for(size_t i=0;i<mtzInput.reflections[0].size();i++){
+            acc(mtzInput.reflections[6][i]);
+        }
+        CHECK(min() == doctest::Approx(0.195903));
+        CHECK(max() == doctest::Approx(1509.03));
+        CHECK(mean() == doctest::Approx(73.1157));
+        auto&& [unique, median1, median2]=median();
+        CHECK(!unique);
+        CHECK(median1 == doctest::Approx(38.2334));
+        if(unique)CHECK(median2 == doctest::Approx(73.1157));
+    }
 }
 
 TEST_CASE("test 1lri mtz input"){
@@ -169,9 +192,15 @@ TEST_CASE("test 1lri mtz input"){
     CHECK_EQ(mtzInput.getHeader().column_labels[0].label, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[1].label, "K");
     CHECK_EQ(mtzInput.getHeader().column_labels[2].label, "L");
+    CHECK_EQ(mtzInput.getHeader().column_labels[3].label, "FREE");
+    CHECK_EQ(mtzInput.getHeader().column_labels[4].label, "FP");
     CHECK_EQ(mtzInput.getHeader().column_labels[0].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[1].type, "H");
     CHECK_EQ(mtzInput.getHeader().column_labels[2].type, "H");
+    CHECK_EQ(mtzInput.getHeader().column_labels[3].type, "I");
+    CHECK_EQ(mtzInput.getHeader().column_labels[4].type, "F");
+//    for(int i=5;i<mtzInput.getHeader().column_labels.size();i++)std::cout<<"L"<<i<<" "<<mtzInput.getHeader().column_labels[i].label<<std::endl;
+//    for(int i=5;i<mtzInput.getHeader().column_labels.size();i++)std::cout<<"I"<<i<<" "<<mtzInput.getHeader().column_labels[i].type<<std::endl;
     CHECK(mtzInput.reflections[0].min() == doctest::Approx(0.0));
     CHECK(mtzInput.reflections[0].max() == doctest::Approx(21.0));
     CHECK(mtzInput.reflections[1].min() == doctest::Approx(0.0));
@@ -184,6 +213,16 @@ TEST_CASE("test 1lri mtz input"){
     space.cell=mtzInput.getHeader().cell;
     std::cout<<"GStar\n"<<space.reciprocal(sylvanmats::density::Orthorhombic)<<std::endl;
     std::cout<<"G\n"<<space.G<<std::endl;
+    sylvanmats::linear::Tensor<std::complex<double>>&& F=mtzInput.getSF(6, 7);
+    CHECK_EQ(F.getDimension(0), 22);
+    CHECK_EQ(F.getDimension(1), 66);
+    CHECK_EQ(F.getDimension(2), 46);
+//    sylvanmats::domain::DiscreteFourierTransform<sylvanmats::linear::Tensor<std::complex<double>>> idft(sylvanmats::domain::INVERSE);
+//    sylvanmats::linear::Tensor<std::complex<double>>&& P=idft(F);
+//    CHECK_EQ(P.getDimension(0), 22);
+//    CHECK_EQ(P.getDimension(1), 66);
+//    CHECK_EQ(P.getDimension(2), 46);
+    
     }
 //    for(int index=0;index<34;index++){
 //        std::cout <<std::setw(4)<<index<<std::setprecision(4)<<std::dec;

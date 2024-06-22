@@ -13,3 +13,5 @@ o 1
 
 usemtl Default
 {indices:}
+
+# End of file

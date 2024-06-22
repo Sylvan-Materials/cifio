@@ -25,7 +25,7 @@ namespace sylvanmats::standards{
             unsigned int start=std::any_cast<long>(v);
         jsonBinder(jpEnd, [&](std::any& v){
             unsigned int end=std::any_cast<long>(v);
-//std::cout<<"start "<<start<<" end"<<end<<" "<<(end-start)<<std::endl;
+//std::cout<<"start "<<start<<" end "<<end<<" "<<(end-start)<<std::endl;
             if((end-start)<=0)return false;
             mio::mmap_source mmap2nd(path.string(), start, end-start+1);
             std::string content=std::string(mmap2nd.begin(), mmap2nd.end());
@@ -37,7 +37,7 @@ namespace sylvanmats::standards{
 
             std::shared_ptr<sylvanmats::CIFParser> parser=std::make_shared<sylvanmats::CIFParser>(tokens.get());
             //parser->setBuildParseTree(true);
-            //std::cout<<"parser "<<std::endl;
+//            std::cout<<"parser "<<std::endl;
             antlr4::tree::ParseTree* tree = parser->cif();
 
             //std::cout << tree->toStringTree(&parser) << std::endl << std::endl;
@@ -51,7 +51,7 @@ namespace sylvanmats::standards{
                 if (sylvanmats::CIFParser::DataBlockContext* r=dynamic_cast<sylvanmats::CIFParser::DataBlockContext*>((*itDB))) {
                     if(r->dataItems().size()>0 && r->dataItems(0)->tag()!=nullptr &&  r->dataItems(0)->tag()->getText().compare("\n_chem_comp.id")==0){
                         if(r->dataItems(0)->value()->getText().compare(comp_ids[index])==0){
-                        //std::cout<<""<<comp_id<<" ? "<<r->dataItems(0)->value()->getText()<<std::endl;
+//                        std::cout<<""<<comp_ids[index]<<" ? "<<r->dataItems(0)->value()->getText()<<std::endl;
                             auto oi=r->dataItems();
                             std::vector<chem_comp_atom<double>> chemCompAtoms;
                             for(sylvanmats::CIFParser::DataItemsContext* l: oi | std::views::filter([](sylvanmats::CIFParser::DataItemsContext* di){ return di->loop()!=nullptr && di->loop()->loopHeader()->tag().size()>0 && di->loop()->loopHeader()->tag(0)->getText().rfind("\n_chem_comp_atom.", 0) == 0; })){

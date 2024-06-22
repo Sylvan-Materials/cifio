@@ -21,7 +21,8 @@ namespace sylvanmats::publishing::st{
       auto fcArg=fmt::arg("face_count", face_count);
       auto mcArg=fmt::arg("material_count", material_count);
       auto vArg=fmt::arg("vertices", vertices);
-        std::string ret=fmt::vformat(objTemplate, fmt::make_format_args(vcArg, fcArg, mcArg, vArg));
+      auto iArg=fmt::arg("indices", indices);
+        std::string ret=fmt::vformat(objTemplate, fmt::make_format_args(vcArg, fcArg, mcArg, vArg, iArg));
         return ret;
     }
 
