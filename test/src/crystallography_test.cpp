@@ -113,7 +113,9 @@ TEST_CASE("test 1q8h mtz input"){
         sylvanmats::statistics::mean<double> mean;
         sylvanmats::statistics::median<double> median;
         sylvanmats::statistics::mode<double> mode;
-        sylvanmats::statistics::Accumulator<double, double, sylvanmats::statistics::min<double>, sylvanmats::statistics::max<double>, sylvanmats::statistics::mean<double>, sylvanmats::statistics::median<double>, sylvanmats::statistics::mode<double>> acc(5, min, max, mean, median, mode);
+        sylvanmats::statistics::population_stddev<double> populationStddev;
+        sylvanmats::statistics::sample_stddev<double> sampleStddev;
+        sylvanmats::statistics::Accumulator<double, double, sylvanmats::statistics::min<double>, sylvanmats::statistics::max<double>, sylvanmats::statistics::mean<double>, sylvanmats::statistics::median<double>, sylvanmats::statistics::mode<double>, sylvanmats::statistics::population_stddev<double>, sylvanmats::statistics::sample_stddev<double>> acc(5, min, max, mean, median, mode, populationStddev, sampleStddev);
         for(size_t i=0;i<mtzInput.reflections[0].size();i++){
             acc(mtzInput.reflections[6][i]);
         }
@@ -126,6 +128,8 @@ TEST_CASE("test 1q8h mtz input"){
         if(unique)CHECK(median2 == doctest::Approx(73.1157));
         std::vector<size_t>&& modeIndices=mode();
         CHECK_EQ(modeIndices.size(), 5);
+        CHECK(populationStddev() == doctest::Approx(0.144782));
+        CHECK(sampleStddev() == doctest::Approx(0.144802));
     }
 }
 

@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <valarray>
+#include <cmath>
 
 #include "linear/Matrix.h"
 
@@ -91,6 +93,32 @@ namespace sylvanmats::statistics{
                 v.push_back((*it).second);
             }
             return v;
+        };
+    };
+    
+    template<std::numerical T>
+    struct population_stddev{
+        std::valarray<T> v;
+        void operator()(T value){
+            v.resize(v.size()+1);
+            v[v.size()-1]=value;
+        };
+        T operator()(){
+            T μ=v.sum()/v.size();
+            return std::sqrt(std::pow((v-μ),2).sum()/v.size());
+        };
+    };
+    
+    template<std::numerical T>
+    struct sample_stddev{
+        std::valarray<T> v;
+        void operator()(T value){
+            v.resize(v.size()+1);
+            v[v.size()-1]=value;
+        };
+        T operator()(){
+            T μ=v.sum()/v.size();
+            return std::sqrt(std::pow((v-μ),2).sum()/(v.size()-1.0));
         };
     };
     
