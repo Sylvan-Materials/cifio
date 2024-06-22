@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <tuple>
 #include <vector>
+#include <map>
+#include <unordered_map>
 
 #include "linear/Matrix.h"
 
@@ -66,6 +68,30 @@ namespace sylvanmats::statistics{
             if(!hit) v.push_back(value);
         };
         std::tuple<bool, T, T> operator()(){return std::make_tuple(v.size() % 2 == 1, v[v.size()/2], v[v.size()/2+1]);};
+    };
+    
+    template<std::numerical T>
+    struct mode{
+        std::unordered_multimap<T, size_t> m;
+        void operator()(T value){
+            m.insert(m.end(), std::make_pair(value, m.size()));
+        };
+        std::vector<size_t> operator()(){
+            std::vector<size_t> v;
+            size_t bucketIndex=0;
+            size_t bucketSize=0;
+            for(size_t i=0;i<m.bucket_count();i++){
+                if(i==0)bucketSize=m.bucket_size(i);
+                else if(bucketSize<m.bucket_size(i)){
+                    bucketSize=m.bucket_size(i);
+                    bucketIndex=i;
+                }
+            }
+            for(typename std::unordered_multimap<T, size_t>::local_iterator it=m.begin(bucketIndex);it!=m.end(bucketIndex);it++){
+                v.push_back((*it).second);
+            }
+            return v;
+        };
     };
     
     template<std::numerical T, typename R = T::value_type,  typename  ...F>//, std::enable_if_t<std::is_invocable_v<(func...), void(*)>, bool> = true>
