@@ -337,6 +337,19 @@ namespace sylvanmats::density::mtz{
             return hkl;
         };
         
+            std::stringstream symmetryAsLua(){
+                std::stringstream ssLua;
+//                ssLua<<R"(local sym =  {}
+//
+//)";
+                for(unsigned int index=0;index<mtzHeader.number_of_symmetry_operations;index++){
+                    ssLua<<"function f"<<(index+1)<<"(X,Y,Z) return "<<mtzHeader.symmetry_operations[index]<<" end"<<std::endl<<std::endl;
+                }
+//                ssLua<<R"(return sym
+//)";
+                return ssLua;
+            };
+        
     private:
         std::vector<std::string> tokenize(std::string input, const char* delimiters = " '"){
             std::vector<std::string> stack;

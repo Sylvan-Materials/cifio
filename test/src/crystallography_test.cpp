@@ -14,6 +14,14 @@
 #include "domain/DiscreteFourierTransform.h"
 #include "statistics/Accumulator.h"
 
+#include "publishing/st/TIKZPublisher.h"
+
+extern "C" {
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
 TEST_SUITE("crystallography"){
 
 TEST_CASE("test 1q8h mtz input"){
@@ -98,8 +106,8 @@ TEST_CASE("test 1q8h mtz input"){
     CHECK(mtzInput.reflections[3].max() == doctest::Approx(1.0));
     sylvanmats::density::Space<double> space;
     space.cell=mtzInput.getHeader().cell;
-    std::cout<<"G*\n"<<space.reciprocal(sylvanmats::density::Tetragonal)<<std::endl;
-    std::cout<<"G\n"<<space.G<<std::endl;
+//    std::cout<<"G*\n"<<space.reciprocal(sylvanmats::density::Tetragonal)<<std::endl;
+//    std::cout<<"G\n"<<space.G<<std::endl;
         
     }
 //    for(int index=0;index<34;index++){
@@ -131,6 +139,97 @@ TEST_CASE("test 1q8h mtz input"){
         CHECK(populationStddev() == doctest::Approx(0.144782));
         CHECK(sampleStddev() == doctest::Approx(0.144802));
     }
+    std::filesystem::path tikzPath="../templates/tikz";
+    sylvanmats::publishing::st::TIKZPublisher tikzPublisher(tikzPath);
+    sylvanmats::linear::Vector3d vOAxis;
+    sylvanmats::linear::Vector3d vXAxis=sylvanmats::linear::Vector3d::UnitX();
+    sylvanmats::linear::Vector3d vYAxis=sylvanmats::linear::Vector3d::UnitY();
+    sylvanmats::linear::Vector3d vZAxis=sylvanmats::linear::Vector3d::UnitZ();
+    tikzPublisher.append("", "O", vOAxis);
+    tikzPublisher.append("r_i", "a", vXAxis);
+    tikzPublisher.append("r_j", "b", vYAxis);
+    tikzPublisher.append("r_k", "c", vZAxis);
+    tikzPublisher.draw("O", "a");
+    tikzPublisher.draw("O", "b");
+    tikzPublisher.draw("O", "c");
+    for(size_t i=0;i<mtzInput.getHeader().number_of_symmetry_operations;i++){
+        std::cout<<i<<" "<<mtzInput.getHeader().symmetry_operations[i]<<std::endl;
+    }
+        lua_State *L = luaL_newstate();
+        int err=luaL_dostring (L, mtzInput.symmetryAsLua().str().c_str());
+        CHECK_EQ(err, LUA_OK);
+        std::string fName="f"+std::to_string(4);
+        lua_getglobal(L, fName.c_str());
+        lua_pushnumber(L, vOAxis[0]);
+        lua_pushnumber(L, vOAxis[1]);
+        lua_pushnumber(L, vOAxis[2]);
+        if (lua_pcall(L, 3, 3, 0) != LUA_OK) {
+                printf("Error calling sym.f2");
+                lua_error(L);
+                //return;
+        }
+        else{
+            vOAxis[0]=lua_tonumber(L, -3);
+            vOAxis[1]=lua_tonumber(L, -2);
+            vOAxis[2]=lua_tonumber(L, -1);
+            lua_pop(L, 3);
+        }
+        tikzPublisher.append("", "Op", vOAxis);
+        lua_getglobal(L, fName.c_str());
+        lua_pushnumber(L, vXAxis[0]);
+        lua_pushnumber(L, vXAxis[1]);
+        lua_pushnumber(L, vXAxis[2]);
+        if (lua_pcall(L, 3, 3, 0) != LUA_OK) {
+                printf("Error calling sym.f2");
+                lua_error(L);
+                //return;
+        }
+        else{
+            vXAxis[0]=lua_tonumber(L, -3);
+            vXAxis[1]=lua_tonumber(L, -2);
+            vXAxis[2]=lua_tonumber(L, -1);
+            lua_pop(L, 3);
+        }
+        tikzPublisher.append("a_i", "ap", vXAxis);
+        tikzPublisher.draw("Op", "ap");
+        lua_getglobal(L, fName.c_str());
+        lua_pushnumber(L, vYAxis[0]);
+        lua_pushnumber(L, vYAxis[1]);
+        lua_pushnumber(L, vYAxis[2]);
+        if (lua_pcall(L, 3, 3, 0) != LUA_OK) {
+                printf("Error calling sym.f2");
+                lua_error(L);
+                //return;
+        }
+        else{
+            vYAxis[0]=lua_tonumber(L, -3);
+            vYAxis[1]=lua_tonumber(L, -2);
+            vYAxis[2]=lua_tonumber(L, -1);
+            lua_pop(L, 3);
+        }
+        tikzPublisher.append("b_j", "bp", vYAxis);
+        tikzPublisher.draw("Op", "bp");
+        lua_getglobal(L, fName.c_str());
+        lua_pushnumber(L, vZAxis[0]);
+        lua_pushnumber(L, vZAxis[1]);
+        lua_pushnumber(L, vZAxis[2]);
+        if (lua_pcall(L, 3, 3, 0) != LUA_OK) {
+                printf("Error calling sym.f2");
+                lua_error(L);
+                //return;
+        }
+        else{
+            vZAxis[0]=lua_tonumber(L, -3);
+            vZAxis[1]=lua_tonumber(L, -2);
+            vZAxis[2]=lua_tonumber(L, -1);
+            lua_pop(L, 3);
+        }
+        tikzPublisher.append("c_k", "cp", vZAxis);
+        tikzPublisher.draw("Op", "cp");
+
+    std::string&& content = tikzPublisher.render();
+    std::ofstream ofs("../documents/symmetry_drawing.tex");
+    ofs<<content<<std::endl;
 }
 
 TEST_CASE("test 1lri mtz input"){
@@ -246,8 +345,9 @@ TEST_CASE("test calcite reciprocal"){
     space.cell.α=90.0;
     space.cell.β=90.0;
     space.cell.γ=120.0;
-    std::cout<<"calcite GStar\n"<<space.reciprocal(sylvanmats::density::Hexagonal)<<std::endl;
-    std::cout<<"G\n"<<space.G<<std::endl;
+    space.reciprocal(sylvanmats::density::Hexagonal);
+//    std::cout<<"calcite GStar\n"<<space.reciprocal(sylvanmats::density::Hexagonal)<<std::endl;
+//    std::cout<<"G\n"<<space.G<<std::endl;
 //    CHECK(space.cStar == doctest::Approx(0.058613));
     CHECK(space.GStar[0, 0] == doctest::Approx(0.053546));
     CHECK(space.GStar[1, 1] == doctest::Approx(0.053546));
