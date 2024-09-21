@@ -66,6 +66,10 @@ namespace sylvanmats::constitution {
                     else if(cdi->tag()->getText().compare("\n_pdbx_nonpoly_scheme.auth_seq_num")==0)graph.componentProperties[n].auth_seq_num=std::strtol(cdi->value()->getText().c_str(), nullptr, 10);
                     else if(cdi->tag()->getText().compare("\n_pdbx_nonpoly_scheme.pdb_mon_id")==0)graph.componentProperties[n].pdb_mon_id.assign(cdi->value()->getText());
                     else if(cdi->tag()->getText().compare("\n_pdbx_nonpoly_scheme.auth_mon_id")==0)graph.componentProperties[n].auth_mon_id.assign(cdi->value()->getText());
+                    else if(cdi->tag()->getText().compare("\n_pdbx_nonpoly_scheme.pdb_strand_id")==0){
+                        graph.componentProperties[n].pdb_strand_id.assign(cdi->value()->getText());
+                        if(graph.componentProperties[n].pdb_strand_id.compare(".")==0)graph.componentProperties[n].pdb_strand_id="?";
+                    }
                     else if(cdi->tag()->getText().compare("\n_pdbx_nonpoly_scheme.pdb_ins_code")==0){
                         graph.componentProperties[n].pdb_ins_code.assign(cdi->value()->getText());
                         if(graph.componentProperties[n].pdb_ins_code.compare(".")==0)graph.componentProperties[n].pdb_ins_code="?";
@@ -231,6 +235,10 @@ namespace sylvanmats::constitution {
                          break;
                          case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, auth_mon_id):
                              graph.componentProperties[n].auth_mon_id.assign(values[valueIndex]->getText());
+                         break;
+                         case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_strand_id):
+                             graph.componentProperties[n].pdb_strand_id.assign(values[valueIndex]->getText());
+                             if(graph.componentProperties[n].pdb_strand_id.compare(".")==0)graph.componentProperties[n].pdb_strand_id="?";
                          break;
                          case offsetof(sylvanmats::constitution::_pdbx_poly_seq_scheme<double>, pdb_ins_code):
                              graph.componentProperties[n].pdb_ins_code.assign(values[valueIndex]->getText());

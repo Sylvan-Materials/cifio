@@ -316,6 +316,12 @@ TEST_CASE("test putting standard protons on 1Q8H"){
         for(lemon::ListGraph::NodeIt nSiteA(graph); nSiteA!=lemon::INVALID; ++nSiteA){
             cifPublisher.insertAtomSites(std::make_tuple(graph.atomSites[nSiteA].group_PDB, graph.atomSites[nSiteA].id, graph.atomSites[nSiteA].type_symbol, graph.atomSites[nSiteA].label_atom_id, graph.atomSites[nSiteA].label_alt_id, graph.atomSites[nSiteA].label_comp_id, graph.atomSites[nSiteA].label_asym_id, graph.atomSites[nSiteA].label_entity_id, graph.atomSites[nSiteA].label_seq_id, graph.atomSites[nSiteA].pdbx_PDB_ins_code, graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z, graph.atomSites[nSiteA].occupancy, graph.atomSites[nSiteA].B_iso_or_equiv, graph.atomSites[nSiteA].pdbx_formal_charge, graph.atomSites[nSiteA].auth_seq_id, graph.atomSites[nSiteA].auth_comp_id, graph.atomSites[nSiteA].auth_asym_id, graph.atomSites[nSiteA].auth_atom_id, graph.atomSites[nSiteA].pdbx_PDB_model_num));
         }
+        for(lemon::ListGraph::NodeIt nR(graph.componentGraph); nR!=lemon::INVALID; ++nR){
+            if(graph.componentProperties[nR].termination!=sylvanmats::constitution::MONOMER)
+                cifPublisher.insertPolymers(std::make_tuple(graph.componentProperties[nR].asym_id, graph.componentProperties[nR].entity_id, graph.componentProperties[nR].seq_id, graph.componentProperties[nR].mon_id, graph.componentProperties[nR].ndb_seq_num, graph.componentProperties[nR].pdb_seq_num, graph.componentProperties[nR].auth_seq_num, graph.componentProperties[nR].pdb_mon_id, graph.componentProperties[nR].auth_mon_id, graph.componentProperties[nR].pdb_strand_id, graph.componentProperties[nR].pdb_ins_code, graph.componentProperties[nR].hetero));
+            else
+                cifPublisher.insertNonpolymers(std::make_tuple(graph.componentProperties[nR].asym_id, graph.componentProperties[nR].entity_id, graph.componentProperties[nR].mon_id, graph.componentProperties[nR].ndb_seq_num, graph.componentProperties[nR].pdb_seq_num, graph.componentProperties[nR].auth_seq_num, graph.componentProperties[nR].pdb_mon_id, graph.componentProperties[nR].auth_mon_id, graph.componentProperties[nR].pdb_strand_id, graph.componentProperties[nR].pdb_ins_code));
+        }
         std::string&& content = cifPublisher.render();
         std::ofstream ofs("test_"+comp_id+".cif");
         ofs<<content<<std::endl;

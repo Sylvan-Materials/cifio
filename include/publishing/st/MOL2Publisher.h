@@ -14,20 +14,6 @@ struct fmt::formatter<std::vector<std::tuple<size_t, std::string, double, double
     
      template <typename FormatContext>
      auto format(const std::vector<std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>>& v, FormatContext& ctx) -> decltype(ctx.out()){
-//        const auto&& buf=ctx.out();
-//        if(curly){
-//            constexpr char* fmt={"{{"};
-//            std::format_to(ctx.out(), fmt);
-//        }
-//        else{
-//            constexpr char* fmt{"["};
-//            std::format_to(ctx.out(), fmt);            
-//        }
- //        if (v.size() > 0){
-//            const std::string_view vf=value_format;
-//            size_t d=v[0];
-//            std::format_to(ctx.out(), vf, d);
-//        }
         for (int i= 0; i < v.size(); ++i){
             size_t i0=std::get<0>((std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>)v[i]);
             std::string i1=std::get<1>((std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>)v[i]);
@@ -42,18 +28,7 @@ struct fmt::formatter<std::vector<std::tuple<size_t, std::string, double, double
         }
         constexpr char* fmt={""};
         return fmt::format_to(ctx.out(), fmt);
-//        if(curly){
-//            constexpr char* fmt={"}}"};
-//            return std::format_to(ctx.out(), fmt);
-//        }
-//        else{
-//            constexpr char* fmt={"]"};
-//            return std::format_to(ctx.out(), fmt);
-//        }
     }
-    // ...
-//    bool        curly{false};
-//    std::string value_format;
 };
 
 template <>
