@@ -29,14 +29,14 @@ namespace sylvanmats::standards{
             if((end-start)<=0)return false;
             mio::mmap_source mmap2nd(path.string(), start, end-start+1);
             std::string content=std::string(mmap2nd.begin(), mmap2nd.end());
-//std::cout<<"content "<<content<<std::endl;
-            mmap2nd.unmap();
+//std::cout<<comp_ids[index]<<" content "<<content<<std::endl;
+            if(!content.empty()){
             std::shared_ptr<antlr4::ANTLRInputStream> input=std::make_shared<antlr4::ANTLRInputStream>(content);
             std::shared_ptr<sylvanmats::CIFLexer> lexer=std::make_shared<sylvanmats::CIFLexer>(input.get());
             std::shared_ptr<antlr4::CommonTokenStream> tokens=std::make_shared<antlr4::CommonTokenStream>(lexer.get());
 
             std::shared_ptr<sylvanmats::CIFParser> parser=std::make_shared<sylvanmats::CIFParser>(tokens.get());
-            //parser->setBuildParseTree(true);
+            parser->setBuildParseTree(true);
 //            std::cout<<"parser "<<std::endl;
             antlr4::tree::ParseTree* tree = parser->cif();
 
@@ -59,7 +59,7 @@ namespace sylvanmats::standards{
                                  chemCompAtoms.push_back(chem_comp_atom<double>());
                                 std::vector<sylvanmats::CIFParser::ValueContext *> values=l->loop()->loopBody()->value();
                                  for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
-                                     //std::cout<<values[valueIndex]->getText()<<" ";
+//                                     std::cout<<values[valueIndex]->getText()<<" ";
                                      switch(columnCount){
                                           case 0:
                                               chemCompAtoms.back().comp_id.assign(values[valueIndex]->getText());
@@ -88,7 +88,7 @@ namespace sylvanmats::standards{
                                      }
                                      columnCount++;
                                      if(valueIndex % (l->loop()->loopHeader()->tag().size()) == l->loop()->loopHeader()->tag().size()-1){
-                                         //std::cout<<std::endl;
+//                                         std::cout<<std::endl;
                                          columnCount=0;
                                         chemCompAtoms.push_back(chem_comp_atom<double>());
                                      }
@@ -100,7 +100,7 @@ namespace sylvanmats::standards{
                                  chemCombonds.push_back(chem_comp_bond());
                                  std::vector<sylvanmats::CIFParser::ValueContext *> values=l->loop()->loopBody()->value();
                                  for(unsigned int valueIndex=0;valueIndex<l->loop()->loopBody()->value().size();valueIndex++){
-                                     //std::cout<<values[valueIndex]->getText()<<" ";
+//                                     std::cout<<values[valueIndex]->getText()<<" ";
                                      switch(columnCount){
                                           case 0:
                                               chemCombonds.back().comp_id.assign(values[valueIndex]->getText());
@@ -123,7 +123,7 @@ namespace sylvanmats::standards{
                                      }
                                      columnCount++;
                                      if(valueIndex % (l->loop()->loopHeader()->tag().size()) == l->loop()->loopHeader()->tag().size()-1){
-                                         //std::cout<<std::endl;
+//                                         std::cout<<std::endl;
                                          std::vector<chem_comp_atom<double>>::iterator cca1=std::find_if(std::begin(chemCompAtoms), std::end(chemCompAtoms), [&](chem_comp_atom<double>& cca){return chemCombonds.back().atom_id_1.compare(cca.atom_id)==0;});
                                          std::vector<chem_comp_atom<double>>::iterator cca2=std::find_if(std::begin(chemCompAtoms), std::end(chemCompAtoms), [&](chem_comp_atom<double>& cca){return chemCombonds.back().atom_id_2.compare(cca.atom_id)==0;});
                                          apply((*cca1), chemCombonds.back(), (*cca2));
@@ -139,7 +139,11 @@ namespace sylvanmats::standards{
                     }
                 }
             }
+            }
+            mmap2nd.unmap();
+            return true;
         });
+            return true;
         });
             
             return ret;

@@ -287,7 +287,7 @@ namespace sylvanmats::reading{
             int len=100;
                 len=SSL_read(ssl, buf, 100);
                 if(len>=0)buf[len]=0;
-                //printf("%s",buf);
+//                printf("%s",buf);
                 //fprintf(fp, "%s",buf);
             co_yield std::make_pair(len, buf);
         }

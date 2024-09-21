@@ -260,7 +260,7 @@ namespace sylvanmats::constitution {
                 for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return tag->getText().rfind("\n_atom_site.", 0) == 0; })){
                    tagLabels[columnCount++]=t->getText().substr(12);
                 }
-                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_atom_site.", 0) == 0; })){
+                   for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_atom_site.", 0) == 0; })){
                     once=false;
                     columnCount=0;
                     unsigned int entityCount=0;
@@ -450,9 +450,10 @@ namespace sylvanmats::constitution {
                          }
                          if(ret)standardAACount++;
                          if(!ret){
-                            //if(current_comp_id.compare("SO4")==0)std::cout<<current_comp_id<<" comp_id "<<comp_id<<" "<<ins_code<<std::endl;
+                            comp_ids.insert(comp_ids.begin(), current_comp_id);
+                            //if(current_comp_id.compare("SO4")==0)std::cout<<current_comp_id<<" comp_id "<<comp_id<<" "<<ins_code<<" "<<comp_ids.size()<<" "<<comp_ids[0]<<" "<<comp_ids.back()<<std::endl;
                             ret=componentStandards(comp_ids, [&](sylvanmats::standards::chem_comp_atom<double>& cca1, sylvanmats::standards::chem_comp_bond& ccb, sylvanmats::standards::chem_comp_atom<double>& cca2){
-                             //std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
+//                             std::cout<<"got std "<<previous_comp_id<<" "<<entityCount<<std::endl;
                              unsigned int countA=0;
                              bool matched=false;
                              for(lemon::ListGraph::NodeIt nSiteA(graph); countA<=entityCount+1 && nSiteA!=lemon::INVALID; ++nSiteA){
@@ -500,7 +501,7 @@ namespace sylvanmats::constitution {
                              }
                              }
                             });
-                            //std::cout<<"ret "<<ret<<" "<<standardCompCount<<std::endl; //https://files.rcsb.org/ligands/view/CGX.cif
+//                            std::cout<<"ret "<<ret<<" "<<standardCompCount<<std::endl; //https://files.rcsb.org/ligands/view/CGX.cif
                             if(ret)standardCompCount++;
                          }
                          previousNNode=nNode;
@@ -770,7 +771,7 @@ namespace sylvanmats::constitution {
                                 ptnr2Node=nComp;
                             }
                         }
-                        //std::cout<<"adding structure connections "<<(ptnr1Node!=lemon::INVALID)<<" "<<(ptnr2Node!=lemon::INVALID)<<" "<<(conn_type_id.compare("metalc")!=0)<<std::endl;
+//                        std::cout<<"adding structure connections "<<(ptnr1Node!=lemon::INVALID)<<" "<<(ptnr2Node!=lemon::INVALID)<<" "<<(conn_type_id.compare("metalc")!=0)<<std::endl;
                         if(ptnr1Node!=lemon::INVALID && ptnr2Node!=lemon::INVALID ){
                             lemon::ListGraph::Edge e=lemon::findEdge(graph.componentGraph, ptnr1Node, ptnr2Node);
                             if(e!=lemon::INVALID){

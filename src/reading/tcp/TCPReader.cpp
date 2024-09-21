@@ -117,7 +117,7 @@ namespace sylvanmats::reading{
     freeaddrinfo(infoptr);
     //int s = socket(AF_UNSPEC, SOCK_STREAM, 0);
     if (sd < 0) {
-        //printf("Error creating socket.\n");
+        printf("Error creating socket.\n");
         return false;
     }
 
@@ -141,19 +141,47 @@ namespace sylvanmats::reading{
         fflush(stdout);
         return false;
     }
-    //printf ("SSL connection using %s\n", SSL_get_cipher (ssl));
+//    printf ("SSL connection using %s\n", SSL_get_cipher (ssl));
     std::string escapedUrl=url::Url::escape_reserved_unsafe(urlStr);
 //std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
-    std::string request = "GET "+urlStr+" HTTP/1.0\r\n\r\n";
-
-    SendPacket(request.c_str());
+    std::string request = "GET "+url.path()+" HTTP/1.1\r\n";
+    request+="Host: "+url.host()+":443\r\n";
+    //request+="User-Agent: Sylvan-Materials/cifio\r\n";
+    request+="Connection: keep-alive\r\n";
+    request+="Accept: */*\r\n";
+    request+="\r\n";
+    //std::cout<<"request "<<request<<std::endl;
+    if(SendPacket(request.c_str())<0){
+        std::cout<<"SendPacket <0"<<std::endl;
+    }
     std::stringstream ss;
-    RecvPacket(ss);
+    if(RecvPacket(ss)<0){
+        std::cout<<"RecvPacket <0"<<std::endl;
+    }
     std::string content=ss.str();
     std::string::size_type n=content.find("\r\n\r\n");
     if(n!=std::string::npos){
+    n+=4;
+    std::string::size_type breakIndex=content.find("\r\n", n);
+//    std::cout<<"header |"<<content.substr(0, breakIndex+2)<<"|"<<std::endl;
     ss.str("");
-    ss<<content.substr(n+4);
+    size_t chunkSize=0;
+    do{
+        chunkSize=0;
+        size_t shifter=0;
+        for(size_t index=breakIndex-1;index>=n;index--){
+            size_t digit=(content.at(index)>='A') ? content.at(index)-'A'+10: content.at(index)-'0';
+            if(content.at(index)>='a')digit=content.at(index)-'a'+10;
+            chunkSize+=(digit<<shifter);
+            shifter+=4;
+        }
+        n=(breakIndex+2+chunkSize+2);
+        if(chunkSize>0 && n<content.size()){
+            ss<<content.substr(breakIndex+2, chunkSize);
+            breakIndex=content.find("\r\n", n);
+        }
+    }while(chunkSize>0 && n<content.size());
+//    std::cout<<"content |"<<ss.str()<<"|"<<std::endl;
     }
     apply(ss);
     return true;
