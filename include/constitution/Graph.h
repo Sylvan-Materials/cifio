@@ -5,9 +5,12 @@
 #include <memory>
 #include <sstream>
 #include <optional>
+#include <tuple>
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
+
+#include "linear/Vector.h"
 
 #include "forcefield/bond_type.h"
 
@@ -311,6 +314,8 @@ namespace sylvanmats::constitution {
             bool componentHasAlternateIds(lemon::ListGraph::Node& n);
             std::vector<std::string> getComponentAlternateIds(lemon::ListGraph::Node& n);
             double getComponentMaximumDiameter(lemon::ListGraph::Node& n);
+            sylvanmats::linear::Vector3d getComponentCentroid(lemon::ListGraph::Node& n);
+            std::tuple<sylvanmats::linear::Vector3d, sylvanmats::linear::Vector3d> getLimitingCorners();
             unsigned int getNumberOfRings(){return currRing;};
             unsigned int countFlexibles(){
                 unsigned int ret=0;

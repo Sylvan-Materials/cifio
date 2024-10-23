@@ -1,38 +1,54 @@
 #pragma once
 
 #include <vector>
+#include <type_traits>
 
 #include "linear/Vector.h"
 
+template<class T>
+typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+   almost_equal(T x, T y, T const abs_relative_error)
+{
+  return 2 * std::abs(x - y) <= abs_relative_error * std::abs(x + y);
+}
+
 namespace sylvanmats::space {
-    enum DIRECIONS{
-        TLF,    // top left front
-        TRF,    // top right front
-        BRF,    // bottom right front
-        BLF,    // bottom left front
-        TLB,    // top left back
-        TRB,    // top right back
-        BRB,    // bottom right back
-        BLB     // bottom left back        
+    enum DIRECIONS : int{
+        UNKNOWN=-1, //not set yet
+        TLF,        // top left front
+        TRF,        // top right front
+        BRF,        // bottom right front
+        BLF,        // bottom left front
+        TLB,        // top left back
+        TRB,        // top right back
+        BRB,        // bottom right back
+        BLB         // bottom left back        
     };
-    
+    /**
+    * https://iq.opengenus.org/octree/
+    **/
     class Octree {
     private:
-        sylvanmats::linear::Vector3d point;
+        std::shared_ptr<sylvanmats::linear::Vector3i> point;
+        sylvanmats::linear::Vector3i top_left_front, bottom_right_back;   // represents the space.
+        bool empty = false;
+        bool regional = false;
         
-        sylvanmats::linear::Vector3d top_left_front, bottom_right_back;   // represents the space.
         std::vector<std::shared_ptr<Octree>> children;
         
     public:
-        Octree() = default;
-        Octree(double x, double y, double z) : point (sylvanmats::linear::Vector3d(x, y, z)) {
+        Octree() : point (new sylvanmats::linear::Vector3i(-1, -1, -1)), empty (true) {
         };
-        Octree(double x1, double y1, double z1, double x2, double y2, double z2){
+        Octree(int x, int y, int z) : point (new sylvanmats::linear::Vector3i(x, y, z)), empty (false) {
+        };
+        Octree(int x1, int y1, int z1, int x2, int y2, int z2) : Octree(sylvanmats::linear::Vector3i(x1, y1, z1), sylvanmats::linear::Vector3i(x2, y2, z2)) {
             if(x2 < x1 || y2 < y1 || z2 < z1)
                 return;
-            point =  sylvanmats::linear::Vector3d{};
-            top_left_front = sylvanmats::linear::Vector3d(x1, y1, z1);
-            bottom_right_back = sylvanmats::linear::Vector3d(x2, y2, z2);
+         };
+        Octree(sylvanmats::linear::Vector3i top_left_front, sylvanmats::linear::Vector3i bottom_right_back) : top_left_front (top_left_front), bottom_right_back (bottom_right_back), empty (false) {
+            if(bottom_right_back.x() < top_left_front.x() || bottom_right_back.y() < top_left_front.y() || bottom_right_back.z() < top_left_front.z())
+                return;
+            regional = true;
             children.assign(8, std::shared_ptr<Octree>(new Octree()));
             for(int i = TLF; i <= BLB; ++i)
                 children[i].reset(new Octree());
@@ -40,15 +56,22 @@ namespace sylvanmats::space {
         Octree(const Octree& orig) = delete;
         virtual ~Octree()= default;
         
-    void insert(double x, double y, double z){
+    void insert(int x, int y, int z){
+        // If the point already exists in the octree
+        if (find(x, y, z)) {
+            std::cout << "Point already exist in the tree" << std::endl;
+            return;
+        }
         if(x < top_left_front.x() || x > bottom_right_back.x()
             || y < top_left_front.y() || y > bottom_right_back.y()
-            || z < top_left_front.z() || z > bottom_right_back.z())
+            || z < top_left_front.z() || z > bottom_right_back.z()){
+            std::cout << "Point is out of bound" << std::endl;
             return;
-        double midx = (top_left_front.x() + bottom_right_back.x())/2.0,
+        }
+        int midx = (top_left_front.x() + bottom_right_back.x())/2.0,
             midy = (top_left_front.y() + bottom_right_back.y())/2.0,
             midz = (top_left_front.z() + bottom_right_back.z())/2.0;
-        int pos = -1;
+        DIRECIONS pos = UNKNOWN;
         if(x <= midx){
             if(y <= midy){
                 if(z <= midz)
@@ -78,21 +101,21 @@ namespace sylvanmats::space {
             }
         }
 
-        if(children[pos]->point == sylvanmats::linear::Vector3d{}){
+        if(children[pos]->regional){
            // if region node
             children[pos]->insert(x, y, z);
             return;
         }
-        else if(children[pos]->point.x() == -1){
+        else if(children[pos]->empty){
             // if empty node
             children[pos].reset(new Octree(x, y, z));
             return;
         }
         else{
-            double x_ = children[pos]->point.x(),
-                y_ = children[pos]->point.y(),
-                z_ = children[pos]->point.z();
-            children[pos].reset(new Octree());
+            int x_ = children[pos]->point->x(),
+                y_ = children[pos]->point->y(),
+                z_ = children[pos]->point->z();
+            children[pos].reset();
             if(pos == TLF){
                 children[pos].reset(new Octree(top_left_front.x(), top_left_front.y(), top_left_front.z(),
                                         midx, midy, midz));
@@ -130,15 +153,15 @@ namespace sylvanmats::space {
         }
     }
     
-    bool find(double x, double y, double z){
+    bool find(int x, int y, int z){
         if(x < top_left_front.x() || x > bottom_right_back.x()
             || y < top_left_front.y() || y > bottom_right_back.y()
             || z < top_left_front.z() || z > bottom_right_back.z())
             return false;
-        double midx = (top_left_front.x() + bottom_right_back.x())/2.0,
+        int midx = (top_left_front.x() + bottom_right_back.x())/2.0,
             midy = (top_left_front.y() + bottom_right_back.y())/2.0,
             midz = (top_left_front.z() + bottom_right_back.z())/2.0;
-        int pos = -1;
+        DIRECIONS pos = UNKNOWN;
         if(x <= midx){
             if(y <= midy){
                 if(z <= midz)
@@ -167,20 +190,21 @@ namespace sylvanmats::space {
                     pos = BRB;
             }
         }
-        if(children[pos]->point == sylvanmats::linear::Vector3d{}){
+        if(children[pos]->regional){
            // if region node
             return children[pos]->find(x, y, z);
         }
-        else if(children[pos]->point.x() == -1){
+        else if(children[pos]->empty){
             // if empty node
             return false;
         }
         else{
-            if(x == children[pos]->point.x() && y == children[pos]->point.y()
-                && z == children[pos]->point.z())
+        //std::cout<<"tol "<<x<<" "<<y<<" "<<z<<" "<<children[pos]->point->x()<<" "<<children[pos]->point->y()<<" "<<children[pos]->point->z()<<std::endl;
+            if(x==children[pos]->point->x() && y==children[pos]->point->y()
+                && z==children[pos]->point->z())
                 return true;
         }
-        return 0;
+        return false;
     }
     };
 

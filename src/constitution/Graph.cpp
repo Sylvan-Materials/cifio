@@ -185,5 +185,40 @@ namespace sylvanmats::constitution {
         }
         componentProperties[n].maximum_diameter=dia;
         return dia;
-    };
+    }
+
+    sylvanmats::linear::Vector3d Graph::getComponentCentroid(lemon::ListGraph::Node& n){
+        sylvanmats::linear::Vector3d centroid(0.0, 0.0, 0.0);//=componentProperties[n].maximum_diameter;
+        //if(dia!=0.0) return dia;
+        size_t count=0;
+        for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemItA(componentNavigation, n); itemItA!=lemon::INVALID; ++itemItA){
+            centroid+=sylvanmats::linear::Vector3d(atomSites[itemItA].Cartn_x, atomSites[itemItA].Cartn_y, atomSites[itemItA].Cartn_z);
+            count++;
+        }
+        if(count>0)centroid/=count;
+        return centroid;
+    }
+
+    std::tuple<sylvanmats::linear::Vector3d, sylvanmats::linear::Vector3d> Graph::getLimitingCorners(){
+        sylvanmats::linear::Vector3d tlf;
+        sylvanmats::linear::Vector3d brb;
+        bool firstTime=true;
+        for(lemon::ListGraph::NodeIt nR(componentGraph); nR!=lemon::INVALID; ++nR){
+            sylvanmats::linear::Vector3d&& centroid=getComponentCentroid(nR);
+            if(firstTime){
+                tlf=centroid;
+                brb=centroid;
+                firstTime=false;
+            }
+            else{
+                if(tlf[0]>centroid[0])tlf[0]=centroid[0];
+                if(tlf[1]>centroid[1])tlf[1]=centroid[1];
+                if(tlf[2]>centroid[2])tlf[2]=centroid[2];
+                if(brb[0]<centroid[0])brb[0]=centroid[0];
+                if(brb[1]<centroid[1])brb[1]=centroid[1];
+                if(brb[2]<centroid[2])brb[2]=centroid[2];
+            }
+        }
+        return std::make_tuple(tlf, brb);
+    }
 }

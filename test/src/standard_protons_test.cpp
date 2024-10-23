@@ -341,7 +341,7 @@ TEST_CASE("test putting standard protons on 1Q8H"){
             
             //vertexLoop.insert(vertexLoop.begin(), std::make_tuple(v(0), v(1), v(2)));
         }
-        std::string&& content2 = cifPublisher.render();
+        std::string&& content2 = objPublisher.render();
         std::ofstream ofs2("test.obj");
         ofs2<<content2<<std::endl;
     }

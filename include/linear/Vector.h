@@ -209,12 +209,6 @@ namespace sylvanmats::linear{
         }
     };
 
-    using Vector2d = Vector<double, 2>;
-    using Vector2l = Vector<long double, 2>;
-
-    using Vector3d = Vector<double, 3>;
-    using Vector3l = Vector<long double, 3>;
-
     template<std::numerical T, signed long long R>
     Vector<T, R> operator + (const typename Vector<T, R>::value_type& s, const Vector<T, R>& v){
         Vector<T, R> v2(v);
@@ -286,6 +280,14 @@ namespace sylvanmats::linear{
                 /*co_yield*/ v2[i]=(lv[i]/v[i]);
         return v2;
     };
+
+    using Vector2i = Vector<int, 2>;
+    using Vector2d = Vector<double, 2>;
+    using Vector2l = Vector<long double, 2>;
+
+    using Vector3i = Vector<int, 3>;
+    using Vector3d = Vector<double, 3>;
+    using Vector3l = Vector<long double, 3>;
 
 }
 
