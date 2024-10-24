@@ -91,6 +91,7 @@ namespace sylvanmats::constitution {
         C_TERMINAL,
         MONOMER
     };
+
     template<typename T>
     struct _pdbx_poly_seq_scheme {
         std::string asym_id;
@@ -110,6 +111,10 @@ namespace sylvanmats::constitution {
         T maximum_diameter=0.0; 
     };
 
+    template<typename T>
+    struct _pdbx_nonpoly_scheme : public _pdbx_poly_seq_scheme<T> {
+    };
+
     enum STRUCT_CONN_TYPE{
         COVALE,          //'covalent bond'
         DISULF,           //'disulfide bridge'
@@ -121,6 +126,14 @@ namespace sylvanmats::constitution {
         COVALE_BASE,      //'covalent modification of a nucleotide base'
         COVALE_SUGAR,     //'covalent modification of a nucleotide sugar'
         COVALE_PHOSPHATE  //'covalent modification of a nucleotide phosphate'
+    };
+
+    template<typename T>
+    struct _entity_poly_seq {
+        long long entity_id;
+        long long num;
+        std::string mon_id;
+        char8_t hetero;
     };
 
     template<typename T>
@@ -266,6 +279,7 @@ namespace sylvanmats::constitution {
             lemon::ListGraph::EdgeMap<STRUCT_CONN_TYPE> structConnType;
             lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node> componentNavigation;
             std::vector<_struct_conn<double>> structureConnections;
+            std::vector<_entity_poly_seq<double>> residueSequence;
             _atom_sites<double> fractionalAtomSites;
 
             Graph() : atomSites(*this), compBond(*this), componentProperties(componentGraph), structConnType(componentGraph), componentNavigation(*this) {
@@ -306,6 +320,7 @@ namespace sylvanmats::constitution {
             };
             _atom_sites<double>& getFractionalAtomSites(){ return fractionalAtomSites;};
             std::vector<_struct_conn<double>>& getStructureConnections(){return structureConnections;};
+            std::vector<_entity_poly_seq<double>>& getResidueSequence(){return residueSequence;};
 
             void identifyFusedSystems(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph, std::function<void(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph)> apply);
             void identifyRings(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subGraph);

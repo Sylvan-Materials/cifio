@@ -828,6 +828,40 @@ namespace sylvanmats::constitution {
                         }
                     }
                 }
+                once=true;
+                std::unordered_map<size_t, std::string> tagSequenceLabels;
+                columnCount=0;
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return tag->getText().rfind("\n_entity_poly_seq.", 0) == 0; })){
+                   tagSequenceLabels[columnCount]=t->getText().substr(18);
+                   columnCount++;
+                }
+                for(sylvanmats::CIFParser::TagContext* t: tags | std::views::filter([&once](sylvanmats::CIFParser::TagContext* tag){ return once && tag->getText().rfind("\n_entity_poly_seq.", 0) == 0; })){
+                    once=false;
+                    columnCount=0;
+                    graph.residueSequence.push_back(_entity_poly_seq<double>());
+                    std::vector<sylvanmats::CIFParser::ValueContext *> values=r->loopBody()->value();
+                    for(unsigned int valueIndex=0;valueIndex<values.size();valueIndex++){
+                         switch(tagSequenceMap[tagSequenceLabels[columnCount]]){
+                            case offsetof(sylvanmats::constitution::_entity_poly_seq<double>, entity_id):
+                                graph.residueSequence.back().entity_id=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case offsetof(sylvanmats::constitution::_entity_poly_seq<double>, num):
+                                graph.residueSequence.back().num=std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                            case offsetof(sylvanmats::constitution::_entity_poly_seq<double>, mon_id):
+                                graph.residueSequence.back().mon_id.assign(values[valueIndex]->getText());
+                            break;
+                            case offsetof(sylvanmats::constitution::_entity_poly_seq<double>, hetero):
+                                graph.residueSequence.back().hetero=(short)std::strtol(values[valueIndex]->getText().c_str(), nullptr, 10);
+                            break;
+                        }
+                        columnCount++;
+                        if((valueIndex % r->loopHeader()->tag().size() == r->loopHeader()->tag().size()-1) || valueIndex==values.size()-1){
+                            columnCount=0;
+                            if(valueIndex<values.size()-1)graph.residueSequence.push_back(_entity_poly_seq<double>());
+                        }
+                    }
+                }
             }
         }
         apply(graph);

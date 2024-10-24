@@ -36,8 +36,8 @@ namespace sylvanmats::linear{
         Matrix() : std::valarray<T>(0.0, R * C) {};
         Matrix(T a, unsigned int s) : std::valarray<T>(a, s), _rows (s), _cols (1) {};
         Matrix(T a, unsigned int s, unsigned int t) : std::valarray<T>(a, s*t), _rows (s), _cols (t) {};
-        Matrix(T a, T b) : std::valarray<T>(0.0, R * C) {operator[](0)=a;operator[](1)=b;};
-        Matrix(T a, T b, T c) : std::valarray<T>(0.0, R * C) {operator[](0)=a;operator[](1)=b;operator[](2)=c;};
+        //Matrix(T a, T b) : std::valarray<T>(0.0, R * C) {operator[](0)=a;operator[](1)=b;};
+        //Matrix(T a, T b, T c) : std::valarray<T>(0.0, R * C) {operator[](0)=a;operator[](1)=b;operator[](2)=c;};
         Matrix(T* a, unsigned int s) : std::valarray<T>(s), _rows (s), _cols (1) {
             for(unsigned int i=0;i<s;i++)
                     /*co_yield*/ operator[](i)=a[i];
@@ -137,6 +137,9 @@ namespace sylvanmats::linear{
         };
     };
 
+    using Matrix3i = Matrix<int, 3, 3>;
     using Matrix3d = Matrix<double, 3, 3>;
     using Matrix3l = Matrix<long double, 3, 3>;
+
+    using MatrixXXi = Matrix<int, -1, -1>;
 }

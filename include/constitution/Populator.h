@@ -91,6 +91,12 @@ namespace sylvanmats::constitution {
                                                                 {"vector[3]", (2*sizeof(double)+offsetof(sylvanmats::constitution::_pdbx_struct_oper_list<double>, vector))}
                                                              };
 
+    std::unordered_map<std::string, size_t> tagSequenceMap = {  {"entity_id", offsetof(sylvanmats::constitution::_entity_poly_seq<double>, entity_id)},
+                                                                    {"num", offsetof(sylvanmats::constitution::_entity_poly_seq<double>, num)},
+                                                                    {"mon_id", offsetof(sylvanmats::constitution::_entity_poly_seq<double>, mon_id)},
+                                                                    {"hetero", offsetof(sylvanmats::constitution::_entity_poly_seq<double>, hetero)}
+                                                                };
+
     std::unordered_map<std::string, size_t> tagConnectionsMap = {  {"id ", offsetof(sylvanmats::constitution::_struct_conn<double>, id)},
                                                                     {"conn_type_id ", offsetof(sylvanmats::constitution::_struct_conn<double>, conn_type_id)},
                                                                     {"pdbx_leaving_atom_flag ", offsetof(sylvanmats::constitution::_struct_conn<double>, pdbx_leaving_atom_flag)},
