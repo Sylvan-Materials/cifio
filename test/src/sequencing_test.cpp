@@ -89,14 +89,19 @@ TEST_CASE("test 8vo3"){
         sequenceA.append(oneLetter[(*it).mon_id]);
     }
     std::string sequenceB{};
+    std::string referenceSequenceB{};
+    std::string dash="-";
     for(lemon::ListGraph::NodeIt nR(graph.componentGraph); nR!=lemon::INVALID; ++nR){
         if(graph.componentProperties[nR].auth_mon_id.compare("?")!=0 && oneLetter.count(graph.componentProperties[nR].mon_id)>0){
         std::string ol=oneLetter[graph.componentProperties[nR].mon_id];
         //std::cout<<" "<<graph.componentProperties[nR].mon_id<<" "<<ol<<std::endl;
         sequenceB.insert(sequenceB.begin(), ol.begin(), ol.end());
+        referenceSequenceB.insert(referenceSequenceB.begin(), ol.begin(), ol.end());
         }
+        else referenceSequenceB.insert(referenceSequenceB.begin(), dash.begin(), dash.end());
     }
     std::cout<<"A "<<sequenceA<<std::endl;
+    std::cout<<"R "<<referenceSequenceB<<std::endl;
     std::cout<<"B "<<sequenceB<<std::endl;
     sylvanmats::alignment::SmithWatermanAligner smithWatermanAligner(sylvanmats::alignment::BLOSUM62);
     auto&& [sequenceI, sequenceJ] =smithWatermanAligner(sequenceA, sequenceB);
