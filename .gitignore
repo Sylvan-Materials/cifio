@@ -4,7 +4,7 @@ cpp_modules/
 test/examples/
 test/*.json
 /tmp/
-/caching/
+/cache/
 /db/
 /documents/*.aux
 /documents/*.log
