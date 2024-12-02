@@ -15,9 +15,8 @@
 #include "zlib.h"
 #include "mio/mmap.hpp"
 
-#include "antlr4-runtime.h"
-#include "reading/gz/GZReader.h"
-#include "reading/tcp/TCPReader.h"
+#include "io/json/Binder.h"
+
 #include "asynchronous/Generator.h"
 
 #include "standards/ComponentStandards.h"
@@ -35,7 +34,9 @@
 #include "publishing/jgf/JGFPublisher.h"
 #include "publishing/st/MOL2Publisher.h"
 
-#include "io/json/Binder.h"
+#include "antlr4-runtime.h"
+#include "reading/gz/GZReader.h"
+#include "reading/tcp/TCPReader.h"
 
 // row-major
 template<std::floating_point T>

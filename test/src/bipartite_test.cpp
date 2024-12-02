@@ -11,9 +11,6 @@
 #include <ranges>
 #include <cmath>
 
-#include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 #include "constitution/Graph.h"
@@ -26,6 +23,10 @@
 #include "surface/BipartiteSurface.h"
 
 #include "io/json/Binder.h"
+
+#include "antlr4-runtime.h"
+#include "parsing/CIFLexer.h"
+#include "parsing/CIFParser.h"
 
 TEST_SUITE("bipartite"){
 

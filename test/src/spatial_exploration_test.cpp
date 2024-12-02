@@ -13,9 +13,6 @@
 #include "algebra/geometric/Bivector.h"
 #include "algebra/geometric/Rotor.h"
 
-#include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 #include "publishing/st/CIFPublisher.h"
@@ -26,6 +23,10 @@
 
 #include "standards/Protons.h"
 #include "space/Octree.h"
+
+#include "antlr4-runtime.h"
+#include "parsing/CIFLexer.h"
+#include "parsing/CIFParser.h"
 
 TEST_SUITE("space"){
 

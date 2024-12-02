@@ -1,7 +1,7 @@
 #include <sstream>
 
-#include "forcefield/OpenFF.h"
 #include "PeriodicTable.h"
+#include "forcefield/OpenFF.h"
 #include "linear/Vector.h"
 
 #include "lemon/list_graph.h"

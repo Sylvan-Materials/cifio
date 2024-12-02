@@ -1,5 +1,6 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#define DOCTEST_CONFIG_TREAT_CHAR_STAR_AS_STRING
 #include <doctest/doctest.h>
 
 #include <fstream>
@@ -19,7 +20,6 @@
 #include "zlib.h"
 #include "mio/mmap.hpp"
 
-#include "antlr4-runtime.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
@@ -41,14 +41,14 @@
 
 #include "lemon/vf2.h"
 
-#include "utils/JVMSingleton.h"
+#include "antlr4-runtime.h"
 
 TEST_SUITE("main"){
 
 
 TEST_CASE("test jvm singleton") {
 
-    sylvanmats::utils::JVMSingleton* jvmSingleton=sylvanmats::utils::JVMSingleton::getInstance();
+    /*sylvanmats::utils::JVMSingleton* jvmSingleton=sylvanmats::utils::JVMSingleton::getInstance();
     JNIEnv *jniEnv=jvmSingleton->getEnv();
     CHECK_NE(jniEnv, nullptr);
     jclass jcls = jniEnv->FindClass("org/stringtemplate/v4/ST");
@@ -62,7 +62,7 @@ TEST_CASE("test jvm singleton") {
        if (constructorId == nullptr) {
           jniEnv->ExceptionDescribe();
        }
-    }
+    }*/
     std::filesystem::path path="../templates/cif";
     sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
     cifPublisher.setEntryID("3SGS");

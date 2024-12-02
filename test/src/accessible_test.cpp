@@ -14,9 +14,6 @@
 #include "algebra/geometric/Bivector.h"
 #include "algebra/geometric/Rotor.h"
 
-#include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 #include "constitution/Graph.h"
@@ -25,6 +22,10 @@
 #include "publishing/st/SVGPublisher.h"
 
 #include "surface/Accessible.h"
+
+#include "antlr4-runtime.h"
+#include "parsing/CIFLexer.h"
+#include "parsing/CIFParser.h"
 
 TEST_SUITE("accessible"){
 

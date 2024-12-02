@@ -2,13 +2,13 @@
 #include <ranges>
 
 #include "constitution/MOL2Populator.h"
+#include "standards/ComponentStandards.h"
 
 #include "antlr4-runtime.h"
 #include "parsing/MOL2Lexer.h"
 #include "parsing/MOL2Parser.h"
 #include "reading/gz/GZReader.h"
 
-#include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 
 namespace sylvanmats::constitution {

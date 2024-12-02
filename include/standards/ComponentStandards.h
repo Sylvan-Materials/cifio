@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <stdio.h>
 #include <memory>
 #include <fstream>
@@ -15,10 +16,6 @@
 #include "zlib.h"
 
 #include "reading/gz/GZReader.h"
-
-#include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
 
 #include <multi_index_container.hpp>
 #include <multi_index/sequenced_index.hpp>

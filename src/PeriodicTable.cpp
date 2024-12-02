@@ -28,7 +28,7 @@ namespace sylvanmats{
         element_set_by_symbol::iterator it=symbolIndex.find(symbol);
         if(it==symbolIndex.end()){
             sylvanmats::io::json::Path jpName;
-            jpName["elements"]["*"]["symbol"]==symbol;
+            jpName["elements"]["*"]["*"]["symbol"]==symbol;
             size_t currentSetSize=elementSet.size();
             jsonBinder(jpName, [&](std::string_view& key, std::any& v){
 //                std::cout<<"key "<<key<<std::endl;

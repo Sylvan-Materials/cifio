@@ -27,7 +27,7 @@ export LD_LIBRARY_PATH=`pwd`/cpp_modules/urlcpp:`pwd`/cpp_modules/libgit2/dist/l
 Generate the c++ lexer/parser code once from the grammars:
 
 ```
-export CLASSPATH=`pwd`/src:`pwd`/build/src:`pwd`/cpp_modules/antlr4/tool/target/antlr4-4.13.2-SNAPSHOT-complete.jar
+export CLASSPATH=`pwd`/src:`pwd`/build/src:`pwd`/cpp_modules/antlr4/tool/target/antlr4-4.13.3-SNAPSHOT-complete.jar
 cd grammars
 java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -encoding utf-8 -o ../src/parsing -lib ../grammars -package sylvanmats CIFLexer.g4 CIFParser.g4
 java -Xmx500M -cp $CLASSPATH org.antlr.v4.Tool -Dlanguage=Cpp -encoding utf-8 -o ../src/parsing -lib ../grammars -package sylvanmats MOL2Lexer.g4 MOL2Parser.g4
@@ -40,12 +40,14 @@ cd ..
 ```
 cnpm  install
 
+# script for building dependcies; run once
 cnpm urlcpp
 cnpm zlib
 cnpm ssl
 cnpm antlr4
 cnpm lemon
-cnpm fmt
+cnpm json
+cnpm xml
 
 cnpm lib
 
@@ -55,26 +57,9 @@ cnpm test
 
 ```
 
-### Or yarn building if you prefer
+### Unit Tests 
 
-```
-yarn config set PATH $PATH
-yarn config set LD_LIBRARY_PATH $LD_LIBRARY_PATH
-yarn config set CIFIO_DB_LOCATION `pwd`/db
-yarn config set JAVA_HOME ${JAVA_HOME}
-yarn config set LUA_HOME ${LUA_HOME}
-yarn install
-
-#run once
-yarn urlcpp
-#run once
-yarn zlib
-#run once
-yarn ssl
-
-yarn lib
-yarn test
-```
+Under test is where the bulk of usage is. Numerous items are checking on new ways to use c++
 
 ## Contact
 

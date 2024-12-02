@@ -15,17 +15,22 @@ namespace sylvanmats::standards{
                 }
                 return true;
             }*/
-            sylvanmats::io::json::Path jpStart(comp_ids[index].c_str());
-            jpStart["start"];
-            sylvanmats::io::json::Path jpEnd(comp_ids[index].c_str());
-            jpEnd["end"];
+            sylvanmats::io::json::Path jpName(comp_ids[index].c_str());
 //            std::cout<<"jpStart "<<jpStart<<" jpEnd "<<jpEnd<<" "<<jsonBinder.countObjects()<<std::endl;
             try{
-        jsonBinder(jpStart, [&](std::any& v){
-            unsigned int start=std::any_cast<long>(v);
-        jsonBinder(jpEnd, [&](std::any& v){
-            unsigned int end=std::any_cast<long>(v);
-//std::cout<<"start "<<start<<" end "<<end<<" "<<(end-start)<<std::endl;
+        size_t start=0;
+        size_t end=0;
+        size_t count=0;
+        jsonBinder(jpName, [&start, &end, &count](std::string_view& key, std::any& v){
+            if(key.compare("start")==0){
+                start=std::any_cast<long>(v);
+            }
+            else if(key.compare("end")==0){
+                end=std::any_cast<long>(v);
+            }
+            count++;
+        });
+//std::cout<<"start "<<start<<" end "<<end<<" "<<(end-start)<<" "<<count<<std::endl;
             if((end-start)<=0)return false;
             mio::mmap_source mmap2nd(path.string(), start, end-start+1);
             std::string content=std::string(mmap2nd.begin(), mmap2nd.end());
@@ -141,10 +146,6 @@ namespace sylvanmats::standards{
             }
             }
             mmap2nd.unmap();
-            return true;
-        });
-            return true;
-        });
             
             return ret;
             }

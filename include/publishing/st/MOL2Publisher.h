@@ -2,18 +2,14 @@
 
 #include "publishing/st/Publisher.h"
 
-#define FMT_HEADER_ONLY
-#include "fmt/format.h"
-#include "fmt/ranges.h"
-
 template <>
 struct fmt::formatter<std::vector<std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
         for (int i= 0; i < v.size(); ++i){
             size_t i0=std::get<0>((std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>)v[i]);
             std::string i1=std::get<1>((std::tuple<size_t, std::string, double, double, double, std::string, long long, std::string, double>)v[i]);
@@ -33,12 +29,12 @@ struct fmt::formatter<std::vector<std::tuple<size_t, std::string, double, double
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<size_t, size_t, size_t, std::string>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<size_t, size_t, size_t, std::string>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<size_t, size_t, size_t, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
         for (int i= 0; i < v.size(); ++i){
             size_t i0=std::get<0>((std::tuple<size_t, size_t, size_t, std::string>)v[i]);
             size_t i1=std::get<1>((std::tuple<size_t, size_t, size_t, std::string>)v[i]);
@@ -53,12 +49,12 @@ struct fmt::formatter<std::vector<std::tuple<size_t, size_t, size_t, std::string
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<size_t, std::string, size_t, std::string, size_t, std::string, std::string, size_t, std::string>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<size_t, std::string, size_t, std::string, size_t, std::string, std::string, size_t, std::string>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<size_t, std::string, size_t, std::string, size_t, std::string, std::string, size_t, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};

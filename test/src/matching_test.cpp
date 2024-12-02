@@ -12,14 +12,11 @@
 #include "zlib.h"
 #include "mio/mmap.hpp"
 
-#include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
+#include "PeriodicTable.h"
+#include "standards/ComponentStandards.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
-#include "PeriodicTable.h"
-#include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "standards/Fragments.h"
 #include "constitution/Graph.h"
@@ -30,6 +27,10 @@
 #include "lattice/Populator.h"
 #include "density/ccp4/MapInput.h"
 #include "publishing/jgf/JGFPublisher.h"
+
+#include "antlr4-runtime.h"
+#include "parsing/CIFLexer.h"
+#include "parsing/CIFParser.h"
 
 #include "io/json/Binder.h"
 

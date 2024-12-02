@@ -24,7 +24,7 @@ namespace sylvanmats::publishing::st{
       auto cArg=fmt::arg("circles", circles);
       auto vArg=fmt::arg("arcs", arcs);
       auto tArg=fmt::arg("text_list", labelText);
-        std::string ret=fmt::vformat(svgTemplate, fmt::make_format_args(hArg, wArg, oxArg, oyArg, cArg, vArg, tArg));
+        std::string ret=render(svgTemplate, fmt::make_format_args(hArg, wArg, oxArg, oyArg, cArg, vArg, tArg));
         return ret;
     }
     

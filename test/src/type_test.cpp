@@ -12,8 +12,6 @@
 #include <typeinfo>
 #include <cxxabi.h>
 
-#include "antlr4-runtime.h"
-
 #include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
@@ -24,6 +22,8 @@
 
 #include "io/xml/Path.h"
 #include "io/xml/Binder.h"
+
+#include "antlr4-runtime.h"
 
 TEST_SUITE("type"){
 

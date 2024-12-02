@@ -4,13 +4,9 @@
 
 #include "linear/Vector.h"
 
-#define FMT_HEADER_ONLY
-#include "fmt/format.h"
-#include "fmt/ranges.h"
-
 template <>
 struct fmt::formatter<std::vector<sylvanmats::linear::Vector3d>>{
-    auto parse(format_parse_context& ctx)
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
     {
         value_format= "{:";        
         for (auto it= std::begin(ctx); it != std::end(ctx); ++it) {
@@ -26,7 +22,7 @@ struct fmt::formatter<std::vector<sylvanmats::linear::Vector3d>>{
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<sylvanmats::linear::Vector3d>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<sylvanmats::linear::Vector3d>& v, FormatContext& ctx) const -> decltype(ctx.out()){
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};
@@ -65,7 +61,7 @@ struct fmt::formatter<std::vector<sylvanmats::linear::Vector3d>>{
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
 //    auto parse(format_parse_context& ctx)
@@ -84,7 +80,7 @@ struct fmt::formatter<std::vector<std::tuple<size_t, size_t, size_t, size_t, siz
 //    }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};

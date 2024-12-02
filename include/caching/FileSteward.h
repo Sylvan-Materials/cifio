@@ -13,6 +13,7 @@ namespace sylvanmats::caching {
         FileSteward() = default;
         FileSteward(const FileSteward& orig) = delete;
         virtual ~FileSteward() = default;
-        void operator ()(std::filesystem::path& path, std::function<void(std::string& content)> apply);
+        bool operator ()(std::filesystem::path& path, std::function<void(std::string& content)> apply);
+        void operator ()(std::filesystem::path& path, std::string& content);
     };
 }

@@ -1,7 +1,6 @@
-#include "reading/smirnoff/SMIRKSPatterns.h"
-
-#include "io/xml/Path.h"
 #include "io/xml/Binder.h"
+
+#include "reading/smirnoff/SMIRKSPatterns.h"
 
 #include <algorithm>
 

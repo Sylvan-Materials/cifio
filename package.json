@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "lemon": "hg+https://lemon.cs.elte.hu/hg/lemon-main",
+    "graph-v2": "stdgraph/graph-v2",
     "brigand": "edouarda/brigand",
     "json-thresher": "DataDriven-CAM/json-thresher",
     "xml-thresher":"DataDriven-CAM/xml-thresher",
@@ -26,13 +27,14 @@
     "clean": "make clean",
     "zlib": "cd cpp_modules/zlib && make clean && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install",
     "lemon": "cd cpp_modules/lemon && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install",
-    "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
+    "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/ope    nssl --openssldir=`pwd`/openssl/openssl && make && make install",
     "urlcpp": "cd cpp_modules/urlcpp && mkdir -p test && cnpm install && pwd && make -f Makefile all",
     "fmt": "cd cpp_modules/fmt && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../dist .. && make install",
-    "json": "cd cpp_modules/json-thresher && pwd && make -f Makefile all",
+    "json": "cd cpp_modules/json-thresher && pwd && MODULE_DIRECTORY=../ make -f Makefile all",
+    "xml": "cd cpp_modules/xml-thresher && pwd && MODULE_DIRECTORY=../ make -f Makefile all",
     "build": "cd test && pwd && which make && make -j 3 -f Makefile all",
-    "test": "cnpm build && cd test && pwd && ./test --test-suite='sequencing' ",
-    "lib": "which make && make -j 3 -f Makefile all"
+    "test": "cnpm build && cd test && pwd && ./test --test-case='test 8vo3' ",
+    "lib": "make -j 3 -f Makefile all"
   },
   "author": "rimmartin",
   "license": "MIT"

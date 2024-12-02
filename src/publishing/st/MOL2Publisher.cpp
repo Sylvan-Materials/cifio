@@ -23,7 +23,7 @@ namespace sylvanmats::publishing::st{
       auto asArg=fmt::arg("atom_sites", atom_sites);
       auto abArg=fmt::arg("atom_bonds", atom_bonds);
       auto sArg=fmt::arg("substructures", substructures);
-        std::string ret=fmt::vformat(mol2Template, fmt::make_format_args(idArg, hArg, wArg, nsArg, asArg, abArg, sArg));
+        std::string ret=render(mol2Template, fmt::make_format_args(idArg, hArg, wArg, nsArg, asArg, abArg, sArg));
         return ret;
     }
     

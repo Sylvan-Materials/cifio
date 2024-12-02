@@ -4,6 +4,7 @@
 #include <sstream>
 #include <filesystem>
 #include "publishing/st/TIKZPublisher.h"
+#include "fmt/args.h"
 
 
 namespace sylvanmats::publishing::st{
@@ -22,7 +23,7 @@ namespace sylvanmats::publishing::st{
       //auto mcArg=fmt::arg("material_count", material_count);
       auto cArg=fmt::arg("coordinates", vertices);
       auto dArg=fmt::arg("draws", indices);
-        std::string ret=fmt::vformat(tikzTemplate, fmt::make_format_args(cArg, dArg));
+        std::string ret=render(tikzTemplate, fmt::make_format_args(cArg, dArg));
         return ret;
     }
 

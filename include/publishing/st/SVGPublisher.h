@@ -7,18 +7,14 @@
 #include "publishing/st/Publisher.h"
 
 
-#define FMT_HEADER_ONLY
-#include "fmt/format.h"
-#include "fmt/ranges.h"
-
 template <>
 struct fmt::formatter<std::vector<std::tuple<double, double, double, std::string>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<double, double, double, std::string>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<double, double, double, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};
@@ -55,12 +51,12 @@ struct fmt::formatter<std::vector<std::tuple<double, double, double, std::string
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<double, double, double, double, double, double, double, int, int, std::string>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<double, double, double, double, double, double, double, int, int, std::string>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<double, double, double, double, double, double, double, int, int, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};
@@ -103,12 +99,12 @@ struct fmt::formatter<std::vector<std::tuple<double, double, double, double, dou
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<double, double, std::string, double>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<double, double, std::string, double>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<double, double, std::string, double>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};

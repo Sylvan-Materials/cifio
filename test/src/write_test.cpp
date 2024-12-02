@@ -12,7 +12,6 @@
 #include "zlib.h"
 #include "mio/mmap.hpp"
 
-#include "antlr4-runtime.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
@@ -30,6 +29,8 @@
 #include "publishing/jgf/JGFPublisher.h"
 #include "publishing/smiles/SMILESPublisher.h"
 #include "publishing/st/MOL2Publisher.h"
+
+#include "antlr4-runtime.h"
 
 TEST_SUITE("publishing"){
 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include "publishing/st/CIFPublisher.h"
+#include "fmt/args.h"
 
 
 namespace sylvanmats::publishing::st{
@@ -23,7 +24,7 @@ namespace sylvanmats::publishing::st{
       auto asArg=fmt::arg("atom_sites", atomSites);
       auto pArg=fmt::arg("polymers", polymers);
       auto npArg=fmt::arg("nonpolymers", nonpolymers);
-        std::string ret=fmt::vformat(cifTemplate, fmt::make_format_args(idArg, asArg, pArg, npArg));
+        std::string ret=render(cifTemplate, fmt::make_format_args(idArg, asArg, pArg, npArg));
         return ret;
     }
 }

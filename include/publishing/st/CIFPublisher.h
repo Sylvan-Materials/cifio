@@ -2,18 +2,14 @@
 
 #include "publishing/st/Publisher.h"
 
-#define FMT_HEADER_ONLY
-#include "fmt/format.h"
-#include "fmt/ranges.h"
-
 template <>
 struct fmt::formatter<std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
         for (int i= 0; i < v.size(); ++i){
             std::string i0=std::get<0>((std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>)v[i]);
             size_t i1=std::get<1>((std::tuple<std::string, unsigned long long, std::string, std::string, std::string, std::string, std::string, long long, long long, std::string, double, double, double, double, double, short, int, std::string, std::string, std::string, int>)v[i]);
@@ -45,12 +41,12 @@ struct fmt::formatter<std::vector<std::tuple<std::string, unsigned long long, st
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string, std::string>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string, std::string>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
         for (int i= 0; i < v.size(); ++i){
             std::string i0=std::get<0>((std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string, std::string>)v[i]);
             long long i1=std::get<1>((std::tuple<std::string, long long, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string, std::string>)v[i]);
@@ -73,12 +69,12 @@ struct fmt::formatter<std::vector<std::tuple<std::string, long long, long long, 
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<std::string, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string>>>{
-    auto parse(format_parse_context& ctx){
+    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
         return ctx.begin();
     }
     
      template <typename FormatContext>
-     auto format(const std::vector<std::tuple<std::string, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string>>& v, FormatContext& ctx) -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<std::string, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
         for (int i= 0; i < v.size(); ++i){
             std::string i0=std::get<0>((std::tuple<std::string, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string>)v[i]);
             long long i1=std::get<1>((std::tuple<std::string, long long, std::string, long long, long long, long long, std::string, std::string, std::string, std::string>)v[i]);

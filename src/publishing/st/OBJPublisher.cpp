@@ -4,6 +4,7 @@
 #include <sstream>
 #include <filesystem>
 #include "publishing/st/OBJPublisher.h"
+#include "fmt/args.h"
 
 
 namespace sylvanmats::publishing::st{
@@ -22,7 +23,7 @@ namespace sylvanmats::publishing::st{
       auto mcArg=fmt::arg("material_count", material_count);
       auto vArg=fmt::arg("vertices", vertices);
       auto iArg=fmt::arg("indices", indices);
-        std::string ret=fmt::vformat(objTemplate, fmt::make_format_args(vcArg, fcArg, mcArg, vArg, iArg));
+        std::string ret=render(objTemplate, fmt::make_format_args(vcArg, fcArg, mcArg, vArg, iArg));
         return ret;
     }
 

@@ -192,6 +192,7 @@ namespace sylvanmats::constitution {
         //if(dia!=0.0) return dia;
         size_t count=0;
         for(lemon::IterableValueMap<lemon::ListGraph, lemon::ListGraph::Node, lemon::ListGraph::Node>::ItemIt itemItA(componentNavigation, n); itemItA!=lemon::INVALID; ++itemItA){
+            std::cout<<" "<<(itemItA!=lemon::INVALID)<<" "<<componentProperties[n].mon_id<<std::endl;
             centroid+=sylvanmats::linear::Vector3d(atomSites[itemItA].Cartn_x, atomSites[itemItA].Cartn_y, atomSites[itemItA].Cartn_z);
             count++;
         }
