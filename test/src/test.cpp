@@ -20,6 +20,7 @@
 #include "zlib.h"
 #include "mio/mmap.hpp"
 
+#include "caching/FileSteward.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
@@ -46,28 +47,20 @@
 TEST_SUITE("main"){
 
 
-TEST_CASE("test jvm singleton") {
+TEST_CASE("test file steward") {
 
-    /*sylvanmats::utils::JVMSingleton* jvmSingleton=sylvanmats::utils::JVMSingleton::getInstance();
-    JNIEnv *jniEnv=jvmSingleton->getEnv();
-    CHECK_NE(jniEnv, nullptr);
-    jclass jcls = jniEnv->FindClass("org/stringtemplate/v4/ST");
-    CHECK_NE(jcls, nullptr);
-    if (jcls == nullptr) {
-       jniEnv->ExceptionDescribe();
-    }
-    if (jcls != nullptr) {
-       jmethodID constructorId = jniEnv->GetMethodID(jcls, "<init>", "(Ljava/lang/String;)V");
-        CHECK_NE(constructorId, nullptr);
-       if (constructorId == nullptr) {
-          jniEnv->ExceptionDescribe();
-       }
-    }*/
-    std::filesystem::path path="../templates/cif";
-    sylvanmats::publishing::st::CIFPublisher cifPublisher(path);
-    cifPublisher.setEntryID("3SGS");
-    std::string&& content = cifPublisher.render();
-    CHECK(!content.empty());
+    std::string comp_id="3sgs";
+    std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
+    sylvanmats::reading::TCPReader tcpReader;
+    CHECK(tcpReader(url, [&comp_id](std::istream& is){
+        std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+        CHECK(!content.empty());
+        sylvanmats::caching::FileSteward fileSteward;
+        std::filesystem::path filePath=comp_id+".cif";
+        CHECK(!fileSteward(filePath, [](std::string& c){}));
+        fileSteward(filePath, content);
+        CHECK(fileSteward(filePath, [](std::string& c){}));
+    }));
 }
 
 TEST_CASE("test periodic table") {
