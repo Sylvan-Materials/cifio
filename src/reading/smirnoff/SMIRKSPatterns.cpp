@@ -24,7 +24,7 @@ namespace sylvanmats::reading {
                     std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                     std::u16string&& lengthValue=xmlReaper.findAttribute(u"length", nv.angle_start, nv.angle_end);
                     std::u16string&& kValue=xmlReaper.findAttribute(u"k", nv.angle_start, nv.angle_end);
-                    //std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
+//                    std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
                     antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                     sylvanmats::SMIRKSLexer lexer(&input);
                     antlr4::CommonTokenStream tokens(&lexer);
@@ -67,7 +67,7 @@ namespace sylvanmats::reading {
                     std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                     std::u16string&& angleValue=xmlReaper.findAttribute(u"angle", nv.angle_start, nv.angle_end);
                     std::u16string&& kValue=xmlReaper.findAttribute(u"k", nv.angle_start, nv.angle_end);
-                    //std::cout<<"got angle smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(angleValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
+//                    std::cout<<"got angle smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(angleValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
                     antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                     sylvanmats::SMIRKSLexer lexer(&input);
                     antlr4::CommonTokenStream tokens(&lexer);
@@ -123,7 +123,7 @@ namespace sylvanmats::reading {
                     std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                     std::u16string&& epsilonValue=xmlReaper.findAttribute(u"epsilon", nv.angle_start, nv.angle_end);
                     std::u16string&& rmin_halfValue=xmlReaper.findAttribute(u"rmin_half", nv.angle_start, nv.angle_end);
-                    //std::cout<<"got smirks vdw "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
+//                    std::cout<<"got smirks vdw "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(epsilonValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(rmin_halfValue).c_str(), nullptr)<<std::endl;
                     antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                     sylvanmats::SMIRKSLexer lexer(&input);
                     antlr4::CommonTokenStream tokens(&lexer);
@@ -479,7 +479,7 @@ namespace sylvanmats::reading {
                     if((*itBN).wildcard || (*itBN).atomic_number==atomic_numberA)bnAN=true;
                 }
                 if(((anAN) && (bnBN)) || ((anBN) && (bnAN)))
-                ret=apply((*it).length, (*it).k, (*it));
+                    ret=apply((*it).length, (*it).k, (*it));
             }
         }
     }

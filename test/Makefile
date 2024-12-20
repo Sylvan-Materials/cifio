@@ -3,8 +3,10 @@ all: LDFLAGS= -fuse-ld=gold -L../ -L../cpp_modules/lemon/dist/lib -L$(JAVA_HOME)
 all:  test
 	$(CXX) $(LDFLAGS) -o test $(wildcard build/src/*.o) $(LUA_HOME)/install/lib/liblua.a 
 	
+test: build/src/matching_test.o build/src/symmetry_test.o build/src/dictionary_test.o build/src/write_test.o build/src/type_test.o build/src/bipartite_test.o build/src/standard_protons_test.o build/src/spatial_exploration_test.o build/src/accessible_test.o build/src/optimization_test.o build/src/sequencing_test.o build/src/construction_test.o build/src/matrix_test.o build/src/crystallography_test.o build/src/lattice_test.o build/src/test.o
+
 test: CXXFLAGS= -DNDEBUG -O3 -pthread -fopenmp -std=c++26 -I../include -I../cpp_modules/lemon/dist/include -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include  -I../src -I../cpp_modules/graph-v2/include -I../cpp_modules/json-thresher/include -I../cpp_modules/urlcpp -I../cpp_modules/doctest -I../cpp_modules/openssl/openssl/include -I../cpp_modules/mio/include -I../cpp_modules/zlib/dist/include -I../cpp_modules/fmt/dist/include -I../cpp_modules/antlr4/runtime/Cpp/run/include/antlr4-runtime -Wl,--allow-multiple-definition -MMD
-test: build/src/matching_test.o build/src/symmetry_test.o build/src/dictionary_test.o build/src/write_test.o build/src/type_test.o build/src/bipartite_test.o build/src/standard_protons_test.o build/src/spatial_exploration_test.o build/src/accessible_test.o build/src/optimization_test.o build/src/sequencing_test.o build/src/construction_test.o build/src/matrix_test.o build/src/crystallography_test.o build/src/lattice_test.o src/test.cpp
+build/src/test.o: src/test.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/test.o src/test.cpp
 

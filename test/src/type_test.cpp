@@ -12,12 +12,14 @@
 #include <typeinfo>
 #include <cxxabi.h>
 
+#include "caching/FileSteward.h"
 #include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
 #include "constitution/Selection.h"
 #include "constitution/MOL2Populator.h"
 #include "PeriodicTable.h"
+#include "reading/smirnoff/SMIRKSPatterns.h"
 #include "forcefield/OpenFF.h"
 
 #include "io/xml/Path.h"
@@ -87,6 +89,9 @@ TEST_CASE("test atom site struct"){
 }
 
 TEST_CASE("test reading SMIRNOFF offxml"){
+    sylvanmats::reading::SMIRKSPatterns smirksPatterns;
+    CHECK_EQ(smirksPatterns.getElectrostatics().cutoff, 9.0);
+    CHECK_EQ(smirksPatterns.getElectrostatics().method, "PME");
 //    sylvanmats::forcefield::OpenFF openFF;
 }
 
