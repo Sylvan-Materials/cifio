@@ -25,6 +25,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "make clean",
+    "clean-test": "cd test && make clean",
     "zlib": "cd cpp_modules/zlib && make clean && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install",
     "lemon": "cd cpp_modules/lemon && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install",
     "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/ope    nssl --openssldir=`pwd`/openssl/openssl && make && make install",

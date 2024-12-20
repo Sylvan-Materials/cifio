@@ -187,5 +187,6 @@ build/src/guile/guile-cifio.o: src/guile/guile-cifio.c
 	$(CXX) $(LDFLAGS) -shared -o libguile-cifio.so build/src/guile/guile-cifio.o
 
 clean:
-	cd cpp_modules/zlib && $(MAKE) clean
-	cd cpp_modules/openssl && $(MAKE) clean
+	rm -rf build/src
+	#cd cpp_modules/zlib && $(MAKE) clean
+	#cd cpp_modules/openssl && $(MAKE) clean
