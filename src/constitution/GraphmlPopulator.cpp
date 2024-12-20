@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <ranges>
+#include <typeinfo>
 
 #include "constitution/GraphmlPopulator.h"
 
@@ -16,43 +17,56 @@ namespace sylvanmats::constitution {
      }
 
     void GraphmlPopulator::operator()(std::istream& content, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply){
-        sylvanmats::io::xml::Binder xmlReaper("../../cifio/db/oxygen_fragments.graphml", "");
-        xmlReaper([&xmlReaper, &graph](std::u16string& utf16, std::vector<std::pair<sylvanmats::io::xml::tag_indexer, std::vector<sylvanmats::io::xml::tag_indexer>>>& dag){
-            if(dag.size()>0){
+        std::string xmlPath=(getenv("CIFIO_DB_LOCATION")!=nullptr) ? std::string(getenv("CIFIO_DB_LOCATION"))+"/oxygen_fragments.graphml": "../oxygen_fragments.graphml";
+        sylvanmats::io::xml::Binder xmlReaper(xmlPath, "");
+        xmlReaper([&xmlReaper, &graph](std::u16string& utf16, sylvanmats::io::xml::G& dagGraph){
+            if(graph::num_edges(dagGraph)>0){
+                std::cout<<"dagGraph "<<graph::num_vertices(dagGraph)<<" "<<graph::num_edges(dagGraph)<<std::endl;
                 std::unordered_map<std::u16string, lemon::ListGraph::Node> nodeIDMap;
                 std::wstring_convert<deletable_facet<std::codecvt<char16_t, char, std::mbstate_t>>, char16_t> cv;
-                for(std::vector<std::pair<sylvanmats::io::xml::tag_indexer, std::vector<sylvanmats::io::xml::tag_indexer>>>::iterator it=dag.begin();it!=dag.end();it++){
-                    if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<graph ")){
-//                std::cout<<(*it).first.index<<" "<<dag[(*it).first.index].second.size()<<" "<<cv.to_bytes(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start))<<" "<<(*it).second.size()<<" "<<cv.to_bytes(utf16.substr(std::get<1>((*it).second.back()), std::get<5>((*it).second.back())-std::get<1>((*it).second.back())))<<std::endl;
-                    for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<node "); })){
+                auto it = std::ranges::find_if(graph::vertices(dagGraph),
+                                         [&](auto& u) { return graph::vertex_value(dagGraph, u).index == 0; });
+                graph::vertex_id_t<sylvanmats::io::xml::G> vid=static_cast<graph::vertex_id_t<sylvanmats::io::xml::G>>(it - begin(graph::vertices(dagGraph)));
+                auto& v=dagGraph[vid];
+                for (auto&& oe : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<graph "); })) {
+                    auto oid=graph::target_id(dagGraph, oe);
+                    auto& o=dagGraph[oid];
+                    for(auto&& itS : graph::edges(dagGraph, o) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<node "); })){
                         lemon::ListGraph::Node n=graph.addNode();
-                        std::u16string&& idValue=xmlReaper.findAttribute(u"id", itS.angle_start, itS.angle_end);
+                        auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itS)]);
+                        std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                         nodeIDMap[idValue]=n;
-                        for(auto itD : dag[itS.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<data "); })){
-//                            std::cout<<"? "<<(n!=lemon::INVALID)<<" "<<(std::get<5>(itD)+1)<<" "<<(dag[std::get<0>(itD)].second.size())<<" "<<std::get<1>(dag[std::get<0>(itD)].second.back())<<std::endl;
-                            std::u16string name=utf16.substr(itD.angle_end+1, dag[itD.index].second.back().angle_start-itD.angle_end-1);
-                    graph.atomSites[n].type_symbol=std::string(cv.to_bytes(name));
-//                std::cout<<"\t\t"<<std::get<5>(itD)<<" "<<std::get<1>(dag[std::get<0>(itD)].second.back())<<" "<<dag[std::get<0>(itD)].second.size()<<" "<<graph.atomSites[n].type_symbol<<std::endl;
-//                std::cout<<" "<<cv.to_bytes(utf16.substr(std::get<1>(dag[std::get<0>(itD)].first), std::get<5>(dag[std::get<0>(itD)].first)-std::get<1>(dag[std::get<0>(itD)].first)))<<std::endl;
-//                std::cout<<" "<<cv.to_bytes(utf16.substr(std::get<1>(dag[std::get<0>(itD)].second.back()), std::get<5>(dag[std::get<0>(itD)].second.back())-std::get<1>(dag[std::get<0>(itD)].second.back())))<<std::endl;
+                        auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                        size_t incEdgeCount=0;
+                        for(auto&& itS : graph::edges(dagGraph, d))incEdgeCount++;
+                        //std::cout<<"id? "<<cv.to_bytes(idValue)<<" "<<size(graph::edges(dagGraph, d))<<std::endl;
+                        for(auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]);std::cout<<"data? "<<cv.to_bytes(utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start))<<std::endl;return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<data "); })){
+                            auto& dv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                            auto& edv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)+1]);
+                            std::string name=cv.to_bytes(utf16.substr(dv.angle_end+1, edv.angle_start-dv.angle_end-1));
+                            graph.atomSites[n].type_symbol=std::string(name.begin(), name.end());
+                            std::cout<<"\t\t"<<dv.index<<" "<<edv.index<<" |"<<graph.atomSites[n].type_symbol<<"|"<<std::endl;
                         }
-                    }
                     }
                 }
-                for(std::vector<std::pair<sylvanmats::io::xml::tag_indexer, std::vector<sylvanmats::io::xml::tag_indexer>>>::iterator it=dag.begin();it!=dag.end();it++){
-                    if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<graph ")){
-                    for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<edge "); })){
-                        std::u16string&& sourceValue=xmlReaper.findAttribute(u"source", itS.angle_start, itS.angle_end);
-                        std::u16string&& targetValue=xmlReaper.findAttribute(u"target", itS.angle_start, itS.angle_end);
+                for (auto&& oe : graph::edges(dagGraph, v)) {
+                    auto oid=graph::target_id(dagGraph, oe);
+                    auto& o=dagGraph[oid];
+                    for(auto&& itS : graph::edges(dagGraph, o) | std::views::filter([&utf16, &dagGraph](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]);return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<edge "); })){
+                        auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itS)]);
+                        std::u16string&& sourceValue=xmlReaper.findAttribute(u"source", nv.angle_start, nv.angle_end);
+                        std::u16string&& targetValue=xmlReaper.findAttribute(u"target", nv.angle_start, nv.angle_end);
                         lemon::ListGraph::Edge e=graph.addEdge(nodeIDMap[sourceValue], nodeIDMap[targetValue]);
-                        for(auto itD : dag[itS.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<data "); })){
-                            std::u16string name=utf16.substr(itD.angle_end+1, dag[itD.index].second.back().angle_start-itD.angle_end-1);
+                        auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                        for(auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]);return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<data "); })){
+                            auto& dv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                            auto& edv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)+1]);
+                             std::string name=cv.to_bytes(utf16.substr(dv.angle_end+1, edv.angle_start-dv.angle_end-1));
                             graph.compBond[e].atom_id_1=cv.to_bytes(sourceValue);
                             graph.compBond[e].atom_id_2=cv.to_bytes(targetValue);
-                            graph.compBond[e].value_order=std::strtol(cv.to_bytes(name).c_str(), nullptr, 10);
+                            graph.compBond[e].value_order=std::strtol(name.c_str(), nullptr, 10);
                         }
                         
-                    }
                     }
                 }
             }

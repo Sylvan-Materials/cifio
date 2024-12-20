@@ -24,6 +24,7 @@
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
+#include "publishing/st/CIFPublisher.h"
 #include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
@@ -34,7 +35,6 @@
 #include "lattice/Populator.h"
 #include "density/ccp4/MapInput.h"
 #include "publishing/jgf/JGFPublisher.h"
-#include "publishing/st/CIFPublisher.h"
 #include "publishing/gz/CIFCompressor.h"
 #include "PeriodicTable.h"
 

@@ -16,6 +16,7 @@
 #include "reading/tcp/TCPReader.h"
 
 #include "PeriodicTable.h"
+#include "publishing/st/MOL2Publisher.h"
 #include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
@@ -28,7 +29,6 @@
 #include "density/ccp4/MapInput.h"
 #include "publishing/jgf/JGFPublisher.h"
 #include "publishing/smiles/SMILESPublisher.h"
-#include "publishing/st/MOL2Publisher.h"
 
 #include "antlr4-runtime.h"
 

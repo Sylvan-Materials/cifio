@@ -9,16 +9,22 @@ namespace sylvanmats::reading {
     SMIRKSPatterns::SMIRKSPatterns() {
         
         sylvanmats::io::xml::Binder xmlReaper("/home/roger/Documents/Optimization/openff-2.1.0.offxml", "");
-        xmlReaper([&](std::u16string& utf16, std::vector<std::pair<sylvanmats::io::xml::tag_indexer, std::vector<sylvanmats::io::xml::tag_indexer>>>& dag){
+        std::cout<<"SMIRKSPatterns () "<<std::endl;
+        xmlReaper([&](std::u16string& utf16, sylvanmats::io::xml::G& dagGraph){
             std::wstring_convert<deletable_facet<std::codecvt<char16_t, char, std::mbstate_t>>, char16_t> cv;
-            for(std::vector<std::pair<sylvanmats::io::xml::tag_indexer, std::vector<sylvanmats::io::xml::tag_indexer>>>::iterator it=dag.begin();it!=dag.end();it++){
-                if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<Bonds ")){
-                for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<Bond "); })){
-                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", itS.angle_start, itS.angle_end);
-                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", itS.angle_start, itS.angle_end);
-                    std::u16string&& lengthValue=xmlReaper.findAttribute(u"length", itS.angle_start, itS.angle_end);
-                    std::u16string&& kValue=xmlReaper.findAttribute(u"k", itS.angle_start, itS.angle_end);
-//                    std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
+                auto it = std::ranges::find_if(graph::vertices(dagGraph),
+                                         [&](auto& u) { return graph::vertex_value(dagGraph, u).index == 0; });
+                graph::vertex_id_t<sylvanmats::io::xml::G> vid=static_cast<graph::vertex_id_t<sylvanmats::io::xml::G>>(it - begin(graph::vertices(dagGraph)));
+                auto& v=dagGraph[vid];
+                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Bonds "); })) {
+                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Bond "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
+                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
+                    std::u16string&& lengthValue=xmlReaper.findAttribute(u"length", nv.angle_start, nv.angle_end);
+                    std::u16string&& kValue=xmlReaper.findAttribute(u"k", nv.angle_start, nv.angle_end);
+                    //std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
                     antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                     sylvanmats::SMIRKSLexer lexer(&input);
                     antlr4::CommonTokenStream tokens(&lexer);
@@ -37,9 +43,6 @@ namespace sylvanmats::reading {
                             lemon::ListGraph::Edge e=lemon::INVALID;
                             lemon::ListGraph::Node nB=lemon::INVALID;
                             for(size_t baaIndex=0;baaIndex<r->bonds_and_atoms().size();baaIndex++){
-//                            for(std::vector<sylvanmats::SMIRKSParser::Bonds_and_atomsContext *>::iterator itB=r->bonds_and_atoms().begin();itB!=r->bonds_and_atoms().end();++itB){
-//                                sylvanmats::SMIRKSParser::AtomsContext* ac=(*itB)->atoms();
-//                    std::cout<<"got next atom "<<std::endl;
                                 nB=processAtoms(r->bonds_and_atoms(baaIndex)->atoms(), smirksPattern);
                                 if(nA!=lemon::INVALID && nB!=lemon::INVALID){
                                     sylvanmats::SMIRKSParser::Bond_primitivesContext* bc=r->bonds_and_atoms(baaIndex)->bond_primitives();
@@ -56,13 +59,15 @@ namespace sylvanmats::reading {
                     }
                 }
                 }
-                if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<Angles ")){
-                for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<Angle "); })){
-                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", itS.angle_start, itS.angle_end);
-                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", itS.angle_start, itS.angle_end);
-                    std::u16string&& angleValue=xmlReaper.findAttribute(u"angle", itS.angle_start, itS.angle_end);
-                    std::u16string&& kValue=xmlReaper.findAttribute(u"k", itS.angle_start, itS.angle_end);
-//                    std::cout<<"got angle smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(angleValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
+                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Angles "); })) {
+                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Angle "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
+                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
+                    std::u16string&& angleValue=xmlReaper.findAttribute(u"angle", nv.angle_start, nv.angle_end);
+                    std::u16string&& kValue=xmlReaper.findAttribute(u"k", nv.angle_start, nv.angle_end);
+                    //std::cout<<"got angle smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(angleValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
                     antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                     sylvanmats::SMIRKSLexer lexer(&input);
                     antlr4::CommonTokenStream tokens(&lexer);
@@ -110,13 +115,15 @@ namespace sylvanmats::reading {
                     }
                 }
                 }
-                if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<vdW ")){
-                for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<Atom "); })){
-                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", itS.angle_start, itS.angle_end);
-                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", itS.angle_start, itS.angle_end);
-                    std::u16string&& epsilonValue=xmlReaper.findAttribute(u"epsilon", itS.angle_start, itS.angle_end);
-                    std::u16string&& rmin_halfValue=xmlReaper.findAttribute(u"rmin_half", itS.angle_start, itS.angle_end);
-//                    std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
+                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<vdW "); })) {
+                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Atom "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
+                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
+                    std::u16string&& epsilonValue=xmlReaper.findAttribute(u"epsilon", nv.angle_start, nv.angle_end);
+                    std::u16string&& rmin_halfValue=xmlReaper.findAttribute(u"rmin_half", nv.angle_start, nv.angle_end);
+                    //std::cout<<"got smirks vdw "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
                     antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                     sylvanmats::SMIRKSLexer lexer(&input);
                     antlr4::CommonTokenStream tokens(&lexer);
@@ -141,26 +148,28 @@ namespace sylvanmats::reading {
                     }
                 }
                 }
-                if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<ProperTorsions ")){
-                    for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<Proper "); })){
-                        std::u16string&& idValue=xmlReaper.findAttribute(u"id", itS.angle_start, itS.angle_end);
-                        std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", itS.angle_start, itS.angle_end);
-                        std::u16string&& periodicity1Value=xmlReaper.findAttribute(u"periodicity1", itS.angle_start, itS.angle_end);
-                        std::u16string&& periodicity2Value=xmlReaper.findAttribute(u"periodicity2", itS.angle_start, itS.angle_end);
-                        std::u16string&& periodicity3Value=xmlReaper.findAttribute(u"periodicity3", itS.angle_start, itS.angle_end);
-                        std::u16string&& periodicity4Value=xmlReaper.findAttribute(u"periodicity4", itS.angle_start, itS.angle_end);
-                        std::u16string&& k1Value=xmlReaper.findAttribute(u"k1", itS.angle_start, itS.angle_end);
-                        std::u16string&& k2Value=xmlReaper.findAttribute(u"k2", itS.angle_start, itS.angle_end);
-                        std::u16string&& k3Value=xmlReaper.findAttribute(u"k3", itS.angle_start, itS.angle_end);
-                        std::u16string&& k4Value=xmlReaper.findAttribute(u"k4", itS.angle_start, itS.angle_end);
-                        std::u16string&& phase1Value=xmlReaper.findAttribute(u"phase1", itS.angle_start, itS.angle_end);
-                        std::u16string&& phase2Value=xmlReaper.findAttribute(u"phase2", itS.angle_start, itS.angle_end);
-                        std::u16string&& phase3Value=xmlReaper.findAttribute(u"phase3", itS.angle_start, itS.angle_end);
-                        std::u16string&& phase4Value=xmlReaper.findAttribute(u"phase4", itS.angle_start, itS.angle_end);
-                        std::u16string&& idivf1Value=xmlReaper.findAttribute(u"idivf1", itS.angle_start, itS.angle_end);
-                        std::u16string&& idivf2Value=xmlReaper.findAttribute(u"idivf2", itS.angle_start, itS.angle_end);
-                        std::u16string&& idivf3Value=xmlReaper.findAttribute(u"idivf3", itS.angle_start, itS.angle_end);
-                        std::u16string&& idivf4Value=xmlReaper.findAttribute(u"idivf4", itS.angle_start, itS.angle_end);
+                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<ProperTorsions "); })) {
+                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Proper "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                        std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
+                        std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
+                        std::u16string&& periodicity1Value=xmlReaper.findAttribute(u"periodicity1", nv.angle_start, nv.angle_end);
+                        std::u16string&& periodicity2Value=xmlReaper.findAttribute(u"periodicity2", nv.angle_start, nv.angle_end);
+                        std::u16string&& periodicity3Value=xmlReaper.findAttribute(u"periodicity3", nv.angle_start, nv.angle_end);
+                        std::u16string&& periodicity4Value=xmlReaper.findAttribute(u"periodicity4", nv.angle_start, nv.angle_end);
+                        std::u16string&& k1Value=xmlReaper.findAttribute(u"k1", nv.angle_start, nv.angle_end);
+                        std::u16string&& k2Value=xmlReaper.findAttribute(u"k2", nv.angle_start, nv.angle_end);
+                        std::u16string&& k3Value=xmlReaper.findAttribute(u"k3", nv.angle_start, nv.angle_end);
+                        std::u16string&& k4Value=xmlReaper.findAttribute(u"k4", nv.angle_start, nv.angle_end);
+                        std::u16string&& phase1Value=xmlReaper.findAttribute(u"phase1", nv.angle_start, nv.angle_end);
+                        std::u16string&& phase2Value=xmlReaper.findAttribute(u"phase2", nv.angle_start, nv.angle_end);
+                        std::u16string&& phase3Value=xmlReaper.findAttribute(u"phase3", nv.angle_start, nv.angle_end);
+                        std::u16string&& phase4Value=xmlReaper.findAttribute(u"phase4", nv.angle_start, nv.angle_end);
+                        std::u16string&& idivf1Value=xmlReaper.findAttribute(u"idivf1", nv.angle_start, nv.angle_end);
+                        std::u16string&& idivf2Value=xmlReaper.findAttribute(u"idivf2", nv.angle_start, nv.angle_end);
+                        std::u16string&& idivf3Value=xmlReaper.findAttribute(u"idivf3", nv.angle_start, nv.angle_end);
+                        std::u16string&& idivf4Value=xmlReaper.findAttribute(u"idivf4", nv.angle_start, nv.angle_end);
 //                            std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(phase1Value).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(k1Value).c_str(), nullptr)<<std::endl;
                         antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                         sylvanmats::SMIRKSLexer lexer(&input);
@@ -235,26 +244,28 @@ namespace sylvanmats::reading {
                         }
                     }
                 }
-                if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<ImproperTorsions ")){
-                    for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<Improper "); })){
-                        std::u16string&& idValue=xmlReaper.findAttribute(u"id", itS.angle_start, itS.angle_end);
-                        std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", itS.angle_start, itS.angle_end);
-                        std::u16string&& periodicity1Value=xmlReaper.findAttribute(u"periodicity1", itS.angle_start, itS.angle_end);
-//                        std::u16string&& periodicity2Value=xmlReaper.findAttribute(u"periodicity2", itS.angle_start, itS.angle_end);
-//                        std::u16string&& periodicity3Value=xmlReaper.findAttribute(u"periodicity3", itS.angle_start, itS.angle_end);
-//                        std::u16string&& periodicity4Value=xmlReaper.findAttribute(u"periodicity4", itS.angle_start, itS.angle_end);
-                        std::u16string&& k1Value=xmlReaper.findAttribute(u"k1", itS.angle_start, itS.angle_end);
-//                        std::u16string&& k2Value=xmlReaper.findAttribute(u"k2", itS.angle_start, itS.angle_end);
-//                        std::u16string&& k3Value=xmlReaper.findAttribute(u"k3", itS.angle_start, itS.angle_end);
-//                        std::u16string&& k4Value=xmlReaper.findAttribute(u"k4", itS.angle_start, itS.angle_end);
-                        std::u16string&& phase1Value=xmlReaper.findAttribute(u"phase1", itS.angle_start, itS.angle_end);
-//                        std::u16string&& phase2Value=xmlReaper.findAttribute(u"phase2", itS.angle_start, itS.angle_end);
-//                        std::u16string&& phase3Value=xmlReaper.findAttribute(u"phase3", itS.angle_start, itS.angle_end);
-//                        std::u16string&& phase4Value=xmlReaper.findAttribute(u"phase4", itS.angle_start, itS.angle_end);
-                        std::u16string&& idivf1Value=xmlReaper.findAttribute(u"idivf1", itS.angle_start, itS.angle_end);
-//                        std::u16string&& idivf2Value=xmlReaper.findAttribute(u"idivf2", itS.angle_start, itS.angle_end);
-//                        std::u16string&& idivf3Value=xmlReaper.findAttribute(u"idivf3", itS.angle_start, itS.angle_end);
-//                        std::u16string&& idivf4Value=xmlReaper.findAttribute(u"idivf4", itS.angle_start, itS.angle_end);
+                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<ImproperTorsions "); })) {
+                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Improper "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                        std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
+                        std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
+                        std::u16string&& periodicity1Value=xmlReaper.findAttribute(u"periodicity1", nv.angle_start, nv.angle_end);
+//                        std::u16string&& periodicity2Value=xmlReaper.findAttribute(u"periodicity2", nv.angle_start, nv.angle_end);
+//                        std::u16string&& periodicity3Value=xmlReaper.findAttribute(u"periodicity3", nv.angle_start, nv.angle_end);
+//                        std::u16string&& periodicity4Value=xmlReaper.findAttribute(u"periodicity4", nv.angle_start, nv.angle_end);
+                        std::u16string&& k1Value=xmlReaper.findAttribute(u"k1", nv.angle_start, nv.angle_end);
+//                        std::u16string&& k2Value=xmlReaper.findAttribute(u"k2", nv.angle_start, nv.angle_end);
+//                        std::u16string&& k3Value=xmlReaper.findAttribute(u"k3", nv.angle_start, nv.angle_end);
+//                        std::u16string&& k4Value=xmlReaper.findAttribute(u"k4", nv.angle_start, nv.angle_end);
+                        std::u16string&& phase1Value=xmlReaper.findAttribute(u"phase1", nv.angle_start, nv.angle_end);
+//                        std::u16string&& phase2Value=xmlReaper.findAttribute(u"phase2", nv.angle_start, nv.angle_end);
+//                        std::u16string&& phase3Value=xmlReaper.findAttribute(u"phase3", nv.angle_start, nv.angle_end);
+//                        std::u16string&& phase4Value=xmlReaper.findAttribute(u"phase4", nv.angle_start, nv.angle_end);
+                        std::u16string&& idivf1Value=xmlReaper.findAttribute(u"idivf1", nv.angle_start, nv.angle_end);
+//                        std::u16string&& idivf2Value=xmlReaper.findAttribute(u"idivf2", nv.angle_start, nv.angle_end);
+//                        std::u16string&& idivf3Value=xmlReaper.findAttribute(u"idivf3", nv.angle_start, nv.angle_end);
+//                        std::u16string&& idivf4Value=xmlReaper.findAttribute(u"idivf4", nv.angle_start, nv.angle_end);
 //                            std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(phase1Value).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(k1Value).c_str(), nullptr)<<std::endl;
                         antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                         sylvanmats::SMIRKSLexer lexer(&input);
@@ -329,15 +340,16 @@ namespace sylvanmats::reading {
                         }
                     }
                 }
-                if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<Electrostatics ")){
-                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", (*it).first.angle_start, (*it).first.angle_end);
-                    std::u16string&& scale12Value=xmlReaper.findAttribute(u"scale12", (*it).first.angle_start, (*it).first.angle_end);
-                    std::u16string&& scale13Value=xmlReaper.findAttribute(u"scale13", (*it).first.angle_start, (*it).first.angle_end);
-                    std::u16string&& scale14Value=xmlReaper.findAttribute(u"scale14", (*it).first.angle_start, (*it).first.angle_end);
-                    std::u16string&& scale15Value=xmlReaper.findAttribute(u"scale15", (*it).first.angle_start, (*it).first.angle_end);
-                    std::u16string&& cutoffValue=xmlReaper.findAttribute(u"cutoff", (*it).first.angle_start, (*it).first.angle_end);
-                    std::u16string&& switchWidthValue=xmlReaper.findAttribute(u"switch_width", (*it).first.angle_start, (*it).first.angle_end);
-                    std::u16string&& methodValue=xmlReaper.findAttribute(u"method", (*it).first.angle_start, (*it).first.angle_end);
+                for (auto&& itD : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Electrostatics "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
+                    std::u16string&& scale12Value=xmlReaper.findAttribute(u"scale12", nv.angle_start, nv.angle_end);
+                    std::u16string&& scale13Value=xmlReaper.findAttribute(u"scale13", nv.angle_start, nv.angle_end);
+                    std::u16string&& scale14Value=xmlReaper.findAttribute(u"scale14", nv.angle_start, nv.angle_end);
+                    std::u16string&& scale15Value=xmlReaper.findAttribute(u"scale15", nv.angle_start, nv.angle_end);
+                    std::u16string&& cutoffValue=xmlReaper.findAttribute(u"cutoff", nv.angle_start, nv.angle_end);
+                    std::u16string&& switchWidthValue=xmlReaper.findAttribute(u"switch_width", nv.angle_start, nv.angle_end);
+                    std::u16string&& methodValue=xmlReaper.findAttribute(u"method", nv.angle_start, nv.angle_end);
                     if(!scale12Value.empty())electrostatics.scale12=std::strtod(cv.to_bytes(scale12Value).c_str(), nullptr);
                     if(!scale13Value.empty())electrostatics.scale13=std::strtod(cv.to_bytes(scale13Value).c_str(), nullptr);
                     if(!scale14Value.empty())electrostatics.scale14=std::strtod(cv.to_bytes(scale14Value).c_str(), nullptr);
@@ -345,11 +357,13 @@ namespace sylvanmats::reading {
                     if(!cutoffValue.empty())electrostatics.cutoff=std::strtod(cv.to_bytes(cutoffValue).c_str(), nullptr);
                     if(!methodValue.empty())electrostatics.method=cv.to_bytes(methodValue);
                 }
-                if(utf16.substr((*it).first.angle_start, (*it).first.angle_end-(*it).first.angle_start).starts_with(u"<LibraryCharges ")){
-                for(auto itS : dag[(*it).first.index].second | std::views::filter([&utf16](sylvanmats::io::xml::tag_indexer& di){ return utf16.substr(di.angle_start, di.angle_end-di.angle_start).starts_with(u"<LibraryCharge "); })){
-                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", itS.angle_start, itS.angle_end);
-                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", itS.angle_start, itS.angle_end);
-                    std::u16string&& charge1Value=xmlReaper.findAttribute(u"charge1", itS.angle_start, itS.angle_end);
+                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<LibraryCharges "); })) {
+                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
+                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<LibraryCharge "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                    std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
+                    std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
+                    std::u16string&& charge1Value=xmlReaper.findAttribute(u"charge1", nv.angle_start, nv.angle_end);
 //                    std::cout<<"got smirks "<<cv.to_bytes(idValue)<<" "<<cv.to_bytes(smirksValue)<<" "<<std::strtod(cv.to_bytes(lengthValue).c_str(), nullptr)<<" "<<std::strtod(cv.to_bytes(kValue).c_str(), nullptr)<<std::endl;
                     antlr4::ANTLRInputStream input(cv.to_bytes(smirksValue));
                     sylvanmats::SMIRKSLexer lexer(&input);
@@ -382,8 +396,6 @@ namespace sylvanmats::reading {
                     }
                 }
                 }
-            }
-
         });
     }
     

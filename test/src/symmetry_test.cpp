@@ -19,6 +19,7 @@
 
 #include "asynchronous/Generator.h"
 
+#include "publishing/st/MOL2Publisher.h"
 #include "standards/ComponentStandards.h"
 #include "standards/AminoStandards.h"
 #include "constitution/Graph.h"
@@ -32,7 +33,6 @@
 #include "algebra/geometric/Quaternion.h"
 #include "algebra/geometric/Motor.h"
 #include "publishing/jgf/JGFPublisher.h"
-#include "publishing/st/MOL2Publisher.h"
 
 #include "antlr4-runtime.h"
 #include "reading/gz/GZReader.h"

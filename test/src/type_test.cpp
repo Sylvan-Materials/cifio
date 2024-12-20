@@ -139,7 +139,9 @@ std::cout<<"graph.getNumberOfAtomSites() "<<graph.getNumberOfAtomSites()<<std::e
     });
     CHECK_EQ(graph.getNumberOfRings(), 2);
     CHECK_EQ(graph.countFlexibles(), 31);
+    std::cout<<"openFF "<<std::endl; 
     sylvanmats::forcefield::OpenFF openFF(graph);
+    std::cout<<"openFF ()"<<std::endl; 
     openFF();
     std::cout<<"MM energy: "<<openFF.getEnergy()<<std::endl<<"grads: "<<openFF.getGradients()<<std::endl;
 }

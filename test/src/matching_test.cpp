@@ -14,6 +14,7 @@
 
 #include "PeriodicTable.h"
 #include "standards/ComponentStandards.h"
+#include "caching/FileSteward.h"
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
@@ -80,9 +81,9 @@ TEST_CASE("test 6jvm"){
        //lemon::Vf2<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::Node>> vf2(selectionGraph, selectionGraph, symmetryMap);
        bool iso = lemon::vf2(selectionGraph, selectionGraph).iso().run();
        CHECK(iso);
-    sylvanmats::constitution::Graph fragmentGraph;
+    sylvanmats::constitution::Graph fragmentGraphIn;
     sylvanmats::constitution::GraphmlPopulator populator;
-    populator(filePath, fragmentGraph, [&graph, &selectionGraph, &filePath](sylvanmats::constitution::Graph& fragmentGraph){
+    populator(filePath, fragmentGraphIn, [&graph, &selectionGraph, &filePath](sylvanmats::constitution::Graph& fragmentGraph){
     CHECK_EQ(fragmentGraph.getNumberOfAtomSites(), 4);
     CHECK_EQ(fragmentGraph.getNumberOfConnections(), 3);
     
@@ -90,15 +91,19 @@ TEST_CASE("test 6jvm"){
     lemon::ListGraph::NodeMap<sylvanmats::standards::type_properties> typeMapA(fragmentGraph);
     for (lemon::ListGraph::NodeIt nSiteA(fragmentGraph); nSiteA!=lemon::INVALID; ++nSiteA)
     {
+        std::cout<<"symbol "<<fragmentGraph.atomSites[nSiteA].type_symbol<<std::endl;
         typeMapA[nSiteA].atomic_number = periodicTable->index(fragmentGraph.atomSites[nSiteA].type_symbol).atomic_number;
     }
     lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<sylvanmats::standards::type_properties> typeMapB(selectionGraph);
     for (lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(selectionGraph); nSiteA!=lemon::INVALID; ++nSiteA)
     {
+        std::cout<<"g symbol "<<graph.atomSites[nSiteA].type_symbol<<std::endl;
         typeMapB[nSiteA].atomic_number = periodicTable->index(graph.atomSites[nSiteA].type_symbol).atomic_number;
     }
     lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<lemon::ListGraph::Node> bijectionMap(selectionGraph);
+    std::cout<<"PT match"<<std::endl;
     bool ret = lemon::vf2(fragmentGraph, selectionGraph).induced().mapping(bijectionMap).nodeLabels<lemon::ListGraph::NodeMap<sylvanmats::standards::type_properties>, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeMap<sylvanmats::standards::type_properties>>(typeMapA, typeMapB).run();
+    std::cout<<"PT matched "<<ret<<std::endl;
     CHECK(!ret);
        
     });
