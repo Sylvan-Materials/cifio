@@ -3,52 +3,56 @@
 #include <stdlib.h>
 #include <string>
 #include <memory>
+#include <functional>
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
 #include "lemon/maps.h"
 
+#include "graph/container/dynamic_graph.hpp"
+
 //#include "constitution/Selection.h"
 
 namespace sylvanmats::surface {
+    
+    using G = graph::container::dynamic_graph<size_t, lemon::ListGraph::Node>;
 
-    class BipartiteSurface : public lemon::ListBpGraph{
+    class BipartiteSurface : public G {
         protected:
         sylvanmats::constitution::Graph& graph;
         std::vector<sylvanmats::constitution::unique_component>& uniqueComponents;
+        std::vector<lemon::ListGraph::Node> bpVertices;
+        std::vector<std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, int>> edges;
         public:
-        lemon::CrossRefMap<BipartiteSurface, lemon::ListBpGraph::Node, lemon::ListGraph::Node> constitutionRefMap;
+        //lemon::CrossRefMap<BipartiteSurface, lemon::ListBpGraph::Node, lemon::ListGraph::Node> constitutionRefMap;
         
         public:
-        BipartiteSurface(sylvanmats::constitution::Graph& graph, std::vector<sylvanmats::constitution::unique_component>& uniqueComponents) : graph (graph), uniqueComponents (uniqueComponents), constitutionRefMap(*this) {};
+        BipartiteSurface(sylvanmats::constitution::Graph& graph, std::vector<sylvanmats::constitution::unique_component>& uniqueComponents) : G(), graph (graph), uniqueComponents (uniqueComponents) {};
         BipartiteSurface(const BipartiteSurface& orig) = delete;
         virtual ~BipartiteSurface() =  default;
 
         void operator()(){
             sylvanmats::constitution::Selection selection(graph);
             selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
-                //CHECK_EQ(lemon::countNodes(selectionGraph), 26);
-                //CHECK_EQ(lemon::countEdges(selectionGraph), 25);
                 graph.visibilityOff(selectionGraph);
                 sylvanmats::surface::Accessible accessible(graph);
                 //accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){});
 
                 selection.compliment(selectionGraph, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& complimentGraph){
-                    //CHECK_EQ(lemon::countNodes(complimentGraph), 1726);
-                    //CHECK_EQ(lemon::countEdges(complimentGraph), 1537);
                     
                     for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteA(selectionGraph); nSiteA!=lemon::INVALID; ++nSiteA){
                         //if(graph.atomSites[nSiteA].type_symbol.compare("O")==0){
                             for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::NodeIt nSiteB(complimentGraph); nSiteB!=lemon::INVALID; ++nSiteB){
                                 double d=std::sqrt(std::pow(graph.atomSites[nSiteA].Cartn_x-graph.atomSites[nSiteB].Cartn_x, 2)+std::pow(graph.atomSites[nSiteA].Cartn_y-graph.atomSites[nSiteB].Cartn_y, 2)+std::pow(graph.atomSites[nSiteA].Cartn_z-graph.atomSites[nSiteB].Cartn_z,2));
-                                if(d<6.0){
-                                    //std::cout<<"d: "<<d<<" "<<graph.getXPath(nSiteA)<<graph.atomSites[nSiteA].label_atom_id<<"---"<<graph.getXPath(nSiteB)<<graph.atomSites[nSiteB].label_atom_id<<std::endl;
-                                    lemon::ListBpGraph::Node targetNode=(constitutionRefMap.count(nSiteB)==0) ? addRedNode() : constitutionRefMap((const lemon::ListGraph::Node)nSiteB);
-                                    lemon::ListBpGraph::Node ligandNode=(constitutionRefMap.count(nSiteA)==0) ? addBlueNode() : constitutionRefMap((const lemon::ListGraph::Node)nSiteA);
-                                    addEdge(asRedNode(targetNode), asBlueNode(ligandNode));
-                                    
-                                    if(constitutionRefMap.count(nSiteB)==0)constitutionRefMap.set(targetNode, nSiteB);
-                                    if(constitutionRefMap.count(nSiteA)==0)constitutionRefMap.set(ligandNode, nSiteA);
+                                if(d<3.25){
+                                    std::vector<lemon::ListGraph::Node>::iterator itA = find(bpVertices.begin(), bpVertices.end(), nSiteA);
+                                    size_t indexA=(itA!=bpVertices.end()) ? itA-bpVertices.begin(): bpVertices.size();
+                                    if(itA==bpVertices.end())bpVertices.push_back(nSiteA);
+                                    std::vector<lemon::ListGraph::Node>::iterator itB = find(bpVertices.begin(), bpVertices.end(), nSiteB);
+                                    size_t indexB=(itB!=bpVertices.end()) ? itB-bpVertices.begin(): bpVertices.size();
+                                    if(itB==bpVertices.end())bpVertices.push_back(nSiteB);
+                                    //std::cout<<" "<<bpVertices.size()<<" "<<indexA<<" "<<indexB<<std::endl;
+                                    edges.push_back(std::make_tuple(indexA, indexB, 1));
                                     
                                 }
                             }
@@ -56,6 +60,24 @@ namespace sylvanmats::surface {
                     }
                 });
             });
+            std::sort(edges.begin(), edges.end(), [](std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, int>& a, std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, int>& b){return std::get<0>(a)<std::get<0>(b) || std::get<1>(a)<std::get<1>(b);});
+            std::cout<<"bpVertices "<<bpVertices.size()<<" "<<edges.size()<<std::endl;
+            using value = std::ranges::range_value_t<decltype(edges)>;
+            graph::vertex_id_t<G> N = static_cast<graph::vertex_id_t<G>>(graph::size(graph::vertices(*this)));
+            using edge_desc  = graph::edge_info<graph::vertex_id_t<G>, true, void, int>;
+            reserve_vertices(bpVertices.size());
+            reserve_edges(edges.size());
+            load_vertices(bpVertices, [&](lemon::ListGraph::Node& nm) {
+                auto uid = static_cast<graph::vertex_id_t<G>>(&nm - bpVertices.data());
+                //std::cout<<"uid "<<uid<<std::endl;
+                return graph::copyable_vertex_t<graph::vertex_id_t<G>, lemon::ListGraph::Node>{uid, nm};
+              });
+            load_edges(edges, [](const value& val) -> edge_desc {
+                    //std::cout<<"edge "<<std::get<0>(val)<<" "<<std::get<1>(val)<<" "<<std::get<2>(val)<<std::endl;
+                return edge_desc{std::get<0>(val), std::get<1>(val), std::get<2>(val)};
+              }, N);
+              //size_t np=graph::num_partitions(bpGraph);
+            //std::cout<<"num_partitions: "<<np<<std::endl;
         }
     };
 

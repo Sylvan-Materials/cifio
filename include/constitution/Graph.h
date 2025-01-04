@@ -7,6 +7,7 @@
 #include <sstream>
 #include <optional>
 #include <tuple>
+#include <uchar.h>
 
 #include "lemon/list_graph.h"
 #include "lemon/connectivity.h"
@@ -46,7 +47,7 @@ namespace sylvanmats::constitution {
         std::string auth_asym_id;
         std::string auth_atom_id;
         int pdbx_PDB_model_num;
-        char8_t connectivity=0;
+        char8_t connectivity=u8'\0';
         char8_t sssr_ring=0;
         char8_t proton_count=0;
         bool visibility=true;

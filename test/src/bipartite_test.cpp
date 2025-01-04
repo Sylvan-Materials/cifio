@@ -23,6 +23,8 @@
 #include "surface/BipartiteSurface.h"
 
 #include "io/json/Binder.h"
+#include "graph/views/vertexlist.hpp"
+#include "graph/views/edgelist.hpp"
 
 #include "antlr4-runtime.h"
 #include "parsing/CIFLexer.h"
@@ -58,9 +60,9 @@ TEST_CASE("test bipartite of 5aej.cif.gz"){
             std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="SO4", .label_asym_id="E", .auth_seq_id=1185},{.label_comp_id="SO4", .label_asym_id="F", .auth_seq_id=1185}};
             sylvanmats::surface::BipartiteSurface bipartiteSurface(graph, uniqueComponents);
             bipartiteSurface();
-            for (sylvanmats::surface::BipartiteSurface::BlueNodeIt n(bipartiteSurface); n!=lemon::INVALID; ++n){
-                lemon::ListGraph::Node nSiteA = bipartiteSurface.constitutionRefMap[n];
-//                std::cout<<"L: "<<graph.getXPath(nSiteA)<<std::endl;
+            for (auto&& [uid, u] : graph::views::vertexlist(bipartiteSurface)) {
+                auto uValue=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
+                //std::cout<<"L: "<<graph.getXPath(uValue)<<std::endl;
             }
        });
        CHECK_EQ(graph.getNumberOfAtomSites(), 4016);
@@ -102,19 +104,16 @@ TEST_CASE("test bipartite of 1a30.cif.gz"){
             bipartiteSurface();
             sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
             
-            for (sylvanmats::surface::BipartiteSurface::BlueNodeIt n(bipartiteSurface); n!=lemon::INVALID; ++n){
-                lemon::ListGraph::Node nSiteA = bipartiteSurface.constitutionRefMap[n];
+            for (auto&& [uid, u] : graph::views::vertexlist(bipartiteSurface)) {
+                auto nSiteA=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
                 sylvanmats::element ele=periodicTable->index(graph.atomSites[nSiteA].type_symbol);
-//                std::cout<<"L: "<<graph.getXPath(nSiteA)<<" "<<graph.atomSites[nSiteA].type_symbol<<" "<<ele.mass<<std::endl;
-                //nlohmann::json::json_pointer eleKey("/elements/~0/symbol/"+graph.atomSites[nSiteA].type_symbol);
-                //auto start=jin[eleKey];
-                //std::cout<<"eleKey "<<eleKey.to_string()<<" "<<start<<std::endl;
+                //std::cout<<"L: "<<graph.getXPath(nSiteA)<<" "<<graph.atomSites[nSiteA].type_symbol<<" "<<ele.mass<<std::endl;
             }
 //            std::cout<<"BP: "<<lemon::countBlueNodes(bipartiteSurface)<<" "<<lemon::countRedNodes(bipartiteSurface)<<" "<<lemon::countEdges(bipartiteSurface)<<std::endl;
             std::valarray<unsigned int> distanceBin(0u, 100);
-            for (sylvanmats::surface::BipartiteSurface::EdgeIt e(bipartiteSurface); e!=lemon::INVALID; ++e){
-                lemon::ListGraph::Node nSiteA=bipartiteSurface.constitutionRefMap[bipartiteSurface.asRedNode(bipartiteSurface.u(e))];
-                lemon::ListGraph::Node nSiteB=bipartiteSurface.constitutionRefMap[bipartiteSurface.asBlueNode(bipartiteSurface.v(e))];
+            for(auto& [uid, vid, uv]: graph::views::edgelist(bipartiteSurface)){
+                lemon::ListGraph::Node nSiteA=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
+                lemon::ListGraph::Node nSiteB=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
                 sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
                 sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
                 double d=(pointB-pointA).norm();

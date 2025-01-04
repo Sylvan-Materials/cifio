@@ -35,7 +35,7 @@ build/src/type_test.o: src/type_test.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/type_test.o src/type_test.cpp
 
-build/src/bipartite_test.o: CXXFLAGS= -DNDEBUG -O3 -pthread -fopenmp -std=c++26 -I../include -I../include -I../src -I../src -I../cpp_modules/lemon/dist/include -I../cpp_modules/fmt/dist/include -I../cpp_modules/graph-v2/include -I../cpp_modules/json-thresher/include -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include -I../cpp_modules/zlib/dist/include -I../cpp_modules/antlr4/runtime/Cpp/run/include/antlr4-runtime -I../cpp_modules/urlcpp -I../cpp_modules/openssl/openssl/include -I../cpp_modules/doctest -MMD
+build/src/bipartite_test.o: CXXFLAGS= -Wtemplate-body -DNDEBUG -O3 -pthread -fopenmp -std=c++26 -I../include -I../include -I../src -I../src -I../cpp_modules/lemon/dist/include -I../cpp_modules/fmt/dist/include -I../cpp_modules/graph-v2/include -I../cpp_modules/json-thresher/include -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include -I../cpp_modules/zlib/dist/include -I../cpp_modules/antlr4/runtime/Cpp/run/include/antlr4-runtime -I../cpp_modules/urlcpp -I../cpp_modules/openssl/openssl/include -I../cpp_modules/doctest -MMD
 build/src/bipartite_test.o: src/bipartite_test.cpp 
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/bipartite_test.o src/bipartite_test.cpp
