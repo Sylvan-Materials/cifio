@@ -34,7 +34,7 @@
     "json": "cd cpp_modules/json-thresher && pwd && MODULE_DIRECTORY=../ make -f Makefile all",
     "xml": "cd cpp_modules/xml-thresher && pwd && MODULE_DIRECTORY=../ make -f Makefile all",
     "build": "cd test && pwd && which make && make -j 3 -f Makefile all",
-    "test": "cnpm build && cd test && pwd && ./test --test-suite='bipartite' ",
+    "test": "cnpm build && cd test && pwd && ./test --test-case='test accessible two spheres' --subcase='in the y-z plane' ",
     "lib": "make -j 3 -f Makefile all"
   },
   "author": "rimmartin",

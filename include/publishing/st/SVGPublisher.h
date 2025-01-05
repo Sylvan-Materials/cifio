@@ -9,12 +9,11 @@
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<double, double, double, std::string>>>{
-    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
+    auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
         return ctx.begin();
     }
     
-     template <typename FormatContext>
-     auto format(const std::vector<std::tuple<double, double, double, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<double, double, double, std::string>>& v, format_context& ctx) const -> format_context::iterator {
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};
@@ -29,6 +28,7 @@ struct fmt::formatter<std::vector<std::tuple<double, double, double, std::string
 //            size_t d=v[0];
 //            std::format_to(ctx.out(), vf, d);
 //        }
+        std::cout<<"c;s "<<v.size()<<std::endl;
         for (int i= 0; i < v.size(); ++i){
             double i0=std::get<0>((std::tuple<double, double, double, std::string>)v[i]);
             double i1=std::get<1>((std::tuple<double, double, double, std::string>)v[i]);
@@ -51,12 +51,11 @@ struct fmt::formatter<std::vector<std::tuple<double, double, double, std::string
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<double, double, double, double, double, double, double, int, int, std::string>>>{
-    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
+    auto parse(format_parse_context& ctx) -> format_parse_context::iterator{
         return ctx.begin();
     }
     
-     template <typename FormatContext>
-     auto format(const std::vector<std::tuple<double, double, double, double, double, double, double, int, int, std::string>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<double, double, double, double, double, double, double, int, int, std::string>>& v, format_context& ctx) const -> format_context::iterator {
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};
@@ -99,12 +98,11 @@ struct fmt::formatter<std::vector<std::tuple<double, double, double, double, dou
 
 template <>
 struct fmt::formatter<std::vector<std::tuple<double, double, std::string, double>>>{
-    auto parse(format_parse_context& ctx) -> decltype(ctx.begin()){
+    auto parse(format_parse_context& ctx) -> format_parse_context::iterator{
         return ctx.begin();
     }
     
-     template <typename FormatContext>
-     auto format(const std::vector<std::tuple<double, double, std::string, double>>& v, FormatContext& ctx) const -> decltype(ctx.out()){
+     auto format(const std::vector<std::tuple<double, double, std::string, double>>& v, format_context& ctx) const -> format_context::iterator {
 //        const auto&& buf=ctx.out();
 //        if(curly){
 //            constexpr char* fmt={"{{"};
@@ -124,7 +122,7 @@ struct fmt::formatter<std::vector<std::tuple<double, double, std::string, double
             double i1=std::get<1>((std::tuple<double, double, std::string, double>)v[i]);
             std::string i2=std::get<2>((std::tuple<double, double, std::string, double>)v[i]);
             double i3=std::get<3>((std::tuple<double, double, std::string, double>)v[i]);
-            fmt::vformat_to(ctx.out(), "    <text x=\"{:>.4f}\" y=\"{:>.4f}\" class=\"medium\">{:>.4f}\</text>\n", fmt::make_format_args(i0, i1, i3));
+            fmt::vformat_to(ctx.out(), "    <text x=\"{:>.4f}\" y=\"{:>.4f}\" class=\"medium\">{:>.4f}</text>\n", fmt::make_format_args(i0, i1, i3));
         }
         constexpr char* fmt={"\n"};
         return fmt::format_to(ctx.out(), fmt);

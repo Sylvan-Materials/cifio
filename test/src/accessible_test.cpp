@@ -8,6 +8,9 @@
 #include <iterator>
 #include <numbers>
 #include <ranges>
+#include <cassert>
+
+#include "graph/container/dynamic_graph.hpp"
 
 #define protected public
 
@@ -23,14 +26,11 @@
 
 #include "surface/Accessible.h"
 
-#include "antlr4-runtime.h"
-#include "parsing/CIFLexer.h"
-#include "parsing/CIFParser.h"
-
 TEST_SUITE("accessible"){
 
 TEST_CASE("test accessible two spheres"){
     SUBCASE("in the y-z plane"){
+        std::cout<<" in the y-z plane"<<std::endl;
         sylvanmats::constitution::Graph graph;
         lemon::ListGraph::Node atomSiteA=graph.addNode();
         graph.atomSites[atomSiteA].Cartn_x=0.0;
@@ -57,7 +57,7 @@ TEST_CASE("test accessible two spheres"){
             sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
             std::vector<std::tuple<double, double, double, std::string>> circleLoop;
             double maxRadius=0.0;
-            for(sylvanmats::surface::circle<double> c : circles){
+            for(sylvanmats::surface::circle<double>& c : circles){
                 circleLoop.insert(circleLoop.begin(), std::make_tuple(c.center[0], c.center[1], c.r0, (c.direction==sylvanmats::surface::COUNTER_CLOCKWISE) ? "green" : "blue"));
                 maxRadius=std::max(maxRadius, c.r0);
             }
@@ -65,13 +65,14 @@ TEST_CASE("test accessible two spheres"){
             svgPublisher.setWidth(4*maxRadius);
 //            svgPublisher.add("offset_x", 2*maxRadius);
 //            svgPublisher.add("offset_y", 2*maxRadius);
-//            svgPublisher.add("circles", circleLoop);
+            svgPublisher.addCircles("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("y_z.svg");
             ofs2<<content<<std::endl;
         });
     }
     SUBCASE("in the x-z plane"){
+        std::cout<<" in the x-z plane"<<std::endl;
         sylvanmats::constitution::Graph graph;
         lemon::ListGraph::Node atomSiteA=graph.addNode();
         graph.atomSites[atomSiteA].Cartn_x=0.0;
@@ -104,13 +105,14 @@ TEST_CASE("test accessible two spheres"){
             svgPublisher.setWidth(4*maxRadius);
 //            svgPublisher.add("offset_x", 2*maxRadius);
 //            svgPublisher.add("offset_y", 2*maxRadius);
-//            svgPublisher.add("circles", circleLoop);
+            svgPublisher.addCircles("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("x_z.svg");
             ofs2<<content<<std::endl;
         });
     }
     SUBCASE("in the x-y plane"){
+        std::cout<<" in the x-y plane"<<std::endl;
         sylvanmats::constitution::Graph graph;
         lemon::ListGraph::Node atomSiteA=graph.addNode();
         graph.atomSites[atomSiteA].Cartn_x=0.0;
@@ -132,6 +134,7 @@ TEST_CASE("test accessible two spheres"){
         accessible.radii["S"]=6.0;
         accessible([](std::string name, std::vector<sylvanmats::surface::circle<double>>& circles){
             std::filesystem::path path="../../cifio/templates/svg";
+            std::cout<<"SVGPublisher "<<path<<std::endl;
             sylvanmats::publishing::st::SVGPublisher svgPublisher(path);
             std::vector<std::tuple<double, double, double, std::string>> circleLoop;
             double maxRadius=0.0;
@@ -143,7 +146,7 @@ TEST_CASE("test accessible two spheres"){
             svgPublisher.setWidth(4*maxRadius);
 //            svgPublisher.add("offset_x", 2*maxRadius);
 //            svgPublisher.add("offset_y", 2*maxRadius);
-//            svgPublisher.add("circles", circleLoop);
+            svgPublisher.addCircles("circles", circleLoop);
             std::string&& content = svgPublisher.render();
             std::ofstream ofs2("x_y.svg");
             ofs2<<content<<std::endl;
@@ -341,12 +344,34 @@ TEST_CASE("test accessible eight spheres"){
         std::vector<sylvanmats::surface::circle<double>>&& circles=atomAreaExposure.project(graph, nSiteA, ri, engulfed);
         if(atomAreaExposure.adjustAnyTangentNorthPoles(graph, nSiteA, ri, circles))std::cout<<"hit at least one north pole "<<std::endl;
         if(!engulfed){
+            sylvanmats::surface::G projectedGraphv2;
+            std::vector<size_t> vertices;
+            std::vector<std::tuple<graph::vertex_id_t<sylvanmats::surface::G>, graph::vertex_id_t<sylvanmats::surface::G>, sylvanmats::surface::arc<double>>> arcs;
             lemon::ListDigraph projectedGraph;
             lemon::ListDigraph::ArcMap<sylvanmats::surface::arc<double>> arcMap(projectedGraph);
-            auto [clockwiseCount, countOverlays, countIntersections, countFulls] = atomAreaExposure.graphProjection(projectedGraph, circles, arcMap);
+            auto [clockwiseCount, countOverlays, countIntersections, countFulls] = atomAreaExposure.graphProjection(projectedGraphv2, vertices, projectedGraph, circles, arcs, arcMap);
             std::cout<<" circles.size() "<<circles.size()<<" "<<graph.atomSites[nSiteA].id<<" "<<graph.atomSites[nSiteA].label_atom_id<<" clockwiseCount "<<clockwiseCount<<" circles: "<<circles.size()<<" nodes: "<<lemon::countNodes(projectedGraph)<<" arcs: "<<lemon::countArcs(projectedGraph)<<" countOverlays: "<<countOverlays<<" countIntersections "<<countIntersections<<" countFulls: "<<countFulls<<std::endl;
+            if(countIntersections!=0){
+                std::sort(arcs.begin(), arcs.end(), [](std::tuple<graph::vertex_id_t<sylvanmats::surface::G>, graph::vertex_id_t<sylvanmats::surface::G>, sylvanmats::surface::arc<double>>& a, std::tuple<graph::vertex_id_t<sylvanmats::surface::G>, graph::vertex_id_t<sylvanmats::surface::G>, sylvanmats::surface::arc<double>>& b){return std::get<0>(a)<std::get<0>(b) || std::get<1>(a)<std::get<1>(b);});
+                std::cout<<"vertices "<<vertices.size()<<" "<<arcs.size()<<std::endl;
+                using value = std::ranges::range_value_t<decltype(arcs)>;
+                graph::vertex_id_t<sylvanmats::surface::G> N = static_cast<graph::vertex_id_t<sylvanmats::surface::G>>(graph::size(graph::vertices(projectedGraphv2)));
+                using edge_desc  = graph::edge_info<graph::vertex_id_t<sylvanmats::surface::G>, true, void, sylvanmats::surface::arc<double>>;
+                projectedGraphv2.reserve_vertices(vertices.size());
+                projectedGraphv2.reserve_edges(arcs.size());
+                projectedGraphv2.load_vertices(vertices, [&](size_t& nm) {
+                    auto uid = static_cast<graph::vertex_id_t<sylvanmats::surface::G>>(&nm - vertices.data());
+                    //std::cout<<"uid "<<uid<<std::endl;
+                    return graph::copyable_vertex_t<graph::vertex_id_t<sylvanmats::surface::G>, size_t>{uid, nm};
+                  });
+                projectedGraphv2.load_edges(arcs, [](const value& val) -> edge_desc {
+                        //std::cout<<"edge "<<std::get<0>(val)<<" "<<std::get<1>(val)<<" "<<std::get<2>(val)<<std::endl;
+                    return edge_desc{std::get<0>(val), std::get<1>(val), std::get<2>(val)};
+                  }, N);
+
+            }
             clockwiseCount=0;
-            auto [dV, dA] = atomAreaExposure.integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraph, circles, arcMap, clockwiseCount);
+            auto [dV, dA] = atomAreaExposure.integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraphv2, vertices, projectedGraph, circles, arcs, arcMap, clockwiseCount);
             std::cout<<"domain connectivity nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
             if(clockwiseCount==0 || circles.size()<=1){
                 dV+=(4.0*std::numbers::pi*std::pow(ri, 3)/3.0);

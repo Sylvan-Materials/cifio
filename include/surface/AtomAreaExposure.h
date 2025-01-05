@@ -8,6 +8,8 @@
 #include "linear/Array.h"
 #include "linear/Vector.h"
 
+#include "graph/container/dynamic_graph.hpp"
+
 #include "lemon/euler.h"
 #include "lemon/bellman_ford.h"
 #include <lemon/suurballe.h>
@@ -67,6 +69,8 @@ namespace sylvanmats::surface{
         virtual ~arc() = default;
     };
 
+    using G = graph::container::dynamic_graph<arc<double>, size_t>;
+
     /**
     * http://paulbourke.net/geometry/circlesphere/ "Intersection of two circles"
     **/
@@ -84,16 +88,19 @@ namespace sylvanmats::surface{
         std::mutex m;
         std::condition_variable cv;
         double toleranceSquared=0.0001*0.0001;
+        std::vector<circle<double>> circles;
 
         public:
+        AtomAreaExposure() = delete;
         AtomAreaExposure(sylvanmats::constitution::Graph& graph, lemon::ListGraph::Node& nSiteA, double ri,std::unordered_map<std::string, double>& radii, double probe_radius=1.4) : graph (graph), nSiteA (nSiteA), ri (ri), radii (radii), probe_radius (probe_radius), status (UNKNOWN) {
         };
         AtomAreaExposure(const AtomAreaExposure& orig) = delete;
+        AtomAreaExposure(AtomAreaExposure&& other) = delete;
         virtual ~AtomAreaExposure() = default;
 
         void operator()(){
-            try{
             do{
+            try{
                 status.store(RUNNING);
                 siteV=0.0;
                 siteA=0.0;
@@ -105,12 +112,34 @@ namespace sylvanmats::surface{
                 else if(engulfed){
                 }
                 else{
+                    G projectedGraphv2;
                     lemon::ListDigraph projectedGraph;
+                    std::vector<size_t> vertices;
+                    std::vector<std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, arc<double>>> arcs;
                     lemon::ListDigraph::ArcMap<arc<double>> arcMap(projectedGraph);
-                    auto [clockwiseCount, countOverlays, countIntersections, countFulls] = graphProjection(projectedGraph, circles, arcMap);
-//                    std::cout<<"clockwiseCount "<<clockwiseCount<<" "<<circles.size()<<" "<<countOverlays<<" "<<countIntersections<<" "<<countFulls<<std::endl;
+                    auto [clockwiseCount, countOverlays, countIntersections, countFulls] = graphProjection(projectedGraphv2, vertices, projectedGraph, circles, arcs, arcMap);
+                    std::cout<<circles.size()<<" clockwiseCount "<<clockwiseCount<<" "<<circles.size()<<" "<<countOverlays<<" "<<countIntersections<<" "<<countFulls<<std::endl;
+                    if(countIntersections!=0){
+                        std::sort(arcs.begin(), arcs.end(), [](std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, arc<double>>& a, std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, arc<double>>& b){return std::get<0>(a)<std::get<0>(b) || std::get<1>(a)<std::get<1>(b);});
+                        std::cout<<"vertices "<<vertices.size()<<" "<<arcs.size()<<std::endl;
+                        using value = std::ranges::range_value_t<decltype(arcs)>;
+                        graph::vertex_id_t<G> N = static_cast<graph::vertex_id_t<G>>(graph::size(graph::vertices(projectedGraphv2)));
+                        using edge_desc  = graph::edge_info<graph::vertex_id_t<G>, true, void, arc<double>>;
+                        projectedGraphv2.reserve_vertices(vertices.size());
+                        projectedGraphv2.reserve_edges(arcs.size());
+                        projectedGraphv2.load_vertices(vertices, [&](size_t& nm) {
+                            auto uid = static_cast<graph::vertex_id_t<G>>(&nm - vertices.data());
+                            //std::cout<<"uid "<<uid<<std::endl;
+                            return graph::copyable_vertex_t<graph::vertex_id_t<G>, size_t>{uid, nm};
+                          });
+                        projectedGraphv2.load_edges(arcs, [](const value& val) -> edge_desc {
+                                //std::cout<<"edge "<<std::get<0>(val)<<" "<<std::get<1>(val)<<" "<<std::get<2>(val)<<std::endl;
+                            return edge_desc{std::get<0>(val), std::get<1>(val), std::get<2>(val)};
+                          }, N);
+
+                    }
                     clockwiseCount=0;
-                    auto [dV, dA] = integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraph, circles, arcMap, clockwiseCount);
+                    auto [dV, dA] = integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraphv2, vertices, projectedGraph, circles, arcs, arcMap, clockwiseCount);
                     std::cout<<"domain connectivity nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
                     if(clockwiseCount==0 || circles.size()<=1){
                         dV+=(4.0*std::numbers::pi*std::pow(ri, 3)/3.0);
@@ -120,7 +149,10 @@ namespace sylvanmats::surface{
                     siteA+=dA;
                 }
                 }
-                
+                std::cout<<"RUNNING "<<status.load()<<" "<<RUNNING<<" to ready "<<std::endl;
+            } catch (const std::bad_alloc& e) {
+                std::cout << "Allocation failed: " << e.what() << '\n';
+            }
                 if(status.load()==RUNNING)status.store(DATA_READY);
                 std::unique_lock<std::mutex> lk(m);
                 do{
@@ -128,10 +160,7 @@ namespace sylvanmats::surface{
                 }while(status.load()==DATA_READY);
                 std::cout<<"done waiting "<<std::endl;
             }while(status.load()!=FINISHED);
-            //std::cout<<"aae finish finished "<<std::endl;
-            } catch (const std::bad_alloc& e) {
-                std::cout << "Allocation failed: " << e.what() << '\n';
-            }
+            std::cout<<"aae finish finished "<<std::endl;
         };
 
         STATUS checkStatus(){return status.load();};
@@ -141,10 +170,11 @@ namespace sylvanmats::surface{
         void setAtomSite(lemon::ListGraph::Node& nSiteA){this->nSiteA = nSiteA;ri=(radii.contains(graph.atomSites[nSiteA].type_symbol)) ? radii[graph.atomSites[nSiteA].type_symbol]: 2.0;};
         double getVolume(){return siteV;};
         double getArea(){return siteA;};
+        std::vector<circle<double>>& getCircles(){return circles;};
 
     protected:
         std::vector<circle<double>> project(sylvanmats::constitution::Graph& graph, lemon::ListGraph::Node& nSiteA, double ri, bool& engulfed){
-            std::vector<circle<double>> circles;
+            if(!circles.empty())circles.clear();
             sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
             for(lemon::ListGraph::NodeIt nSiteB(graph); nSiteB!=lemon::INVALID; ++nSiteB){
                 if(graph.atomSites[nSiteB].visibility){
@@ -191,7 +221,7 @@ namespace sylvanmats::surface{
                             circles.back().d=d;
                             circles.back().center3d=pointB;
                             if(a>=0.0)circles.back().direction=CLOCKWISE;
-//                            std::cout<<pointA<<" "<<pointB<<" a: "<<a<<" b: "<<b<<" c: "<<c<<" d: "<<d<<" ground zero t0="<<circles.back().center[0]<<" s0="<<circles.back().center[1]<<" r0="<<circles.back().r0<<" ri="<<ri<<" rj="<<rj<<std::endl;
+                            std::cout<<pointA<<" "<<pointB<<" a: "<<a<<" b: "<<b<<" c: "<<c<<" d: "<<d<<" ground zero t0="<<circles.back().center[0]<<" s0="<<circles.back().center[1]<<" r0="<<circles.back().r0<<" ri="<<ri<<" rj="<<rj<<std::endl;
                         }
                     }
 //                    else std::cout<<"neither "<<pointB<<std::endl;
@@ -214,12 +244,12 @@ namespace sylvanmats::surface{
             return atLeastOne;
         };
         
-        std::tuple<unsigned int, unsigned int, unsigned int, unsigned int> graphProjection(lemon::ListDigraph& projectedGraph, std::vector<circle<double>>& circles, lemon::ListDigraph::ArcMap<arc<double>>& arcMap){
+        std::tuple<unsigned int, unsigned int, unsigned int, unsigned int> graphProjection(G& projectedGraphv2, std::vector<size_t>& vertices, lemon::ListDigraph& projectedGraph, std::vector<circle<double>>& circles, std::vector<std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, arc<double>>>& arcs, lemon::ListDigraph::ArcMap<arc<double>>& arcMap){
             unsigned int clockwiseCount=0;
             unsigned int countOverlays=0;
             unsigned int countIntersections=0;
             unsigned int countFulls=0;
-            std::map<unsigned int, std::vector<std::tuple<double, lemon::ListDigraph::Node>>> circleAngleMap;
+            std::map<unsigned int, std::vector<std::tuple<double, lemon::ListDigraph::Node, size_t>>> circleAngleMap;
             for(sylvanmats::surface::circle<double>& circleA : circles){
                 if(circleA.direction==CLOCKWISE)clockwiseCount++;
                 for(sylvanmats::surface::circle<double>& circleB : circles | std::views::filter([&circleA](sylvanmats::surface::circle<double>& c){return c.id>circleA.id;})){
@@ -247,16 +277,18 @@ namespace sylvanmats::surface{
                         //if(β0<α0)β0+=2.0*std::numbers::pi;
                         lemon::ListDigraph::Node nA=projectedGraph.addNode();
                         lemon::ListDigraph::Node nB=projectedGraph.addNode();
-                        circleAngleMap[circleA.id].push_back(std::make_tuple(α0, nA));
-                        circleAngleMap[circleA.id].push_back(std::make_tuple(β0, nB));
+                        vertices.push_back(vertices.size());
+                        circleAngleMap[circleA.id].push_back(std::make_tuple(α0, nA, vertices.back()));
+                        vertices.push_back(vertices.size());
+                        circleAngleMap[circleA.id].push_back(std::make_tuple(β0, nB, vertices.back()));
                         //if(β>2.0*std::numbers::pi){α-=2.0*std::numbers::pi;β-=2.0*std::numbers::pi;};
 //                        std::cout<<"t1 "<<circleA.center[0]<<" s1 "<<circleA.center[1]<<" r1 "<<circleA.r0<<" α "<<α0<<" β "<<β0<<" "<<(β0-α0)<<std::endl;
                         double α1=findAngleBetween(unitX, (P3b-P1));
                         double β1=findAngleBetween(unitX, (P3a-P1));
                         //if(a>d)std::swap(α1, β1);
                         //if(β1<α1)β1+=2.0*std::numbers::pi;
-                        circleAngleMap[circleB.id].push_back(std::make_tuple(α1, nB));
-                        circleAngleMap[circleB.id].push_back(std::make_tuple(β1, nA));
+                        circleAngleMap[circleB.id].push_back(std::make_tuple(α1, nB, vertices.back()));
+                        circleAngleMap[circleB.id].push_back(std::make_tuple(β1, nA, vertices.back()-1));
                         //if(β>2.0*std::numbers::pi){α-=2.0*std::numbers::pi;β-=2.0*std::numbers::pi;};
 //                        std::cout<<"t1 "<<circleB.center[0]<<" s1 "<<circleB.center[1]<<" r1 "<<circleB.r0<<" α "<<α1<<" β "<<β1<<" "<<(β1-α1)<<std::endl;
                         countIntersections++;
@@ -274,8 +306,12 @@ namespace sylvanmats::surface{
                     double α=std::get<0>(circleAngle.second[angleIndex]);
                     double β=(angleIndex<circleAngle.second.size()-1) ? std::get<0>(circleAngle.second[angleIndex+1]) : std::get<0>(circleAngle.second[0])+2.0*std::numbers::pi;
 //                    std::cout<<idA<<" α: "<<α<<" β: "<<β<<std::endl;
+                    arcs.push_back(std::make_tuple(std::get<2>(circleAngle.second[angleIndex]), (angleIndex<circleAngle.second.size()-1) ? std::get<2>(circleAngle.second[angleIndex+1]) : std::get<2>(circleAngle.second[0]), arc<double>{}));
+
                     lemon::ListDigraph::Arc a=projectedGraph.addArc(std::get<1>(circleAngle.second[angleIndex]), (angleIndex<circleAngle.second.size()-1) ? std::get<1>(circleAngle.second[angleIndex+1]) : std::get<1>(circleAngle.second[0]));
                     for(sylvanmats::surface::circle<double>& circleA : circles | std::views::filter([&idA](sylvanmats::surface::circle<double>& c){return c.id==idA;})){
+                        std::get<2>(arcs.back())=arc<double>(α, β, circleA.id, circleA.center[0], circleA.center[1], circleA.r0, circleA.direction, circleA.a, circleA.b, circleA.c, circleA.d);
+                         std::get<2>(arcs.back()).center3d=circleA.center3d;
                         arcMap[a]=arc<double>(α, β, circleA.id, circleA.center[0], circleA.center[1], circleA.r0, circleA.direction, circleA.a, circleA.b, circleA.c, circleA.d);
                         arcMap[a].center3d=circleA.center3d;
                     }
@@ -320,13 +356,17 @@ namespace sylvanmats::surface{
             return std::make_tuple(clockwiseCount, countOverlays, countIntersections, countFulls);
         };
 
-        std::tuple<double, double> integrateAlongDomainPath(unsigned int countIntersections, unsigned int countFulls, double zi, double ri, lemon::ListDigraph& projectedGraph, std::vector<circle<double>>& circles, lemon::ListDigraph::ArcMap<arc<double>>& arcMap, unsigned int& clockwiseCount){
+        std::tuple<double, double> integrateAlongDomainPath(unsigned int countIntersections, unsigned int countFulls, double zi, double ri, G& projectedGraphv2, std::vector<size_t>& vertices, lemon::ListDigraph& projectedGraph, std::vector<circle<double>>& circles, std::vector<std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, arc<double>>>& arcs, lemon::ListDigraph::ArcMap<arc<double>>& arcMap, unsigned int& clockwiseCount){
                 if(countIntersections==0){
+                    vertices.push_back(vertices.size());
+                    arcs.push_back(std::make_tuple(vertices.back(), vertices.back(), arc<double>(0.0, 2.0*std::numbers::pi, circles[0].id, circles[0].center[0], circles[0].center[1], circles[0].r0, circles[0].direction, circles[0].a, circles[0].b, circles[0].c, circles[0].d)));
                     lemon::ListDigraph::Node nA=projectedGraph.addNode();
                     lemon::ListDigraph::Arc e=projectedGraph.addArc(nA, nA);
                     arcMap[e]=arc<double>(0.0, 2.0*std::numbers::pi, circles[0].id, circles[0].center[0], circles[0].center[1], circles[0].r0, circles[0].direction, circles[0].a, circles[0].b, circles[0].c, circles[0].d);
+                    std::get<2>(arcs.back()).center3d=circles[0].center3d;
                     arcMap[e].center3d=circles[0].center3d;
                     if(arcMap[e].direction==CLOCKWISE)clockwiseCount++;
+                    std::get<2>(arcs.back()).member_of_domain=true;
                     arcMap[e].member_of_domain=true;
                     std::cout<<"no intersections "<<std::endl;
                     return integrate(zi, ri, arcMap[e].center[0], arcMap[e].center[1], arcMap[e].r0, arcMap[e].direction);

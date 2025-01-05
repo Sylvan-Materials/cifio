@@ -6,6 +6,8 @@
 #include <utility>
 #include <cstring>
 
+#include "graph/container/dynamic_graph.hpp"
+
 #define protected public
 
 #include "antlr4-runtime.h"

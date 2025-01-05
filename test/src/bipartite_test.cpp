@@ -10,6 +10,7 @@
 #include <valarray>
 #include <ranges>
 #include <cmath>
+#include <cassert>
 
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"

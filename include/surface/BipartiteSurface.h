@@ -15,19 +15,19 @@
 
 namespace sylvanmats::surface {
     
-    using G = graph::container::dynamic_graph<size_t, lemon::ListGraph::Node>;
+    using biG = graph::container::dynamic_graph<size_t, lemon::ListGraph::Node>;
 
-    class BipartiteSurface : public G {
+    class BipartiteSurface : public biG {
         protected:
         sylvanmats::constitution::Graph& graph;
         std::vector<sylvanmats::constitution::unique_component>& uniqueComponents;
         std::vector<lemon::ListGraph::Node> bpVertices;
-        std::vector<std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, int>> edges;
+        std::vector<std::tuple<graph::vertex_id_t<biG>, graph::vertex_id_t<biG>, int>> edges;
         public:
         //lemon::CrossRefMap<BipartiteSurface, lemon::ListBpGraph::Node, lemon::ListGraph::Node> constitutionRefMap;
         
         public:
-        BipartiteSurface(sylvanmats::constitution::Graph& graph, std::vector<sylvanmats::constitution::unique_component>& uniqueComponents) : G(), graph (graph), uniqueComponents (uniqueComponents) {};
+        BipartiteSurface(sylvanmats::constitution::Graph& graph, std::vector<sylvanmats::constitution::unique_component>& uniqueComponents) : biG(), graph (graph), uniqueComponents (uniqueComponents) {};
         BipartiteSurface(const BipartiteSurface& orig) = delete;
         virtual ~BipartiteSurface() =  default;
 
@@ -60,17 +60,17 @@ namespace sylvanmats::surface {
                     }
                 });
             });
-            std::sort(edges.begin(), edges.end(), [](std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, int>& a, std::tuple<graph::vertex_id_t<G>, graph::vertex_id_t<G>, int>& b){return std::get<0>(a)<std::get<0>(b) || std::get<1>(a)<std::get<1>(b);});
+            std::sort(edges.begin(), edges.end(), [](std::tuple<graph::vertex_id_t<biG>, graph::vertex_id_t<biG>, int>& a, std::tuple<graph::vertex_id_t<biG>, graph::vertex_id_t<biG>, int>& b){return std::get<0>(a)<std::get<0>(b) || std::get<1>(a)<std::get<1>(b);});
             std::cout<<"bpVertices "<<bpVertices.size()<<" "<<edges.size()<<std::endl;
             using value = std::ranges::range_value_t<decltype(edges)>;
-            graph::vertex_id_t<G> N = static_cast<graph::vertex_id_t<G>>(graph::size(graph::vertices(*this)));
-            using edge_desc  = graph::edge_info<graph::vertex_id_t<G>, true, void, int>;
+            graph::vertex_id_t<biG> N = static_cast<graph::vertex_id_t<biG>>(graph::size(graph::vertices(*this)));
+            using edge_desc  = graph::edge_info<graph::vertex_id_t<biG>, true, void, int>;
             reserve_vertices(bpVertices.size());
             reserve_edges(edges.size());
             load_vertices(bpVertices, [&](lemon::ListGraph::Node& nm) {
-                auto uid = static_cast<graph::vertex_id_t<G>>(&nm - bpVertices.data());
+                auto uid = static_cast<graph::vertex_id_t<biG>>(&nm - bpVertices.data());
                 //std::cout<<"uid "<<uid<<std::endl;
-                return graph::copyable_vertex_t<graph::vertex_id_t<G>, lemon::ListGraph::Node>{uid, nm};
+                return graph::copyable_vertex_t<graph::vertex_id_t<biG>, lemon::ListGraph::Node>{uid, nm};
               });
             load_edges(edges, [](const value& val) -> edge_desc {
                     //std::cout<<"edge "<<std::get<0>(val)<<" "<<std::get<1>(val)<<" "<<std::get<2>(val)<<std::endl;

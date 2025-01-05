@@ -10,10 +10,13 @@
 #include <algorithm>
 #include <tuple>
 #include <thread>
+#include <chrono>
 
 #include "surface/AtomAreaExposure.h"
 
 #include "constitution/Graph.h"
+
+using namespace std::chrono_literals;
 
 namespace sylvanmats::surface {
     
@@ -84,6 +87,7 @@ namespace sylvanmats::surface {
                                 accessibles[aae->getAtomSite()].atom_site_area = aae->getArea();
                                 V+=accessibles[aae->getAtomSite()].atom_site_volume;
                                 A+=accessibles[aae->getAtomSite()].atom_site_area;
+                                apply(graph.getUniqueName(aae->getAtomSite())+".svg", aae->getCircles());
                                 if(nSiteA!=lemon::INVALID){
                                     aae->setAtomSite(nSiteA);
                                     aae->notifyAndContinue();
@@ -96,25 +100,41 @@ namespace sylvanmats::surface {
                         std::this_thread::yield();
                     }while(!completedOne);
                 }
-                //apply(graph.getUniqueName(nSiteA)+".svg", circles);
+
             }
             std::cout<<atomAreaExposures.size()<<" V "<<V<<" A "<<A<<" count "<<count<<" "<<lemon::countNodes(graph)<<std::endl;
             do{
-                for(auto aae : atomAreaExposures | std::views::filter([](std::shared_ptr<AtomAreaExposure>& a){ std::this_thread::yield();return a->checkStatus()==DATA_READY; })){
+                for(auto& aae : atomAreaExposures | std::views::filter([](std::shared_ptr<AtomAreaExposure>& a){ std::this_thread::yield();return a->checkStatus()==DATA_READY; })){
                          accessibles[aae->getAtomSite()].atom_site_volume = aae->getVolume();
                         accessibles[aae->getAtomSite()].atom_site_area = aae->getArea();
                         V+=accessibles[aae->getAtomSite()].atom_site_volume;
                         A+=accessibles[aae->getAtomSite()].atom_site_area;
+                        apply(graph.getUniqueName(aae->getAtomSite())+".svg", aae->getCircles());
                         aae->notifyAndFinish();
                         //std::vector<std::shared_ptr<AtomAreaExposure>>::iterator pos=std::find(atomAreaExposures.begin(), atomAreaExposures.end(), aae);
                         //if(pos!=atomAreaExposures.end())atomAreaExposures.erase(pos);
                         count++;
-                        std::cout<<count<<" "<<lemon::countNodes(graph)<<std::endl;
+                        std::cout<<count<<" count "<<lemon::countNodes(graph)<<std::endl;
                         break;
                 }
                 std::this_thread::yield();
+                if(count==lemon::countNodes(graph)){
+                    int countFinished=0;
+                    for(auto& aae : atomAreaExposures){
+                        if(aae->checkStatus()!=FINISHED)std::cout<<"not finished "<<aae->checkStatus()<<" "<<FINISHED<<std::endl;
+                        else {aae->notifyAndFinish();countFinished++;}
+                        std::this_thread::sleep_for(400ms);
+                    }
+                    /*for(auto& t : threads){
+                        std::cout<<"Requesting stop of sleepy worker "<<" "<<t.joinable()<<std::endl;
+                        //t.request_stop();
+                        //t.join();
+                        std::cout<<"Sleepy worker joined"<<std::endl;
+                    }*/
+                    //std::cout<<countFinished<<" threads size "<<threads.size()<<" "<<atomAreaExposures.size()<<std::endl;
+                }
             }while(count<lemon::countNodes(graph));
-            std::cout<<"V "<<V<<" A "<<A<<std::endl;
+            std::cout<<"V: "<<V<<" A: "<<A<<std::endl;
         }
 
     };
