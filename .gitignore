@@ -3,6 +3,7 @@ src/parsing
 cpp_modules/
 test/examples/
 test/*.json
+test/*.svg
 /tmp/
 /cache/
 /db/

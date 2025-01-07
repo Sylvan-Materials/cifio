@@ -21,7 +21,7 @@ namespace sylvanmats::linear{
         using Matrix<T, R, 1>::size;
     public:
         Vector() : Matrix<T, R, 1>(){};
-        Vector(T a, T b) : Matrix<T, R, 1>(a, b){};
+        Vector(T a, T b) : Matrix<T, R, 1>({a, b}){};
         Vector(T a, T b, T c) : Matrix<T, R, 1>({a, b, c}){};
         Vector(T* a) : Matrix<T, R, 1>(a) {};
         Vector(std::initializer_list<T> il) : Matrix<T, R, 1>(il) {};

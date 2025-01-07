@@ -243,7 +243,7 @@ TEST_CASE("test accessible three spheres"){
             svgPublisher.setWidth(4*maxRadius);
 //            svgPublisher.add("offset_x", 2*maxRadius);
 //            svgPublisher.add("offset_y", 2*maxRadius);
-//            svgPublisher.add("circles", circleLoop);
+            svgPublisher.addCircles("circles", circleLoop);
         std::string&& content = svgPublisher.render();
         std::ofstream ofs2("three"+name);
         ofs2<<content<<std::endl;

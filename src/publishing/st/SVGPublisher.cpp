@@ -10,7 +10,7 @@ namespace sylvanmats::publishing::st{
     SVGPublisher::SVGPublisher(std::filesystem::path& stPath) : Publisher(stPath) {
        std::string templateLocation=(getenv("CIFIO_DB_LOCATION")!=NULL) ? std::string(getenv("CIFIO_DB_LOCATION"))+"/../templates/svg": "../templates/svg";
         std::filesystem::path path=templateLocation+"/svg.txt";
-        std::cout<<"SVGPublisher construct "<<path.string()<<std::endl;
+//        std::cout<<"SVGPublisher construct "<<path.string()<<std::endl;
         std::ifstream file(path);
         svgTemplate=std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     };
