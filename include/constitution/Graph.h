@@ -16,6 +16,8 @@
 
 #include "forcefield/bond_type.h"
 
+#include "graph/container/dynamic_graph.hpp"
+
 namespace sylvanmats::constitution {
     
     struct symmetry_labels{
@@ -265,6 +267,8 @@ namespace sylvanmats::constitution {
         std::string label_comp_id;
         std::string label_seq_id;
     };
+
+    using CG = graph::container::dynamic_graph<size_t, lemon::ListGraph::Node>;
 
     class Graph : public lemon::ListGraph {
         protected:

@@ -154,9 +154,9 @@ TEST_CASE("test tcp for 3sgs.cif.gz"){
     std::string comp_id="3sgs";
     std::string url = "https://files.rcsb.org/download/"+comp_id+".cif";
     sylvanmats::reading::TCPReader tcpReader;
-    tcpReader(url, [&comp_id](std::istream& is){
+    CHECK(tcpReader(url, [&comp_id](std::istream& is){
         std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-        CHECK_EQ(content.size(), 26817);
+        CHECK_EQ(content.size(), 32257);
         std::string path="./examples/"+comp_id+".cif.gz";
         gzFile file=gzopen(path.c_str(), "wb");
         int uncomprLen=1024;
@@ -176,10 +176,10 @@ TEST_CASE("test tcp for 3sgs.cif.gz"){
         }
 //        count++;
 //        gzseek(file, 1L, SEEK_CUR);
-        CHECK_EQ(count, 26817);
+        CHECK_EQ(count, 32257);
         gzclose(file);
         
-    });
+    }));
 
 }
 

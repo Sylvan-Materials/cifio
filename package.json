@@ -9,7 +9,7 @@
     "xml-thresher":"DataDriven-CAM/xml-thresher",
     "mio": "mandreyel/mio",
     "multi_index": "Alexhuszagh/multi_index",
-    "openssl": "openssl/openssl#openssl-3.3.1",
+    "openssl": "openssl/openssl#openssl-3.5.0",
     "urlcpp": "rimmartin/urlcpp",
     "zlib": "madler/zlib",
     "fmt": "fmtlib/fmt",
@@ -34,7 +34,7 @@
     "json": "cd cpp_modules/json-thresher && pwd && MODULE_DIRECTORY=../ make -f Makefile all",
     "xml": "cd cpp_modules/xml-thresher && pwd && MODULE_DIRECTORY=../ make -f Makefile all",
     "build": "cd test && pwd && which make && make -j 3 -f Makefile all",
-    "test": "cnpm build && cd test && pwd && ./test --test-suite='optimization' ",
+    "test": "cnpm build && cd test && pwd && ./test --test-case='test tcp for 3sgs.cif.gz' ",
     "lib": "make -j 3 -f Makefile all"
   },
   "author": "rimmartin",
