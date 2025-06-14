@@ -4,6 +4,8 @@ cpp_modules/
 test/examples/
 test/*.json
 test/*.svg
+test/*.obj
+test/test
 /tmp/
 /cache/
 /db/
@@ -12,6 +14,7 @@ test/*.svg
 /documents/*.out
 /documents/*.pdf
 /documents/*.gz
+/documents/*_drawing.tex
 dictionaries
 private
 /libcifio.so

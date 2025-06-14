@@ -114,7 +114,7 @@ namespace sylvanmats::surface {
                         //std::vector<std::shared_ptr<AtomAreaExposure>>::iterator pos=std::find(atomAreaExposures.begin(), atomAreaExposures.end(), aae);
                         //if(pos!=atomAreaExposures.end())atomAreaExposures.erase(pos);
                         count++;
-                        std::cout<<count<<" count "<<lemon::countNodes(graph)<<std::endl;
+//                        std::cout<<count<<" count "<<lemon::countNodes(graph)<<std::endl;
                         break;
                 }
                 std::this_thread::yield();

@@ -9,37 +9,37 @@
 
 namespace sylvanmats::algebra::geometric{
 
-    long double operator"" _e1234 ( long double d )
+    long double operator""_e1234 ( long double d )
     {
         return d;
     }
 
-    long double operator"" _e12 ( long double d )
+    long double operator""_e12 ( long double d )
     {
         return d;
     }
 
-    long double operator"" _e23 ( long double d )
+    long double operator""_e23 ( long double d )
     {
         return d;
     }
 
-    long double operator"" _e31 ( long double d )
+    long double operator""_e31 ( long double d )
     {
         return d;
     }
 
-    long double operator"" _e41 ( long double d )
+    long double operator""_e41 ( long double d )
     {
         return d;
     }
 
-    long double operator"" _e42 ( long double d )
+    long double operator""_e42 ( long double d )
     {
         return d;
     }
 
-    long double operator"" _e43 ( long double d )
+    long double operator""_e43 ( long double d )
     {
         return d;
     }

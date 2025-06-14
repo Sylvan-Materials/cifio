@@ -5,6 +5,9 @@
 
 namespace sylvanmats::linear{
 
+    template<std::numerical U, signed long long V, signed long long C> class Vector;
+    template<std::numerical T, signed long long R, signed long long C> class Matrix;
+    
     template<std::numerical T, signed long long R, signed long long C=1>
     class Array : public Matrix<T, R, C> {
     protected:
@@ -116,49 +119,49 @@ namespace sylvanmats::linear{
         };
 
         Array<T, R, C> operator + (const typename Array<T, R, C>::value_type& s){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=(s+operator[](i));
             return v2;
         };
 
         Array<T, R, C> operator + (const Array<T, R, C>& v){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=(operator[](i)+v[i]);
             return v2;
         };
 
         Array<T, R, C> operator - (){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=(-operator[](i));
             return v2;
         };
 
         Array<T, R, C> operator - (const typename Array<T, R, C>::value_type& s){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=(s-operator[](i));
             return v2;
         };
 
         Array<T, R, C> operator - (const Array<T, R, C>& v){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=(operator[](i)-v[i]);
             return v2;
         };
 
         Array<T, R, C> operator * (const typename Array<T, R, C>::value_type& s){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=operator[](i)*s;
             return v2;
         };
 
         Array<T, R, C> operator * (const Array<T, R, C>& v){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(_rows, _cols);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=operator[](i)*v[i];
             return v2;
@@ -195,7 +198,7 @@ namespace sylvanmats::linear{
         };
 
         void normalize(){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             T n = norm();
             *this/=n;
             //for(unsigned int i=0;i<R;i++)
@@ -203,7 +206,7 @@ namespace sylvanmats::linear{
         }
 
         Array<T, R, C> normalized(){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(*this);
             for(unsigned int i=0;i<_rows;i++)
                     /*co_yield*/ v2[i]=operator[](i);
             T n = norm();
@@ -214,7 +217,7 @@ namespace sylvanmats::linear{
         }
         
         Array<T, R, C> transpose(){
-            Array<T, R> v2(*this);
+            Array<T, R, C> v2(_cols, _rows);
             for(unsigned long long j=0;j<_cols;j++)
             for(unsigned long long i=0;i<_rows;i++)
                     /*co_yield*/ v2[j+C*i]=operator[](i+_rows*j);
@@ -222,24 +225,26 @@ namespace sylvanmats::linear{
             return v2;
         };
         
-//        Array<T, R, C> row(unsigned int s){
-//            Array<T, R, C> v2((*this)[std::slice(s, _cols, _rows)]);
-//            return v2;
-//        }
+       Vector<T, R, C> vector(){
+           Vector<T, R, C> v2(0.0l, this->rows(), this->cols());
+            for(unsigned long long i=0;i<_rows;i++)
+                    /*co_yield*/ v2[i]=operator[](i);
+           return v2;
+       };
     };
 
-    using Array2f = Array<float, 2>;
-    using Array2d = Array<double, 2>;
-    using Array2l = Array<long double, 2>;
+    using Array2f = Array<float, 1, 2>;
+    using Array2d = Array<double, 1, 2>;
+    using Array2l = Array<long double, 1, 2>;
 
-    using Array3f = Array<float, 3>;
-    using Array3d = Array<double, 3>;
-    using Array3l = Array<long double, 3>;
+    using Array3f = Array<float, 1, 3>;
+    using Array3d = Array<double, 1, 3>;
+    using Array3l = Array<long double, 1, 3>;
 
-    using ArrayXi = Array<int, -1>;
-    using ArrayXf = Array<float, -1>;
-    using ArrayXd = Array<double, -1>;
-    using ArrayXl = Array<long double, -1>;
+    using ArrayXi = Array<int, 1, -1>;
+    using ArrayXf = Array<float, 1, -1>;
+    using ArrayXd = Array<double, 1, -1>;
+    using ArrayXl = Array<long double, 1, -1>;
 
     using ArrayX3f = Array<float, -1, 3>;
     using ArrayX3d = Array<double, -1, 3>;
@@ -290,8 +295,8 @@ namespace sylvanmats::linear{
     };
 
     template<std::numerical T, signed long long R, signed long long C>
-        Array<T, R, C> operator - (const Array<T, R, C>& lv, const Array<T, R>& v){
-        Array<T, R> v2(v);
+        Array<T, R, C> operator - (const Array<T, R, C>& lv, const Array<T, R, C>& v){
+        Array<T, R, C> v2(v);
         for(unsigned long long i=0;i<v.rows();i++)
                 /*co_yield*/ v2[i]=(lv[i]-v[i]);
         return v2;
@@ -307,7 +312,7 @@ namespace sylvanmats::linear{
 
     template<std::numerical T, signed long long R, signed long long C>
     Array<T, R, C> operator * (const Array<T, R, C>& lv, const Array<T, R, C>& v){
-        Array<T, R> v2(v);
+        Array<T, R, C> v2(v);
         for(unsigned long long i=0;i<v.rows();i++)
                 /*co_yield*/ v2[i]=(lv[i]*v[i]);
         return v2;

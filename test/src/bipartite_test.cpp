@@ -114,7 +114,7 @@ TEST_CASE("test bipartite of 1a30.cif.gz"){
             std::valarray<unsigned int> distanceBin(0u, 100);
             for(auto& [uid, vid, uv]: graph::views::edgelist(bipartiteSurface)){
                 lemon::ListGraph::Node nSiteA=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
-                lemon::ListGraph::Node nSiteB=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
+                lemon::ListGraph::Node nSiteB=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, vid));
                 sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);
                 sylvanmats::linear::Vector3d pointB(graph.atomSites[nSiteB].Cartn_x, graph.atomSites[nSiteB].Cartn_y, graph.atomSites[nSiteB].Cartn_z);
                 double d=(pointB-pointA).norm();

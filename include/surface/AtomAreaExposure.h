@@ -9,6 +9,9 @@
 #include "linear/Vector.h"
 
 #include "graph/container/dynamic_graph.hpp"
+#include "graph/algorithm/bellman_ford_shortest_paths.hpp"
+#include "graph/views/vertexlist.hpp"
+#include "graph/views/edgelist.hpp"
 
 #include "lemon/euler.h"
 #include "lemon/bellman_ford.h"
@@ -140,7 +143,7 @@ namespace sylvanmats::surface{
                     }
                     clockwiseCount=0;
                     auto [dV, dA] = integrateAlongDomainPath(countIntersections, countFulls, graph.atomSites[nSiteA].Cartn_z, ri, projectedGraphv2, vertices, projectedGraph, circles, arcs, arcMap, clockwiseCount);
-                    std::cout<<"domain connectivity nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
+//                    std::cout<<"domain connectivity nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
                     if(clockwiseCount==0 || circles.size()<=1){
                         dV+=(4.0*std::numbers::pi*std::pow(ri, 3)/3.0);
                         dA+=(4.0*std::numbers::pi*std::pow(ri, 2));
@@ -221,7 +224,7 @@ namespace sylvanmats::surface{
                             circles.back().d=d;
                             circles.back().center3d=pointB;
                             if(a>=0.0)circles.back().direction=CLOCKWISE;
-                            std::cout<<pointA<<" "<<pointB<<" a: "<<a<<" b: "<<b<<" c: "<<c<<" d: "<<d<<" ground zero t0="<<circles.back().center[0]<<" s0="<<circles.back().center[1]<<" r0="<<circles.back().r0<<" ri="<<ri<<" rj="<<rj<<std::endl;
+//                            std::cout<<pointA<<" "<<pointB<<" a: "<<a<<" b: "<<b<<" c: "<<c<<" d: "<<d<<" ground zero t0="<<circles.back().center[0]<<" s0="<<circles.back().center[1]<<" r0="<<circles.back().r0<<" ri="<<ri<<" rj="<<rj<<std::endl;
                         }
                     }
 //                    else std::cout<<"neither "<<pointB<<std::endl;
@@ -392,7 +395,7 @@ namespace sylvanmats::surface{
                 {
 //                    std::cout<<" nodes: "<<lemon::countNodes(projectedGraph)<<" edges: "<<lemon::countArcs(projectedGraph)<<" connected "<<lemon::countConnectedComponents(projectedGraph)<<" "<<lemon::countStronglyConnectedComponents(projectedGraph)<<" eulerian? "<<lemon::eulerian(projectedGraph)<<" loop? "<<lemon::loopFree(projectedGraph)<<" parallel? "<<lemon::parallelFree(projectedGraph)<<" "<<std::endl;
                     lemon::ListDigraph::NodeMap<int> componentMap(projectedGraph);
-                    sylvanmats::linear::Array<double, -1l> componentCounts(lemon::connectedComponents(projectedGraph, componentMap));
+                    sylvanmats::linear::ArrayXd componentCounts(lemon::connectedComponents(projectedGraph, componentMap));
                     for(lemon::ListDigraph::NodeIt nProjected(projectedGraph); nProjected!=lemon::INVALID; ++nProjected){
                         //std::cout<<"componentMap "<<componentMap[nProjected]<<std::endl;
                         componentCounts[componentMap[nProjected]]++;
@@ -406,6 +409,21 @@ namespace sylvanmats::surface{
                     if(lemon::eulerian(projectedGraph)){
                     lemon::Path<lemon::ListDigraph> shortestPath;
                     double bestLength=0.0;
+
+                    std::vector<double>         distance(graph::size(graph::vertices(projectedGraphv2)));
+                    std::vector<graph::vertex_id_t<G>> predecessors(graph::size(graph::vertices(projectedGraphv2)));
+                    for(auto& [uid, vid, uv]: graph::views::edgelist(projectedGraphv2)){
+                        auto uValue=graph::edge_value(projectedGraphv2, uv);//*graph::find_vertex(bipartiteSurface, uid));
+                        distance[uid]=uValue.length;
+                    }
+                    graph::init_shortest_paths(distance, predecessors);
+                    
+                    for (auto&& [uid, u] : graph::views::vertexlist(projectedGraphv2)) {
+                        auto uValue=graph::vertex_value(projectedGraphv2, *graph::find_vertex(projectedGraphv2, uid));
+                        //std::cout<<"L: "<<graph.getXPath(uValue)<<std::endl;
+                        std::optional<graph::vertex_id_t<G>> cycle_vertex_id = graph::bellman_ford_shortest_paths(projectedGraphv2, uid, distance, predecessors);
+                        
+                    }
 
                     lemon::BellmanFord<lemon::ListDigraph, lemon::ListDigraph::ArcMap<double>> bellmanFord(projectedGraph, lengthMap);
                     for(lemon::ListDigraph::NodeIt nIntersectionA(projectedGraph);nIntersectionA!=lemon::INVALID; ++nIntersectionA){
@@ -431,7 +449,7 @@ namespace sylvanmats::surface{
                                 lemon::pathCopy(testPath, shortestPath);
                                 shortestPath.addFront(aSiteA);
                             }
-//                        std::cout<<length<<" bestLength: "<<bestLength<<" "<<testPath.length()<<" "<<shortestPath.length()<<std::endl;
+                        std::cout<<length<<" bestLength: "<<bestLength<<" "<<testPath.length()<<" "<<shortestPath.length()<<std::endl;
                         }
                     }
                     auto [dVi, dAi] =  integrate(zi, ri, shortestPath, arcMap);
