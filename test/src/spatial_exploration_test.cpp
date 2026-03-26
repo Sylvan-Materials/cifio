@@ -10,6 +10,9 @@
 #include <ranges>
 #include <locale>
 
+#include <assert.h>
+#include "graph/container/dynamic_graph.hpp"
+
 #include "algebra/geometric/Bivector.h"
 #include "algebra/geometric/Rotor.h"
 

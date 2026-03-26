@@ -106,13 +106,14 @@ TEST_CASE("test bipartite of 1a30.cif.gz"){
             sylvanmats::PeriodicTable* periodicTable=sylvanmats::PeriodicTable::getInstance();
             
             for (auto&& [uid, u] : graph::views::vertexlist(bipartiteSurface)) {
+                //auto uid=graph::vertex_id(bipartiteSurface, u);
                 auto nSiteA=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
                 sylvanmats::element ele=periodicTable->index(graph.atomSites[nSiteA].type_symbol);
                 //std::cout<<"L: "<<graph.getXPath(nSiteA)<<" "<<graph.atomSites[nSiteA].type_symbol<<" "<<ele.mass<<std::endl;
             }
 //            std::cout<<"BP: "<<lemon::countBlueNodes(bipartiteSurface)<<" "<<lemon::countRedNodes(bipartiteSurface)<<" "<<lemon::countEdges(bipartiteSurface)<<std::endl;
             std::valarray<unsigned int> distanceBin(0u, 100);
-            for(auto& [uid, vid, uv]: graph::views::edgelist(bipartiteSurface)){
+            for(auto [uid, vid, uv]: graph::views::edgelist(bipartiteSurface)){
                 lemon::ListGraph::Node nSiteA=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, uid));
                 lemon::ListGraph::Node nSiteB=graph::vertex_value(bipartiteSurface, *graph::find_vertex(bipartiteSurface, vid));
                 sylvanmats::linear::Vector3d pointA(graph.atomSites[nSiteA].Cartn_x, graph.atomSites[nSiteA].Cartn_y, graph.atomSites[nSiteA].Cartn_z);

@@ -10,6 +10,7 @@
 #include <numbers>
 #include <ranges>
 
+#include <assert.h>
 #include "graph/container/dynamic_graph.hpp"
 
 #include "minimization/QuasiNewton.h"

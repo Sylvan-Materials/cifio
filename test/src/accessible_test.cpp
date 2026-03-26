@@ -356,17 +356,17 @@ TEST_CASE("test accessible eight spheres"){
                 std::cout<<"vertices "<<vertices.size()<<" "<<arcs.size()<<std::endl;
                 using value = std::ranges::range_value_t<decltype(arcs)>;
                 graph::vertex_id_t<sylvanmats::surface::G> N = static_cast<graph::vertex_id_t<sylvanmats::surface::G>>(graph::size(graph::vertices(projectedGraphv2)));
-                using edge_desc  = graph::edge_info<graph::vertex_id_t<sylvanmats::surface::G>, true, void, sylvanmats::surface::arc<double>>;
-                projectedGraphv2.reserve_vertices(vertices.size());
-                projectedGraphv2.reserve_edges(arcs.size());
-                projectedGraphv2.load_vertices(vertices, [&](size_t& nm) {
+                // using edge_desc  = graph::edge_info<graph::vertex_id_t<sylvanmats::surface::G>, true, void, sylvanmats::surface::arc<double>>;
+                // projectedGraphv2.reserve_vertices(vertices.size());
+                // projectedGraphv2.reserve_edges(arcs.size());
+                projectedGraphv2.load_vertices(vertices, [&](size_t& nm) -> graph::copyable_vertex_t<graph::vertex_id_t<sylvanmats::surface::G>, size_t>{
                     auto uid = static_cast<graph::vertex_id_t<sylvanmats::surface::G>>(&nm - vertices.data());
                     //std::cout<<"uid "<<uid<<std::endl;
-                    return graph::copyable_vertex_t<graph::vertex_id_t<sylvanmats::surface::G>, size_t>{uid, nm};
+                    return {uid, nm};
                   });
-                projectedGraphv2.load_edges(arcs, [](const value& val) -> edge_desc {
+                projectedGraphv2.load_edges(arcs, [](const value& val) -> graph::copyable_edge_t<size_t, sylvanmats::surface::arc<double>> {
                         //std::cout<<"edge "<<std::get<0>(val)<<" "<<std::get<1>(val)<<" "<<std::get<2>(val)<<std::endl;
-                    return edge_desc{std::get<0>(val), std::get<1>(val), std::get<2>(val)};
+                    return {std::get<0>(val), std::get<1>(val), std::get<2>(val)};
                   }, N);
 
             }

@@ -6,6 +6,7 @@
 #include <utility>
 #include <cstring>
 
+#include <assert.h>
 #include "graph/container/dynamic_graph.hpp"
 
 #define protected public

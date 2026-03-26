@@ -12,14 +12,14 @@ namespace sylvanmats::reading {
         std::cout<<"SMIRKSPatterns () "<<std::endl;
         xmlReaper([&](std::u16string& utf16, sylvanmats::io::xml::G& dagGraph){
             std::wstring_convert<deletable_facet<std::codecvt<char16_t, char, std::mbstate_t>>, char16_t> cv;
-                auto it = std::ranges::find_if(graph::vertices(dagGraph),
-                                         [&](auto& u) { return graph::vertex_value(dagGraph, u).index == 0; });
-                graph::vertex_id_t<sylvanmats::io::xml::G> vid=static_cast<graph::vertex_id_t<sylvanmats::io::xml::G>>(it - begin(graph::vertices(dagGraph)));
-                auto& v=dagGraph[vid];
-                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Bonds "); })) {
-                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
-                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Bond "); })) {
-                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                auto it = std::ranges::find_if(dagGraph.vertex_ids(),
+                                         [&](auto u) { return dagGraph.vertex_value(u).index == 0; });
+                graph::vertex_id_t<sylvanmats::io::xml::G> vid=static_cast<graph::vertex_id_t<sylvanmats::io::xml::G>>(it - std::begin(dagGraph.vertex_ids()));
+                auto v=*graph::find_vertex(dagGraph, vid);
+                for (auto&& itS : graph::views::incidence(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Bonds "); })) {
+                    auto d=*graph::find_vertex(dagGraph, itS.target_id);
+                for (auto&& itD : graph::views::incidence(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Bond "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, itD.target_id));
                     std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                     std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                     std::u16string&& lengthValue=xmlReaper.findAttribute(u"length", nv.angle_start, nv.angle_end);
@@ -59,10 +59,10 @@ namespace sylvanmats::reading {
                     }
                 }
                 }
-                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Angles "); })) {
-                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
-                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Angle "); })) {
-                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                for (auto&& itS : graph::views::incidence(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Angles "); })) {
+                    auto d=*graph::find_vertex(dagGraph, itS.target_id);
+                for (auto&& itD : graph::views::incidence(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Angle "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, itD.target_id));
                     std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                     std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                     std::u16string&& angleValue=xmlReaper.findAttribute(u"angle", nv.angle_start, nv.angle_end);
@@ -115,10 +115,10 @@ namespace sylvanmats::reading {
                     }
                 }
                 }
-                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<vdW "); })) {
-                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
-                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Atom "); })) {
-                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                for (auto&& itS : graph::views::incidence(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<vdW "); })) {
+                    auto d=*graph::find_vertex(dagGraph, itS.target_id);
+                for (auto&& itD : graph::views::incidence(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Atom "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, itD.target_id));
                     std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                     std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                     std::u16string&& epsilonValue=xmlReaper.findAttribute(u"epsilon", nv.angle_start, nv.angle_end);
@@ -148,10 +148,10 @@ namespace sylvanmats::reading {
                     }
                 }
                 }
-                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<ProperTorsions "); })) {
-                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
-                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Proper "); })) {
-                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                for (auto&& itS : graph::views::incidence(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<ProperTorsions "); })) {
+                    auto d=*graph::find_vertex(dagGraph, itS.target_id);
+                for (auto&& itD : graph::views::incidence(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Proper "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, itD.target_id));
                         std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                         std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                         std::u16string&& periodicity1Value=xmlReaper.findAttribute(u"periodicity1", nv.angle_start, nv.angle_end);
@@ -244,10 +244,10 @@ namespace sylvanmats::reading {
                         }
                     }
                 }
-                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<ImproperTorsions "); })) {
-                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
-                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Improper "); })) {
-                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                for (auto&& itS : graph::views::incidence(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<ImproperTorsions "); })) {
+                    auto d=*graph::find_vertex(dagGraph, itS.target_id);
+                for (auto&& itD : graph::views::incidence(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph,       ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Improper "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, itD.target_id));
                         std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                         std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                         std::u16string&& periodicity1Value=xmlReaper.findAttribute(u"periodicity1", nv.angle_start, nv.angle_end);
@@ -340,8 +340,8 @@ namespace sylvanmats::reading {
                         }
                     }
                 }
-                for (auto&& itD : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Electrostatics "); })) {
-                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                for (auto&& itD : graph::views::incidence(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<Electrostatics "); })) {
+                    auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, itD.target_id));
                     std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                     std::u16string&& scale12Value=xmlReaper.findAttribute(u"scale12", nv.angle_start, nv.angle_end);
                     std::u16string&& scale13Value=xmlReaper.findAttribute(u"scale13", nv.angle_start, nv.angle_end);
@@ -357,10 +357,10 @@ namespace sylvanmats::reading {
                     if(!cutoffValue.empty())electrostatics.cutoff=std::strtod(cv.to_bytes(cutoffValue).c_str(), nullptr);
                     if(!methodValue.empty())electrostatics.method=cv.to_bytes(methodValue);
                 }
-                for (auto&& itS : graph::edges(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<LibraryCharges "); })) {
-                    auto& d=dagGraph[graph::target_id(dagGraph, itS)];
-                for (auto&& itD : graph::edges(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto& ei){auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, ei)]); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<LibraryCharge "); })) {
-                    auto& nv=graph::vertex_value(dagGraph, dagGraph[graph::target_id(dagGraph, itD)]);
+                for (auto&& itS : graph::views::incidence(dagGraph, v) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<LibraryCharges "); })) {
+                    auto d=*graph::find_vertex(dagGraph, itS.target_id);
+                for (auto&& itD : graph::views::incidence(dagGraph, d) | std::views::filter([&utf16, &dagGraph, &cv](auto ei){auto& nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, ei.target_id)); return utf16.substr(nv.angle_start, nv.angle_end-nv.angle_start).starts_with(u"<LibraryCharge "); })) {
+                    auto nv=graph::vertex_value(dagGraph, *graph::find_vertex(dagGraph, itD.target_id));
                     std::u16string&& idValue=xmlReaper.findAttribute(u"id", nv.angle_start, nv.angle_end);
                     std::u16string&& smirksValue=xmlReaper.findAttribute(u"smirks", nv.angle_start, nv.angle_end);
                     std::u16string&& charge1Value=xmlReaper.findAttribute(u"charge1", nv.angle_start, nv.angle_end);

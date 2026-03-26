@@ -13,6 +13,9 @@
 #include "reading/gz/GZReader.h"
 #include "reading/tcp/TCPReader.h"
 
+#include <assert.h>
+#include "graph/container/dynamic_graph.hpp"
+
 #include "constitution/Graph.h"
 #include "constitution/Populator.h"
 #include "alignment/SmithWatermanAligner.h"

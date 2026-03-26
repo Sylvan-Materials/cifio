@@ -16,9 +16,9 @@ namespace sylvanmats::minimization {
     template<std::floating_point T>
     class QuasiNewton {
     protected:
-        sylvanmats::linear::Array<T, -1> x;
-        sylvanmats::linear::Array<T, -1> g;
-        sylvanmats::linear::Array<T, -1> d;
+        sylvanmats::linear::Array<T, 1, -1> x;
+        sylvanmats::linear::Array<T, 1, -1> g;
+        sylvanmats::linear::Array<T, 1, -1> d;
         size_t i=0;
         
         T α=0.5;
@@ -34,28 +34,28 @@ namespace sylvanmats::minimization {
         QuasiNewton(const QuasiNewton& orig) = delete;
         virtual ~QuasiNewton() = default;
         
-        void initialize(sylvanmats::linear::Array<T, -1>& x){this->x=x;};
-        void objective(std::function<T(sylvanmats::linear::Array<T, -1>&)> o){this->o=o;};
-        void gradient(std::function<void(sylvanmats::linear::Array<T, -1>&, sylvanmats::linear::Array<T, -1>&)> grad){this->grad=grad;};
+        void initialize(sylvanmats::linear::Array<T, 1, -1>& x){this->x=x;};
+        void objective(std::function<T(sylvanmats::linear::Array<T, 1, -1>&)> o){this->o=o;};
+        void gradient(std::function<void(sylvanmats::linear::Array<T, 1, -1>&, sylvanmats::linear::Array<T, 1, -1>&)> grad){this->grad=grad;};
         void monitor(std::function<void(size_t i, long double f)> m){this->m=m;};
-        sylvanmats::linear::Array<T, -1>& solve(){
+        sylvanmats::linear::Array<T, 1, -1>& solve(){
             T Φ=o(x);
             T t=backtrackingLineSearch(Φ);
-            sylvanmats::linear::Array<T, -1> xminus1(x.rows());
+            sylvanmats::linear::Array<T, 1, -1> xminus1(x.rows());
             xminus1=x;
-            sylvanmats::linear::Array<T, -1> gkminus1(g.rows());
+            sylvanmats::linear::Array<T, 1, -1> gkminus1(g.rows());
             grad(xminus1, gkminus1);
             x=xminus1+t*d;
             m(i, o(x));
-            sylvanmats::linear::Array<T, -1> xplus1(x.rows());
+            sylvanmats::linear::Array<T, 1, -1> xplus1(x.rows());
             i++;
             sylvanmats::linear::Matrix<T, -1 , -1> B=typename sylvanmats::linear::Matrix<T, -1, -1>::Identity(0.0, x.rows(), x.rows());
             sylvanmats::linear::Matrix<T, -1 , -1> Bplus=typename sylvanmats::linear::Matrix<T, -1, -1>::Identity(0.0, x.rows(), x.rows());
             for(;i<4;++i){
                 grad(x, g);
                 sylvanmats::linear::Matrix<T, -1 , -1> I=typename sylvanmats::linear::Matrix<T, -1, -1>::Identity(0.0, x.rows(), x.rows());
-                sylvanmats::linear::Vector<T, -1> Δx=(x-xminus1).vector();
-                sylvanmats::linear::Vector<T, -1> Δy=(g-gkminus1).vector();
+                sylvanmats::linear::Vector<T, 1, -1> Δx=(x-xminus1).vector();
+                sylvanmats::linear::Vector<T, 1, -1> Δy=(g-gkminus1).vector();
                 //std::cout<<"I "<<I<<std::endl;
                 //std::cout<<"Δx "<<Δx<<" Δy "<<Δy<<std::endl<<B<<std::endl;
                 //sylvanmats::linear::Vector<T, -1 , -1> vv=Δx*Δy.transpose();
@@ -87,8 +87,8 @@ namespace sylvanmats::minimization {
         };
         
     protected:
-        std::function<T(sylvanmats::linear::Array<T, -1>&)> o;
-        std::function<void(sylvanmats::linear::Array<T, -1>&, sylvanmats::linear::Array<T, -1>&)> grad;
+        std::function<T(sylvanmats::linear::Array<T, 1, -1>&)> o;
+        std::function<void(sylvanmats::linear::Array<T, 1, -1>&, sylvanmats::linear::Array<T, 1, -1>&)> grad;
         std::function<void(size_t i, long double f)> m;
         
         void lineSearch(T Φ0, T dΦ, T Φ){
@@ -106,7 +106,7 @@ namespace sylvanmats::minimization {
             grad(x, g);
             T df=c*g.norm();
             d=-g;
-            sylvanmats::linear::Array<T, -1> newx(g.rows());
+            sylvanmats::linear::Array<T, 1, -1> newx(g.rows());
             newx=x+d;
             T newf=o(newx);
             T t=1.0;

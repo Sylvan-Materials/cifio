@@ -15,7 +15,7 @@
 
 namespace sylvanmats::surface {
     
-    using biG = graph::container::dynamic_graph<size_t, lemon::ListGraph::Node>;
+    using biG = graph::container::dynamic_adjacency_graph<graph::container::vov_graph_traits<size_t, lemon::ListGraph::Node>>;
 
     class BipartiteSurface : public biG {
         protected:
@@ -64,17 +64,17 @@ namespace sylvanmats::surface {
             std::cout<<"bpVertices "<<bpVertices.size()<<" "<<edges.size()<<std::endl;
             using value = std::ranges::range_value_t<decltype(edges)>;
             graph::vertex_id_t<biG> N = static_cast<graph::vertex_id_t<biG>>(graph::size(graph::vertices(*this)));
-            using edge_desc  = graph::edge_info<graph::vertex_id_t<biG>, true, void, int>;
-            reserve_vertices(bpVertices.size());
-            reserve_edges(edges.size());
-            load_vertices(bpVertices, [&](lemon::ListGraph::Node& nm) {
+//            using edge_desc  = graph::edge_info<graph::vertex_id_t<biG>, true, void, int>;
+//            reserve_vertices(bpVertices.size());
+//            reserve_edges(edges.size());
+            load_vertices(bpVertices, [&](lemon::ListGraph::Node& nm) -> graph::copyable_vertex_t<graph::vertex_id_t<biG>, lemon::ListGraph::Node>{
                 auto uid = static_cast<graph::vertex_id_t<biG>>(&nm - bpVertices.data());
                 //std::cout<<"uid "<<uid<<std::endl;
-                return graph::copyable_vertex_t<graph::vertex_id_t<biG>, lemon::ListGraph::Node>{uid, nm};
+                return {uid, nm};
               });
-            load_edges(edges, [](const value& val) -> edge_desc {
+            load_edges(edges, [](const value& val) -> graph::copyable_edge_t<size_t, int> {
                     //std::cout<<"edge "<<std::get<0>(val)<<" "<<std::get<1>(val)<<" "<<std::get<2>(val)<<std::endl;
-                return edge_desc{std::get<0>(val), std::get<1>(val), std::get<2>(val)};
+                return {std::get<0>(val), std::get<1>(val), std::get<2>(val)};
               }, N);
               //size_t np=graph::num_partitions(bpGraph);
             //std::cout<<"num_partitions: "<<np<<std::endl;
