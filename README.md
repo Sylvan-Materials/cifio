@@ -57,6 +57,18 @@ cnpm test
 
 ```
 
+### Setting ssl Certificates for TLS TCP calls to rcsb.org
+
+```
+openssl s_client -showcerts -connect files.rcsb.org:443 -tls1_3 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > server_chain.pem
+cp server_chain.pem /usr/local/share/ca-certificates/rcsb_chain.crt
+
+\#update the certificate chain
+sudo update-ca-certificates
+
+\#The library uses this environment variable currently
+export SSL_CERT_FILEPATH="/usr/local/share/ca-certificates/rcsb_chain.crt"
+```
 ### Unit Tests 
 
 Under test is where the bulk of usage is. Numerous items are checking on new ways to use c++

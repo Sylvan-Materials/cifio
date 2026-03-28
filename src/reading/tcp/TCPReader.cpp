@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <openssl/bio.h>
 #include "reading/tcp/TCPReader.h"
 
 namespace sylvanmats::reading{
@@ -18,7 +19,7 @@ namespace sylvanmats::reading{
     }
     struct addrinfo *ptr;
     struct sockaddr_in  *sockaddr_ipv4;
-        struct sockaddr_in6 *sockaddr_ipv6;
+    struct sockaddr_in6 *sockaddr_ipv6;
     char host[256];
     int sd = -1;
     int infoCount=0;
@@ -40,8 +41,8 @@ namespace sylvanmats::reading{
         case AF_INET:
             std::cout<<"AF_INET (IPv4)"<<std::endl;
             sockaddr_ipv4 = (struct sockaddr_in *) ptr->ai_addr;
-            //printf("\tIPv4 address %s\n",
-            //    inet_ntoa(sockaddr_ipv4->sin_addr) );
+            printf("\tIPv4 address %s %d\n",
+                inet_ntoa(sockaddr_ipv4->sin_addr), ntohs(sockaddr_ipv4->sin_port));
             break;
         case AF_INET6:
             std::cout<<"AF_INET6 (IPv6)"<<std::endl;
@@ -136,25 +137,17 @@ namespace sylvanmats::reading{
     SSL_CTX_set_cipher_list(ctx, "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256");
     //SSL_CTX_set_cipher_list(ctx, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
     SSL_CTX_load_verify_dir(ctx, "/etc/ssl/certs");
-    //SSL_CTX_use_certificate_file(ctx, "/home/roger/sylvanmats/cifio/server_chain.pem", SSL_FILETYPE_PEM);
-    //SSL_CTX_use_certificate_file(ctx, "/etc/ssl/certs/ca-certificates.crt", SSL_FILETYPE_PEM);
+    if(getenv("SSL_CERT_FILEPATH")!=nullptr){
+        SSL_CTX_use_certificate_file(ctx, getenv("SSL_CERT_FILEPATH"), SSL_FILETYPE_PEM);
+    }
     //SSL_CTX_use_PrivateKey_file(ctx, "/etc/ssl/private/ssl-cert-snakeoil.key", SSL_FILETYPE_PEM);
     SSL_CTX_set_options(ctx, SSL_OP_NO_TICKET);
+    SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
     SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, [](int preverify_ok, X509_STORE_CTX *x509_ctx)->int{
         std::cout<<"preverify_ok "<<preverify_ok<<" "<<std::endl;
         return preverify_ok;  
     });
 
-    ssl = SSL_new (ctx);
-    if (!ssl) {
-        std::cout<<"Error creating SSL."<<std::endl;
-        log_ssl();
-        return false;
-    }
-    //BIO *bio = BIO_new_socket(sd, BIO_NOCLOSE);
-    //std::cout<<"bio "<<bio<<" "<<SSL_get_blocking_mode(ssl)<<std::endl;
-    //SSL_set_bio(ssl, bio, bio);
-    //std::cout<<"bio'd "<<bio<<" "<<SSL_get_blocking_mode(ssl)<<std::endl;
     SSL_CTX_set_info_callback(ctx, [](const SSL *s, int where, int ret)->void{
         const char *str;
         int w;
@@ -185,11 +178,24 @@ namespace sylvanmats::reading{
             }
         }
     });
+
+    ssl = SSL_new (ctx);
+    if (!ssl) {
+        std::cout<<"Error creating SSL."<<std::endl;
+        log_ssl();
+        return false;
+    }
     //sock = SSL_get_fd(ssl);
     if (SSL_set_fd(ssl, sd)==0){
         std::cout<<"Failed to set fd. "<<std::endl;
     }
     SSL_set_tlsext_host_name(ssl, "files.rcsb.org");
+    const unsigned char alpn_server_protos[] = {
+        // 2, 'h', '3',         // "h3" (length 2)
+        // 2, 'h', '2',         // "h2" (length 2)
+        8, 'h', 't', 't', 'p', '/', '1', '.', '1' // "http/1.1" (length 8)
+    };
+    SSL_set_alpn_protos(ssl, alpn_server_protos, sizeof(alpn_server_protos));
     int err = SSL_connect(ssl);
     if (err <= 0) {
         std::cout<<"Error creating SSL connection.  err="<<err<<std::endl;
@@ -198,18 +204,32 @@ namespace sylvanmats::reading{
         return false;
     }
     std::cout<<"SSL connection using "<<SSL_get_cipher (ssl)<<std::endl;
+    const unsigned char *alpn = nullptr;
+    unsigned int alpnlen = 0;
+
+    // Get the negotiated ALPN protocol
+    SSL_get0_alpn_selected(ssl, &alpn, &alpnlen);
+
+    if (alpn != nullptr) {
+        // NOTE: The protocol is NOT NULL-terminated
+        printf("ALPN protocol negotiated: %.*s\n", alpnlen, alpn);
+    } else {
+        printf("No ALPN protocol negotiated.\n");
+    }
     std::string escapedUrl=url::Url::escape_reserved_unsafe(urlStr);
 //std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
     std::string request = "GET "+url.path()+" HTTP/1.1\r\n";
     request+="Host: "+url.host()+":443\r\n";
     //request+="User-Agent: Sylvan-Materials/cifio\r\n";
-    request+="Connection: keep-alive\r\n";
+    request+="Range: bytes=0-1000\r\n";
+    request+="Connection: close\r\n";
     request+="Accept: */*\r\n";
     request+="\r\n";
-    //std::cout<<"request "<<request<<std::endl;
+//    std::cout<<"request "<<request<<std::endl;
     if(SendPacket(request.c_str())<0){
         std::cout<<"SendPacket <0"<<std::endl;
     }
+    std::cout<<"request sent "<<std::endl;
     std::stringstream ss;
     if(RecvPacket(ss)<0){
         std::cout<<"RecvPacket <0"<<std::endl;
@@ -219,7 +239,7 @@ namespace sylvanmats::reading{
     if(n!=std::string::npos){
     n+=4;
     std::string::size_type breakIndex=content.find("\r\n", n);
-//    std::cout<<"header |"<<content.substr(0, breakIndex+2)<<"|"<<std::endl;
+    //std::cout<<n<<" "<<content.size()<<std::endl<<"header |"<<content.substr(0, breakIndex+2)<<"|"<<std::endl;
     ss.str("");
     size_t chunkSize=0;
     do{
@@ -237,10 +257,10 @@ namespace sylvanmats::reading{
             breakIndex=content.find("\r\n", n);
         }
     }while(chunkSize>0 && n<content.size());
-//    std::cout<<"content |"<<ss.str()<<"|"<<std::endl;
+    std::cout<<"content |"<<ss.str().size()<<"|"<<std::endl;
     }
     apply(ss);
     return true;
-    };
+    }
 
 }

@@ -272,10 +272,10 @@ namespace sylvanmats::reading{
 
     class TCPReader{
     protected:
-            char buf[1'000'000];
-            int port = 443;
-            SSL *ssl;
-            int sock;
+		char buf[1'000'000];
+		int port = 443;
+		SSL *ssl;
+		int sock;
 
     public:
         TCPReader() = default;
@@ -287,8 +287,48 @@ namespace sylvanmats::reading{
             int len=100;
                 len=SSL_read(ssl, buf, 100);
                 if(len>=0)buf[len]=0;
-//                printf("%s",buf);
-                //fprintf(fp, "%s",buf);
+				if(len==0){
+					std::cout<<"SSL_read returned 0."<<std::endl;
+					int ret_code=0;
+					int err = SSL_get_error(ssl, ret_code);
+					switch (err) {
+						case SSL_ERROR_NONE:
+							printf("SSL_ERROR_NONE: The operation completed successfully.\n");
+							break;
+						case SSL_ERROR_ZERO_RETURN:
+							printf("SSL_ERROR_ZERO_RETURN: The TLS/SSL connection has been closed cleanly by the peer.\n");
+							break;
+						case SSL_ERROR_WANT_READ:
+							printf("SSL_ERROR_WANT_READ: The operation did not complete; it needs more data to read. Call the same function again later.\n");
+							break;
+						case SSL_ERROR_WANT_WRITE:
+							printf("SSL_ERROR_WANT_WRITE: The operation did not complete; it needs to write data. Call the same function again later.\n");
+							break;
+						case SSL_ERROR_SYSCALL:
+							printf("SSL_ERROR_SYSCALL: Some non-recoverable I/O error occurred (e.g., unexpected EOF, connection reset).\n");
+							// Check errno for more details
+							if (ret_code == 0) {
+								printf("System call error: Unexpected EOF from peer (no closure alert).\n");
+							} else if (ret_code == -1) {
+								printf("System call error: errno %d - %s\n", errno, strerror(errno));
+							}
+							break;
+						case SSL_ERROR_SSL:
+							printf("SSL_ERROR_SSL: A fatal error occurred in the SSL library (usually a protocol error).\n");
+							// More detailed information is available on the OpenSSL error queue
+							ERR_print_errors_fp(stderr); // Prints all errors in the queue to stderr
+							break;
+						case SSL_ERROR_WANT_CONNECT:
+						case SSL_ERROR_WANT_ACCEPT:
+							printf("SSL_ERROR_WANT_CONNECT/ACCEPT: The operation did not complete during handshake. Call the same function again later.\n");
+							break;
+						default:
+							printf("Unknown SSL error: %d\n", err);
+							break;
+					}
+				}
+//               if(len>=0)printf("%s",buf);
+//                fprintf(fp, "%s",buf);
             co_yield std::make_pair(len, buf);
         }
 
@@ -301,6 +341,7 @@ namespace sylvanmats::reading{
                     len=(*it).first;
                     if(len>0)ss.write((*it).second, len);
                 }
+				
             } while (len>0);
             if (len < 0) {
                 int err = SSL_get_error(ssl, len);
