@@ -189,7 +189,7 @@ namespace sylvanmats::reading{
     if (SSL_set_fd(ssl, sd)==0){
         std::cout<<"Failed to set fd. "<<std::endl;
     }
-    SSL_set_tlsext_host_name(ssl, "files.rcsb.org");
+    SSL_set_tlsext_host_name(ssl, url.host().c_str());
     const unsigned char alpn_server_protos[] = {
         // 2, 'h', '3',         // "h3" (length 2)
         // 2, 'h', '2',         // "h2" (length 2)
@@ -216,9 +216,7 @@ namespace sylvanmats::reading{
     } else {
         printf("No ALPN protocol negotiated.\n");
     }
-    std::string escapedUrl=url::Url::escape_reserved_unsafe(urlStr);
-//std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
-    std::string request = "GET "+url.path()+" HTTP/1.1\r\n";
+    std::string request = "GET "+url.path()+url::Url::escape(url.query(), url::utils::URL_CHAR_QUERY)+" HTTP/1.1\r\n";
     request+="Host: "+url.host()+":443\r\n";
     //request+="User-Agent: Sylvan-Materials/cifio\r\n";
     request+="Range: bytes=0-1000\r\n";
