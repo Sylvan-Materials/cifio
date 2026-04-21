@@ -30,6 +30,9 @@ TEST_CASE("find pyrophosphate entries in rcsb"){
     std::string search_request = std::format(std::runtime_format(search_template), "pyrophosphate", "entry");
     std::string url = "https://search.rcsb.org/rcsbsearch/v2/query?json="+search_request+"";
     sylvanmats::reading::TCPReader tcpReader;
+    if(getenv("SSL_CERT_FILEPATH")!=nullptr){
+        tcpReader.setSSLCertificatePath(getenv("SSL_CERT_FILEPATH"));
+    }
     CHECK(tcpReader(url, [&search_request](std::istream& is){
         std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
         CHECK(!content.empty());
@@ -48,7 +51,17 @@ TEST_CASE("find pyrophosphate entries in rcsb"){
     });
     CHECK_EQ(val.size(), 10);
 
-
+    if(val.size()>0){
+     for(auto id : val){
+       std::string dataUri= "https://data.rcsb.org/rest/v1/core/entry/"+std::string(id);
+        sylvanmats::reading::TCPReader tcpDataReader;
+        CHECK(tcpDataReader(dataUri, [&id](std::istream& is){
+            std::string content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+            CHECK(!content.empty());
+            std::cout<<"data for "<<id<<" "<<content<<std::endl;
+        }));
+      }
+    }
     }));
 }
 

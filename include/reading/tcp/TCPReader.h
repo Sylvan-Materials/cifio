@@ -276,6 +276,7 @@ namespace sylvanmats::reading{
 		int port = 443;
 		SSL *ssl;
 		int sock;
+		std::string sslCertificatePath{};
 
     public:
         TCPReader() = default;
@@ -332,6 +333,11 @@ namespace sylvanmats::reading{
             co_yield std::make_pair(len, buf);
         }
 
+		void setSSLCertificatePath(const std::string& sslCertificatePath){
+			this->sslCertificatePath=sslCertificatePath;
+		};
+
+		private:
         int RecvPacket(std::stringstream& ss)
         {
             int len=100;

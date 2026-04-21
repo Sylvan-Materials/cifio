@@ -137,8 +137,8 @@ namespace sylvanmats::reading{
     SSL_CTX_set_cipher_list(ctx, "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256");
     //SSL_CTX_set_cipher_list(ctx, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
     SSL_CTX_load_verify_dir(ctx, "/etc/ssl/certs");
-    if(getenv("SSL_CERT_FILEPATH")!=nullptr){
-        SSL_CTX_use_certificate_file(ctx, getenv("SSL_CERT_FILEPATH"), SSL_FILETYPE_PEM);
+    if(sslCertificatePath.empty()){
+        SSL_CTX_use_certificate_file(ctx, sslCertificatePath.c_str(), SSL_FILETYPE_PEM);
     }
     //SSL_CTX_use_PrivateKey_file(ctx, "/etc/ssl/private/ssl-cert-snakeoil.key", SSL_FILETYPE_PEM);
     SSL_CTX_set_options(ctx, SSL_OP_NO_TICKET);
