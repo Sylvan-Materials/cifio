@@ -7,6 +7,7 @@
 #include <sstream>
 #include <regex>
 #include <iterator>
+#include <format>
 
 #define protected public
 
@@ -16,16 +17,17 @@
 TEST_SUITE("search"){
 
 TEST_CASE("find pyrophosphate entries in rcsb"){
-    std::string search_request = R"({
-  "query": {
+    std::string search_template = R"({{
+  "query": {{
     "type": "terminal",
     "service": "full_text",
-    "parameters": {
-      "value": "pyrophosphatase"
-    }
-  },
-  "return_type": "entry"
-})";
+    "parameters": {{
+      "value": "{}"
+    }}
+  }},
+  "return_type": "{}"
+}})";
+    std::string search_request = std::format(std::runtime_format(search_template), "pyrophosphate", "entry");
     std::string url = "https://search.rcsb.org/rcsbsearch/v2/query?json="+search_request+"";
     sylvanmats::reading::TCPReader tcpReader;
     CHECK(tcpReader(url, [&search_request](std::istream& is){
