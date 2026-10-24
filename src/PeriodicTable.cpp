@@ -30,23 +30,31 @@ namespace sylvanmats{
             sylvanmats::io::json::Path jpName;
             jpName["elements"]["*"]["*"]["symbol"]==symbol;
             size_t currentSetSize=elementSet.size();
-            jsonBinder(jpName, [&](std::string_view& key, std::any& v){
+            jsonBinder(jpName, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
 //                std::cout<<"key "<<key<<std::endl;
                 if(key.compare("name")==0){
                     if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
-                    elementSet.begin()->name=std::any_cast<std::string_view>(v);
+                    if(auto pVal = std::get_if<std::string_view>(&v)) {
+                        elementSet.begin()->name.assign(*pVal);
+                    }
                 }
                 else if(key.compare("number")==0){
                     if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
-                    elementSet.begin()->atomic_number=std::any_cast<long>(v);
+                    if(auto pVal = std::get_if<long>(&v)) {
+                        elementSet.begin()->atomic_number=*pVal;
+                    }
                 }
                 else if(key.compare("symbol")==0){
                     if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
-                    elementSet.begin()->symbol=std::any_cast<std::string_view>(v);
+                    if(auto pVal = std::get_if<std::string_view>(&v)) {
+                        elementSet.begin()->symbol.assign(*pVal);
+                    }
                 }
                 else if(key.compare("atomic_mass")==0){
                     if(currentSetSize==elementSet.size())elementSet.insert(element(elementSet.size()));
-                    elementSet.begin()->mass=std::any_cast<double>(v);
+                    if(auto pVal = std::get_if<double>(&v)) {
+                        elementSet.begin()->mass=*pVal;
+                    }
                 }
             });
 

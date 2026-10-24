@@ -21,12 +21,16 @@ namespace sylvanmats::standards{
         size_t start=0;
         size_t end=0;
         size_t count=0;
-        jsonBinder(jpName, [&start, &end, &count](std::string_view& key, std::any& v){
+        jsonBinder(jpName, [&start, &end, &count](std::string_view key, const sylvanmats::io::json::JsonValue& v){
             if(key.compare("start")==0){
-                start=std::any_cast<long>(v);
+                if (auto pVal = std::get_if<long>(&v)) {
+                    start=*pVal;
+                }
             }
             else if(key.compare("end")==0){
-                end=std::any_cast<long>(v);
+                if (auto pVal = std::get_if<long>(&v)) {
+                    end=*pVal;
+                }
             }
             count++;
         });

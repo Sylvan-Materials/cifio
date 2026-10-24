@@ -423,7 +423,7 @@ namespace sylvanmats::surface{
                     for (auto&& [uid, u] : graph::views::vertexlist(projectedGraphv3)) {
                         auto uValue=graph::vertex_value(projectedGraphv3, *graph::find_vertex(projectedGraphv3, uid));
                         //std::cout<<"L: "<<graph.getXPath(uValue)<<std::endl;
-                        std::optional<graph::vertex_id_t<G>> cycle_vertex_id = graph::bellman_ford_shortest_paths(projectedGraphv3, uid, distance, predecessors);
+                        std::optional<graph::vertex_id_t<G>> cycle_vertex_id = graph::bellman_ford_shortest_paths(projectedGraphv3, uid, graph::container_value_fn(distance), graph::container_value_fn(predecessors));
                         
                     }
 
