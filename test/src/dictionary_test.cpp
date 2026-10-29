@@ -16,6 +16,7 @@
 #include "antlr4-runtime.h"
 #include "parsing/DICLexer.h"
 #include "parsing/DICParser.h"
+#include "primeval/MMCIFDictionary.h"
 
 TEST_SUITE("dictionary"){
 
@@ -33,6 +34,19 @@ TEST_CASE("test dictionary parsing") {
     antlr4::tree::ParseTree* tree = parser.dic();*/
     
 
+}
+
+TEST_CASE("Compile time the mmcif dictionary"){
+    static constexpr char dicBuffer[] ={
+#embed "cif_mm.dic"
+    };
+
+    sylvanmats::primeval::MMCIFDictionary<sizeof(dicBuffer)> mmCIFDictionary{};
+    //static constexpr auto gbnf=
+    static constexpr auto astGraph=mmCIFDictionary(std::string_view(dicBuffer, sizeof(dicBuffer)));
+    std::cout<<"v "<<std::get<0>(astGraph)<<" e "<<std::get<1>(astGraph)<<" "<<std::endl;
+    CHECK_EQ(std::get<0>(astGraph), 100);
+    CHECK_EQ(std::get<1>(astGraph), 101);
 }
 
 }

@@ -20,7 +20,7 @@ build/src/symmetry_test.o: src/symmetry_test.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/symmetry_test.o src/symmetry_test.cpp
 
-build/src/dictionary_test.o: CXXFLAGS= -DNDEBUG -O3 -pthread -fopenmp -std=c++26 -fcontracts -freflection -I../include -I../cpp_modules/lemon/dist/include -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include  -I../src  -I../cpp_modules/fmt/dist/include -I../cpp_modules/expected/include -I../cpp_modules/graph-v3/include -I../cpp_modules/json-thresher/include -I../cpp_modules/urlcpp -I../cpp_modules/doctest -I../cpp_modules/openssl/openssl/include -I../cpp_modules/mio/include -I../cpp_modules/zlib/dist/include -I../cpp_modules/antlr4/runtime/Cpp/run/include/antlr4-runtime -MMD
+build/src/dictionary_test.o: CXXFLAGS= -DNDEBUG -O3 -pthread -fopenmp -std=c++26 -fconstexpr-ops-limit=1000000000 -fcontracts -freflection --embed-dir=../dictionaries -I../include -I../external/cairns/include -I../cpp_modules/lemon/dist/include -I../cpp_modules/brigand/include -I../cpp_modules/multi_index/include  -I../src  -I../cpp_modules/fmt/dist/include -I../cpp_modules/expected/include -I../cpp_modules/graph-v3/include -I../cpp_modules/json-thresher/include -I../cpp_modules/urlcpp -I../cpp_modules/doctest -I../cpp_modules/openssl/openssl/include -I../cpp_modules/mio/include -I../cpp_modules/zlib/dist/include -I../cpp_modules/antlr4/runtime/Cpp/run/include/antlr4-runtime -MMD
 build/src/dictionary_test.o: src/dictionary_test.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/dictionary_test.o src/dictionary_test.cpp
