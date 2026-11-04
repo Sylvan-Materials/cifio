@@ -21,12 +21,12 @@ build/src/standards/ComponentStandards.o: src/standards/ComponentStandards.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/standards/ComponentStandards.o src/standards/ComponentStandards.cpp
  
-build/src/constitution/Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -fopenmp -std=c++26  -Iinclude -Isrc -Icpp_modules/lemon/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/fmt/include -I$(MODULE_DIRECTORY)/expected/include -Icpp_modules/graph-v3/include -Icpp_modules/json-thresher/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I$(MODULE_DIRECTORY)/antlr4/runtime/Cpp/run/include/antlr4-runtime -MMD
+build/src/constitution/Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -fopenmp -std=c++26 -fconstexpr-ops-limit=2000000000 -fconstexpr-loop-limit=200000 -fconstexpr-depth=100000 -fcontracts -freflection --embed-dir=$(MODULE_DIRECTORY)/cif_core --embed-dir=./dictionaries  -Iinclude -I./external/cairns/include -Isrc -Icpp_modules/lemon/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/fmt/include -I$(MODULE_DIRECTORY)/expected/include -Icpp_modules/graph-v3/include -Icpp_modules/json-thresher/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I$(MODULE_DIRECTORY)/antlr4/runtime/Cpp/run/include/antlr4-runtime -MMD
 build/src/constitution/Populator.o: src/constitution/Populator.cpp 
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/Populator.o src/constitution/Populator.cpp
  
-build/src/constitution/MOL2Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -fopenmp -std=c++26  -Iinclude -Isrc -Icpp_modules/lemon/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/fmt/include -I$(MODULE_DIRECTORY)/expected/include -Icpp_modules/graph-v3/include -Icpp_modules/json-thresher/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I$(MODULE_DIRECTORY)/antlr4/runtime/Cpp/run/include/antlr4-runtime -MMD
+build/src/constitution/MOL2Populator.o: CXXFLAGS= -DNDEBUG -O3 -fPIC -pthread -fopenmp -std=c++26 -fcontracts -freflection  -Iinclude -Isrc -Icpp_modules/lemon/dist/include -Icpp_modules/brigand/include -Icpp_modules/multi_index/include -Icpp_modules/fmt/include -I$(MODULE_DIRECTORY)/expected/include -Icpp_modules/graph-v3/include -Icpp_modules/json-thresher/include -Icpp_modules/mio/include -Icpp_modules/zlib/dist/include -I$(MODULE_DIRECTORY)/antlr4/runtime/Cpp/run/include/antlr4-runtime -MMD
 build/src/constitution/MOL2Populator.o: src/constitution/MOL2Populator.cpp 
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/constitution/MOL2Populator.o src/constitution/MOL2Populator.cpp

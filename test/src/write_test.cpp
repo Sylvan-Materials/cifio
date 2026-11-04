@@ -128,6 +128,7 @@ std::cout<<"graph.getNumberOfAtomSites() "<<graph.getNumberOfAtomSites()<<std::e
     std::vector<sylvanmats::constitution::unique_component> uniqueComponents = {{.label_comp_id="QD0", .label_asym_id="*", .pdbx_PDB_ins_code="*", .auth_seq_id=1}};
     sylvanmats::constitution::Selection selection(graph, true);
     selection(uniqueComponents, [&](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& selectionGraph){
+        std::cout<<"before particles "<<std::endl;
    sylvanmats::dynamics::Particles particles(graph, selectionGraph);
    sylvanmats::publishing::SMILESPublisher smilesPublisher(graph, particles);
    std::cout<<" "<<smilesPublisher<<std::endl;

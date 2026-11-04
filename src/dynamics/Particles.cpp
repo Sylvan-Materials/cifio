@@ -18,11 +18,14 @@ namespace sylvanmats::dynamics{
         lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeMap<bool> edgeFusedFilter(subgraph, false);
         lemon::FilterEdges<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>> filterFusedEdges(subgraph, edgeFusedFilter);
         graph.identifyFusedSystems(subgraph, [&graph, &filterFusedEdges](lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>& subSelectionGraph){
+            std::cout<<"identifyRings "<<lemon::countNodes(subSelectionGraph)<<" "<<lemon::countNodes(subSelectionGraph)<<std::endl;
             graph.identifyRings(subSelectionGraph);
+            std::cout<<"identifiedRings "<<std::endl;
             for(lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeIt e(subSelectionGraph);e!=lemon::INVALID;++e){
                 filterFusedEdges.enable(e);
             }
         });
+        std::cout<<"connectedComponents "<<std::endl;
         lemon::FilterEdges<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>>::NodeMap<unsigned int> islandMap(filterFusedEdges);
         lemon::connectedComponents(filterFusedEdges, islandMap);
         sylvanmats::linear::ArrayXi islandSize = sylvanmats::linear::ArrayXi::Zero(lemon::countConnectedComponents(filterFusedEdges));

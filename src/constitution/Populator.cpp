@@ -867,5 +867,8 @@ namespace sylvanmats::constitution {
         apply(graph);
 //       std::cout<<"standardCompCount "<<standardCompCount<<" "<<standardAACount<<std::endl;
     };
+
+    static constexpr SchemaType compiledData = Populator::bake(dicBuffer);
+     const SchemaType* globalSchema = &compiledData;
     
 }

@@ -12,6 +12,7 @@
 #include <vector>
 #include <functional>
 #include <chrono>
+#include <meta>
 
 #include "zlib.h"
 

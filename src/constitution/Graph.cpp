@@ -97,8 +97,8 @@ namespace sylvanmats::constitution {
                 }
             }
         }
-        //std::cout<<"subGraph "<<lemon::countNodes(subGraph)<<" "<<lemon::countEdges(subGraph)<<std::endl;
-        //std::cout<<"maskGraph "<<lemon::countNodes(maskGraph)<<" "<<lemon::countEdges(maskGraph)<<std::endl;
+        std::cout<<"subGraph "<<lemon::countNodes(subGraph)<<" "<<lemon::countEdges(subGraph)<<std::endl;
+        std::cout<<"maskGraph "<<lemon::countNodes(maskGraph)<<" "<<lemon::countEdges(maskGraph)<<std::endl;
        lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeMap<int> lengthMap(maskGraph);
         lemon::Suurballe<lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>, lemon::SubGraph<lemon::ListGraph, lemon::ListGraph::NodeMap<bool>, lemon::ListGraph::EdgeMap<bool>>::EdgeMap<int>> suurballe(maskGraph, lengthMap);
 
@@ -116,20 +116,20 @@ namespace sylvanmats::constitution {
                     currRing++;
                     compBond[eSiteA].ring=currRing;
                     if(atomSites[startNode].sssr_ring==0 || atomSites[startNode].sssr_ring>suurballe.path(i).length()+1)atomSites[startNode].sssr_ring=suurballe.path(i).length()+1;
-                    //std::cout<<i<<" ";
+                    std::cout<<i<<" ";
                     for(unsigned int j=0;j<suurballe.path(i).length();j++){
                         compBond[suurballe.path(i).nth(j)].ring=currRing;
                         if(atomSites[subGraph.target(suurballe.path(i).nth(j))].sssr_ring==0 || atomSites[subGraph.target(suurballe.path(i).nth(j))].sssr_ring>suurballe.path(i).length()+1)atomSites[subGraph.target(suurballe.path(i).nth(j))].sssr_ring=suurballe.path(i).length()+1;
-                        //std::cout<<atomSites[subGraph.source(suurballe.path(i).nth(j))].label_atom_id<<" ";
-//                        if(j==suurballe.path(i).length()-1)std::cout<<atomSites[subGraph.target(suurballe.path(i).nth(j))].label_atom_id<<std::endl;
+                        std::cout<<atomSites[subGraph.source(suurballe.path(i).nth(j))].label_atom_id<<" ";
+                       if(j==suurballe.path(i).length()-1)std::cout<<atomSites[subGraph.target(suurballe.path(i).nth(j))].label_atom_id<<std::endl;
                     }
-                    //std::cout<<std::endl;
+                    std::cout<<std::endl;
                  }
                 maskGraph.disable(startNode);
                 maskGraph.disable(eSiteA);
             }
         }while(startNode!=lemon::INVALID);
-        
+        std::cout<<"identifyRings end "<<std::endl;
     };
 
     std::string Graph::getComponentXPath(lemon::ListGraph::Node& n){

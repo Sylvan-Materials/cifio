@@ -13,7 +13,19 @@
 
 #include "constitution/Graph.h"
 
+#include "primeval/MMCIFDictionary.h"
+
 namespace sylvanmats::constitution {
+
+    static constexpr char8_t coreDicBuffer[] ={
+#embed "cif_core.dic"
+    };
+    using Schema2Type = std::tuple<cairns::fixed_stack<std::tuple<size_t, sylvanmats::primeval::cairn>, sizeof(coreDicBuffer) / 16>, cairns::fixed_stack<std::tuple<size_t, size_t>, 2*sizeof(coreDicBuffer) / 16>>;
+
+    static constexpr char dicBuffer[] ={
+#embed "cif_mm.dic"
+    };
+    using SchemaType = std::tuple<cairns::fixed_stack<std::tuple<size_t, sylvanmats::primeval::cairn>, sizeof(dicBuffer) / 16>, cairns::fixed_stack<std::tuple<size_t, size_t>, 2*sizeof(dicBuffer) / 16>>;
 
     class Populator{
     protected:
@@ -183,10 +195,17 @@ namespace sylvanmats::constitution {
         void operator()(std::istream& content, sylvanmats::constitution::Graph& graph, std::function<void(sylvanmats::constitution::Graph& graph)> apply);
 
         unsigned int getNumberOfStandardizedAminoAcids(){return standardAACount;};
+
+        template<size_t N>
+        static consteval SchemaType bake(const char (&buffer)[N]){
+            sylvanmats::primeval::MMCIFDictionary<SchemaType, sizeof(dicBuffer)> mmCIFDictionary{};
+            return mmCIFDictionary(std::string_view(buffer, N));
+        };
     protected:
         bool compareInsertionCode(std::string_view a, std::string_view b){
             if((a.compare("?")==0 || a.compare(".")==0) && (b.compare("?")==0 || b.compare(".")==0)) return true;
             return a.compare(b)==0;
         }
     };
+    extern const SchemaType* globalSchema;
 }
